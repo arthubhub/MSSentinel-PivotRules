@@ -1,0 +1,27 @@
+id: DM-T1
+name: Timeline du domaine
+indicators: [domain, url]
+action: timeline
+description: >
+  Déroulé de toutes les traces du domaine autour de T0 : e-mails reçus (avec destinataire), clics, DNS,
+  connexions réseau, téléchargements et lignes de commande qui le citent.
+reading:
+  decisive: E-mail → clic → téléchargement ou commande → connexion d'un processus non navigateur.
+  context: Résolutions DNS depuis des machines qui n'ont pas cliqué (propagation, autre vecteur).
+  noise: Chargements de ressources tierces par les navigateurs.
+window: { before: 30m, after: 30m }
+uses: [domain_hits]
+query: |
+  union isfuzzy=true
+  (
+      _DomainHits(StartTime, EndTime, ValueDomain)
+      | project TimeGenerated, Source, Host, Account, Action, Detail = Url
+  ),
+  (
+      DeviceProcessEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where ProcessCommandLine has ValueDomain
+      | project TimeGenerated, Source = "DeviceProcessEvents", Host = tolower(DeviceName), Account = tolower(AccountName),
+          Action = strcat("Processus ", FileName), Detail = strcat(InitiatingProcessFileName, " → ", ProcessCommandLine)
+  )
+  | sort by TimeGenerated asc

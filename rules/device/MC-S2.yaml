@@ -1,0 +1,31 @@
+id: MC-S2
+name: Alertes de la machine par jour
+indicators: [device]
+action: statistics
+description: >
+  Alertes qui citent la machine, par jour, titre et gravité : Defender XDR (AlertEvidence) et Sentinel
+  (SecurityAlert). Une alerte Defender peut apparaître dans les deux tables.
+reading:
+  decisive: Plusieurs alertes de familles différentes (exécution, persistance, accès aux identifiants) le même jour.
+  context: Alerte récurrente jamais traitée sur la machine.
+  noise: Détections d'outils d'administration ou de logiciels potentiellement indésirables récurrentes.
+window: { before: 30d, after: 1d }
+render: columnchart
+query: |
+  union isfuzzy=true
+  (
+      AlertEvidence
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where DeviceName startswith ValueShort
+      | where _IsHost(DeviceName)
+      | summarize arg_min(TimeGenerated, Title, Severity) by AlertId
+  ),
+  (
+      SecurityAlert
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where CompromisedEntity has ValueShort or Entities has ValueShort
+      | summarize arg_max(TimeGenerated, AlertName, AlertSeverity) by SystemAlertId
+      | project TimeGenerated, Title = AlertName, Severity = AlertSeverity, AlertId = SystemAlertId
+  )
+  | summarize Alerts = dcount(AlertId) by bin(TimeGenerated, 1d), Serie = strcat(Severity, " · ", Title)
+  | render columnchart

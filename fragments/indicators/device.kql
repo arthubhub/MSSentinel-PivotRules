@@ -1,0 +1,5 @@
+// Indicateur Machine : comparaison sur le nom court (avant le premier point), insensible à la casse,
+// pour rapprocher DeviceName (FQDN Defender) et Computer (FQDN ou NetBIOS Windows).
+let ValueHost = tolower(Value);
+let ValueShort = tostring(split(ValueHost, ".")[0]);
+let _IsHost = (h:string) { tolower(tostring(split(h, ".")[0])) == ValueShort };

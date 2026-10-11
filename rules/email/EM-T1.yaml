@@ -1,0 +1,56 @@
+id: EM-T1
+name: Timeline e-mail, clic, téléchargement, réseau, processus
+indicators: [email]
+action: timeline
+description: >
+  Chaîne complète autour de T0 pour l'utilisateur : e-mails reçus, clics, fichiers téléchargés, premier contact
+  avec chaque destination publique et processus lancés depuis l'explorateur, un navigateur ou Office.
+reading:
+  decisive: E-mail → clic → téléchargement ou commande collée → processus (powershell, mshta, script) → connexion sortante.
+  context: Délai court (moins de 5 minutes) entre le clic et le premier processus inhabituel.
+  noise: Navigation ordinaire, ouverture de documents Office depuis Outlook.
+window: { before: 30m, after: 30m }
+query: |
+  let Launchers = dynamic(["explorer.exe", "chrome.exe", "msedge.exe", "firefox.exe", "brave.exe", "opera.exe", "outlook.exe",
+      "olk.exe", "winword.exe", "excel.exe", "powerpnt.exe", "onenote.exe", "ms-teams.exe", "teams.exe"]);
+  let IsUser = (upn:string, name:string) { upn =~ ValueMail or (isempty(upn) and name =~ ValueMailLocal) };
+  union isfuzzy=true
+  (
+      EmailEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where RecipientEmailAddress =~ ValueMail
+      | project TimeGenerated, Source = "EmailEvents", Host = "", Account = ValueMail, Action = "E-mail reçu",
+          Detail = strcat(SenderFromAddress, " · ", Subject, " · ", DeliveryAction, " ", ThreatTypes)
+  ),
+  (
+      UrlClickEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where AccountUpn =~ ValueMail
+      | project TimeGenerated, Source = "UrlClickEvents", Host = "", Account = ValueMail, Action = strcat("Clic ", ActionType), Detail = Url
+  ),
+  (
+      DeviceFileEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where IsUser(InitiatingProcessAccountUpn, InitiatingProcessAccountName)
+      | where isnotempty(FileOriginUrl) or FolderPath has @"\Downloads\"
+      | project TimeGenerated, Source = "DeviceFileEvents", Host = tolower(DeviceName), Account = ValueMail,
+          Action = strcat("Fichier ", ActionType), Detail = strcat(FolderPath, " ← ", FileOriginUrl, " · ", InitiatingProcessFileName)
+  ),
+  (
+      DeviceProcessEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where IsUser(AccountUpn, AccountName)
+      | where InitiatingProcessFileName in~ (Launchers)
+      | project TimeGenerated, Source = "DeviceProcessEvents", Host = tolower(DeviceName), Account = ValueMail,
+          Action = strcat("Processus ", FileName), Detail = strcat(InitiatingProcessFileName, " → ", ProcessCommandLine)
+  ),
+  (
+      DeviceNetworkEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where IsUser(InitiatingProcessAccountUpn, InitiatingProcessAccountName)
+      | where RemoteIPType == "Public"
+      | summarize TimeGenerated = min(TimeGenerated) by DeviceName, InitiatingProcessFileName, Destination = coalesce(RemoteUrl, RemoteIP), RemotePort
+      | project TimeGenerated, Source = "DeviceNetworkEvents", Host = tolower(DeviceName), Account = ValueMail,
+          Action = strcat("Premier contact · ", InitiatingProcessFileName), Detail = strcat(Destination, ":", tostring(RemotePort))
+  )
+  | sort by TimeGenerated asc

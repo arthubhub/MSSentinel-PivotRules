@@ -1,0 +1,58 @@
+id: AC-P4
+name: Règles de boîte, consentements et méthodes MFA
+indicators: [account]
+action: pivot
+description: >
+  Modifications de persistance d'un compte cloud : règles de boîte et transferts (New-InboxRule, Set-Mailbox,
+  UpdateInboxRules…), délégations de boîte, consentements OAuth et permissions accordées, ajout de méthodes
+  d'authentification, changements de mot de passe et de rôle.
+reading:
+  decisive: Règle de transfert ou de redirection vers une adresse externe, ou consentement à une application inconnue, peu après une connexion suspecte.
+  context: Règle qui déplace ou supprime des messages contenant « facture », « paiement » ou le nom du support.
+  noise: Absences, boîtes partagées, enregistrement MFA lors d'un changement de téléphone.
+v1: true
+window: { before: 7d, after: 1d }
+query: |
+  let MailboxOps = dynamic(["New-InboxRule", "Set-InboxRule", "UpdateInboxRules", "Set-Mailbox", "Add-MailboxPermission",
+      "Add-RecipientPermission", "Set-MailboxJunkEmailConfiguration", "New-TransportRule", "Set-TransportRule"]);
+  let EntraOps = dynamic(["Consent to application", "Add delegated permission grant", "Add app role assignment grant to user",
+      "Add app role assignment to service principal", "Add service principal", "Add service principal credentials",
+      "Add owner to application", "User registered security info", "User registered all required security info",
+      "Admin registered security info", "User changed default security info", "Reset password (by admin)",
+      "Change user password", "Add member to role", "Add eligible member to role"]);
+  let Flag = (text:string) {
+      case(text has_any ("ForwardTo", "RedirectTo", "ForwardingSmtpAddress", "ForwardingAddress", "ForwardAsAttachmentTo"), "Transfert ou redirection",
+          text has_any ("DeleteMessage", "MoveToFolder", "MarkAsRead", "SoftDeleteMessage"), "Suppression ou masquage",
+          "")
+  };
+  union isfuzzy=true
+  (
+      OfficeActivity
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where Operation in (MailboxOps)
+      | where UserId =~ ValueUpn or Parameters has ValueUpn
+      | project TimeGenerated, Source = "OfficeActivity", Operation, Detail = substring(Parameters, 0, 1000), IP = ClientIP, Flag = Flag(Parameters)
+  ),
+  (
+      CloudAppEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where ActionType in (MailboxOps)
+      | where tostring(RawEventData.UserId) =~ ValueUpn or RawEventData has ValueUpn
+      | extend Params = tostring(RawEventData.Parameters)
+      | project TimeGenerated, Source = "CloudAppEvents", Operation = ActionType, Detail = substring(Params, 0, 1000), IP = IPAddress, Flag = Flag(Params)
+  ),
+  (
+      AuditLogs
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where OperationName in (EntraOps) or OperationName has "Certificates and secrets management"
+      | where InitiatedBy has ValueUpn or TargetResources has ValueUpn
+      | extend Changes = tostring(TargetResources[0].modifiedProperties)
+      | project TimeGenerated, Source = "AuditLogs", Operation = OperationName,
+          Detail = substring(strcat(tostring(TargetResources[0].displayName), " · ", Changes), 0, 1000),
+          IP = tostring(InitiatedBy.user.ipAddress),
+          Flag = case(OperationName has "Consent" or OperationName has "permission grant", "Consentement OAuth",
+              OperationName has "security info", "Méthode d'authentification",
+              OperationName has "password", "Mot de passe",
+              OperationName has "role", "Rôle", "")
+  )
+  | sort by TimeGenerated asc

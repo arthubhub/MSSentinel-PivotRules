@@ -1,0 +1,22 @@
+id: EM-P3
+name: Connexions réseau de l'utilisateur autour de T0
+indicators: [email]
+action: pivot
+description: >
+  Connexions réseau Defender (DeviceNetworkEvents) initiées par des processus de l'utilisateur, par défaut 5 minutes
+  avant et après T0 (heure du clic par exemple). Le rapprochement se fait sur l'UPN du processus, ou à défaut sur
+  la partie locale de l'adresse (approximation quand le nom de compte Windows diffère).
+reading:
+  decisive: Connexion vers le domaine de l'e-mail ou du faux CAPTCHA, suivie d'une connexion d'un processus non navigateur.
+  context: Destinations publiques jamais vues ailleurs dans le parc.
+  noise: Trafic de fond du navigateur, de Teams et des agents de mise à jour.
+window: { before: 5m, after: 5m }
+query: |
+  DeviceNetworkEvents
+  | where TimeGenerated between (StartTime .. EndTime)
+  | where InitiatingProcessAccountUpn =~ ValueMail
+      or (isempty(InitiatingProcessAccountUpn) and InitiatingProcessAccountName =~ ValueMailLocal)
+  | where RemoteIPType != "Loopback"
+  | project TimeGenerated, DeviceName, ActionType, Process = InitiatingProcessFileName, CommandLine = InitiatingProcessCommandLine,
+      RemoteUrl, RemoteIP, RemotePort, RemoteIPType, Protocol
+  | sort by TimeGenerated asc

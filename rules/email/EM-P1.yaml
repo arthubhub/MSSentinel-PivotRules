@@ -1,0 +1,28 @@
+id: EM-P1
+name: Messages impliquant l'adresse
+indicators: [email]
+action: pivot
+description: >
+  E-mails reçus ou envoyés par l'adresse autour de T0 (par défaut 4 heures avant et 1 heure après), avec
+  livraison, menaces, URL et pièces jointes, et le nombre de destinataires ayant reçu le même sujet du même
+  expéditeur (indice de campagne).
+reading:
+  decisive: Même sujet du même expéditeur reçu par de nombreux destinataires (campagne), livré en boîte de réception.
+  context: Message en provenance d'un domaine nouveau, avec URL ou pièce jointe HTML, SVG ou archive.
+  noise: Notifications automatiques internes, invitations de calendrier.
+window: { before: 4h, after: 1h }
+query: |
+  let Mails = EmailEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where RecipientEmailAddress =~ ValueMail or SenderFromAddress =~ ValueMail or SenderMailFromAddress =~ ValueMail;
+  let Campaign = EmailEvents
+      | where TimeGenerated between ((StartTime - 1d) .. (EndTime + 1d))
+      | where Subject in ((Mails | distinct Subject))
+      | summarize SameSubjectRecipients = dcount(RecipientEmailAddress) by Subject, SenderFromAddress;
+  Mails
+  | join kind=leftouter (Campaign) on Subject, SenderFromAddress
+  | extend Role = iff(RecipientEmailAddress =~ ValueMail, "Destinataire", "Expéditeur")
+  | project TimeGenerated, Role, SenderFromAddress, SenderMailFromAddress, SenderDisplayName, RecipientEmailAddress, Subject,
+      SameSubjectRecipients, EmailDirection, DeliveryAction, LatestDeliveryLocation, LatestDeliveryAction, ThreatTypes,
+      DetectionMethods, UrlCount, AttachmentCount, SenderIPv4, AuthenticationDetails, NetworkMessageId, InternetMessageId
+  | sort by TimeGenerated asc

@@ -1,0 +1,4 @@
+// Indicateur Compte : accepte un UPN (user@domaine), DOMAINE\user ou un nom SAM.
+// ValueUpn sert aux journaux Entra ID et Microsoft 365, ValueSam aux journaux Windows et Defender.
+let ValueUpn = tolower(Value);
+let ValueSam = tolower(tostring(split(tostring(split(ValueUpn, "@")[0]), @"\")[-1]));

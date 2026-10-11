@@ -1,0 +1,43 @@
+id: HS-P1
+name: Machines et chemins du fichier
+indicators: [hash]
+action: pivot
+description: >
+  Machines, chemins et noms sous lesquels le fichier apparaît, avec les actions vues (écrit, exécuté, chargé),
+  les comptes et les processus à l'origine. Le contexte HOST restreint à une machine.
+reading:
+  decisive: Même fichier dans le même chemin sur plusieurs machines, exécuté (propagation ou campagne).
+  context: Fichier renommé (noms différents pour un même hash).
+  noise: Copies de logiciels déployés par l'IT.
+v1: true
+window: { before: 30d, after: 1d }
+context: [HOST]
+query: |
+  union isfuzzy=true
+  (
+      DeviceFileEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where SHA256 == ValueHash or SHA1 == ValueHash or MD5 == ValueHash
+      | where isempty(HostFilter) or DeviceName startswith HostFilter
+      | project TimeGenerated, DeviceName = tolower(DeviceName), FolderPath, FileName, Action = strcat("Fichier ", ActionType),
+          Account = tolower(InitiatingProcessAccountName), Process = InitiatingProcessFileName
+  ),
+  (
+      DeviceProcessEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where SHA256 == ValueHash or SHA1 == ValueHash or MD5 == ValueHash
+      | where isempty(HostFilter) or DeviceName startswith HostFilter
+      | project TimeGenerated, DeviceName = tolower(DeviceName), FolderPath, FileName, Action = "Exécuté",
+          Account = tolower(AccountName), Process = InitiatingProcessFileName
+  ),
+  (
+      DeviceImageLoadEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where SHA256 == ValueHash or SHA1 == ValueHash or MD5 == ValueHash
+      | where isempty(HostFilter) or DeviceName startswith HostFilter
+      | project TimeGenerated, DeviceName = tolower(DeviceName), FolderPath, FileName, Action = "Chargé (DLL)",
+          Account = tolower(InitiatingProcessAccountName), Process = InitiatingProcessFileName
+  )
+  | summarize Events = count(), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Actions = make_set(Action),
+      Accounts = make_set(Account, 5), Processes = make_set(Process, 5) by DeviceName, FolderPath, FileName
+  | sort by FirstSeen asc

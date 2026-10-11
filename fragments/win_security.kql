@@ -1,0 +1,104 @@
+// Événements de sécurité Windows normalisés, quelle que soit la table d'ingestion :
+// Pour les SecurityEvent, on reparse les champs depuis le EventData XML si il y a des bugs, avec une regex (ajouté au moment du build)
+// Paramètres : start, end (fenêtre), ids (liste d'EventID, vide = tous), term (pré-filtre texte, vide = aucun ;
+// recherché dans le XML brut et dans les colonnes de compte, de machine, d'IP et de processus).
+// @requires: win_names
+let _WinSecurity = (start:datetime, end:datetime, ids:dynamic, term:string) {
+    union isfuzzy=true
+    (
+        SecurityEvent
+        | where TimeGenerated between (start .. end)
+        | where array_length(ids) == 0 or EventID in (ids)
+        | where isempty(term) or EventData has term or Computer has term or IpAddress has term or TargetUserName has term
+            or SubjectUserName has term or WorkstationName has term or NewProcessName has term or ParentProcessName has term
+            or TargetServerName has term
+        | extend _x = tostring(EventData)
+        | extend
+            SubjectUserSid = coalesce(SubjectUserSid, XMLFIELD(_x, SubjectUserSid)),
+            SubjectUserName = coalesce(SubjectUserName, XMLFIELD(_x, SubjectUserName)),
+            SubjectDomainName = coalesce(SubjectDomainName, XMLFIELD(_x, SubjectDomainName)),
+            SubjectLogonId = coalesce(SubjectLogonId, XMLFIELD(_x, SubjectLogonId)),
+            TargetUserSid = coalesce(TargetUserSid, TargetSid, XMLFIELD(_x, TargetUserSid), XMLFIELD(_x, TargetSid)),
+            TargetUserName = coalesce(TargetUserName, XMLFIELD(_x, TargetUserName)),
+            TargetDomainName = coalesce(TargetDomainName, XMLFIELD(_x, TargetDomainName)),
+            TargetLogonId = coalesce(TargetLogonId, XMLFIELD(_x, TargetLogonId)),
+            LogonType = coalesce(tostring(LogonType), XMLFIELD(_x, LogonType)),
+            LogonProcessName = coalesce(LogonProcessName, XMLFIELD(_x, LogonProcessName)),
+            AuthenticationPackageName = coalesce(AuthenticationPackageName, PackageName, XMLFIELD(_x, AuthenticationPackageName), XMLFIELD(_x, PackageName)),
+            WorkstationName = coalesce(WorkstationName, Workstation, XMLFIELD(_x, WorkstationName), XMLFIELD(_x, Workstation)),
+            IpAddress = coalesce(IpAddress, ClientAddress, XMLFIELD(_x, IpAddress), XMLFIELD(_x, ClientAddress)),
+            IpPort = coalesce(IpPort, XMLFIELD(_x, IpPort), XMLFIELD(_x, ClientPort)),
+            ProcessName = coalesce(ProcessName, XMLFIELD(_x, ProcessName)),
+            ElevatedToken = coalesce(ElevatedToken, XMLFIELD(_x, ElevatedToken)),
+            Status = coalesce(Status, XMLFIELD(_x, Status)),
+            SubStatus = coalesce(SubStatus, XMLFIELD(_x, SubStatus)),
+            ServiceName = coalesce(ServiceName, XMLFIELD(_x, ServiceName)),
+            TicketEncryptionType = XMLFIELD(_x, TicketEncryptionType),
+            TicketOptions = XMLFIELD(_x, TicketOptions),
+            TargetServerName = coalesce(TargetServerName, XMLFIELD(_x, TargetServerName)),
+            NewProcessName = coalesce(NewProcessName, XMLFIELD(_x, NewProcessName)),
+            ParentProcessName = coalesce(ParentProcessName, XMLFIELD(_x, ParentProcessName)),
+            CommandLine = coalesce(CommandLine, XMLFIELD(_x, CommandLine)),
+            TaskName = XMLFIELD(_x, TaskName),
+            TaskContent = coalesce(XMLFIELD(_x, TaskContent), XMLFIELD(_x, TaskContentNew)),
+            MemberName = coalesce(MemberName, XMLFIELD(_x, MemberName)),
+            MemberSid = coalesce(MemberSid, XMLFIELD(_x, MemberSid)),
+            ServiceFileName = coalesce(ServiceFileName, XMLFIELD(_x, ServiceFileName), XMLFIELD(_x, ImagePath)),
+            ShareName = coalesce(ShareName, XMLFIELD(_x, ShareName)),
+            RelativeTargetName = coalesce(RelativeTargetName, XMLFIELD(_x, RelativeTargetName)),
+            ObjectName = coalesce(ObjectName, XMLFIELD(_x, ObjectName)),
+            AccessMask = coalesce(AccessMask, XMLFIELD(_x, AccessMask)),
+            PrivilegeList = coalesce(PrivilegeList, XMLFIELD(_x, PrivilegeList))
+        | extend SourceTable = "SecurityEvent"
+    ),
+    (
+        WindowsEvent
+        | where TimeGenerated between (start .. end)
+        | where Provider == "Microsoft-Windows-Security-Auditing"
+        | where array_length(ids) == 0 or EventID in (ids)
+        | where isempty(term) or tostring(EventData) has term or RawEventData has term or Computer has term
+        | extend _x = tostring(RawEventData)
+        | extend
+            SubjectUserSid = coalesce(tostring(EventData.SubjectUserSid), XMLFIELD(_x, SubjectUserSid)),
+            SubjectUserName = coalesce(tostring(EventData.SubjectUserName), XMLFIELD(_x, SubjectUserName)),
+            SubjectDomainName = coalesce(tostring(EventData.SubjectDomainName), XMLFIELD(_x, SubjectDomainName)),
+            SubjectLogonId = coalesce(tostring(EventData.SubjectLogonId), XMLFIELD(_x, SubjectLogonId)),
+            TargetUserSid = coalesce(tostring(EventData.TargetUserSid), tostring(EventData.TargetSid), XMLFIELD(_x, TargetUserSid), XMLFIELD(_x, TargetSid)),
+            TargetUserName = coalesce(tostring(EventData.TargetUserName), XMLFIELD(_x, TargetUserName)),
+            TargetDomainName = coalesce(tostring(EventData.TargetDomainName), XMLFIELD(_x, TargetDomainName)),
+            TargetLogonId = coalesce(tostring(EventData.TargetLogonId), XMLFIELD(_x, TargetLogonId)),
+            LogonType = coalesce(tostring(EventData.LogonType), XMLFIELD(_x, LogonType)),
+            LogonProcessName = coalesce(tostring(EventData.LogonProcessName), XMLFIELD(_x, LogonProcessName)),
+            AuthenticationPackageName = coalesce(tostring(EventData.AuthenticationPackageName), tostring(EventData.PackageName), XMLFIELD(_x, AuthenticationPackageName), XMLFIELD(_x, PackageName)),
+            WorkstationName = coalesce(tostring(EventData.WorkstationName), tostring(EventData.Workstation), XMLFIELD(_x, WorkstationName), XMLFIELD(_x, Workstation)),
+            IpAddress = coalesce(tostring(EventData.IpAddress), tostring(EventData.ClientAddress), XMLFIELD(_x, IpAddress), XMLFIELD(_x, ClientAddress)),
+            IpPort = coalesce(tostring(EventData.IpPort), tostring(EventData.ClientPort), XMLFIELD(_x, IpPort), XMLFIELD(_x, ClientPort)),
+            ProcessName = coalesce(tostring(EventData.ProcessName), XMLFIELD(_x, ProcessName)),
+            ElevatedToken = coalesce(tostring(EventData.ElevatedToken), XMLFIELD(_x, ElevatedToken)),
+            Status = coalesce(tostring(EventData.Status), XMLFIELD(_x, Status)),
+            SubStatus = coalesce(tostring(EventData.SubStatus), XMLFIELD(_x, SubStatus)),
+            ServiceName = coalesce(tostring(EventData.ServiceName), XMLFIELD(_x, ServiceName)),
+            TicketEncryptionType = coalesce(tostring(EventData.TicketEncryptionType), XMLFIELD(_x, TicketEncryptionType)),
+            TicketOptions = coalesce(tostring(EventData.TicketOptions), XMLFIELD(_x, TicketOptions)),
+            TargetServerName = coalesce(tostring(EventData.TargetServerName), XMLFIELD(_x, TargetServerName)),
+            NewProcessName = coalesce(tostring(EventData.NewProcessName), XMLFIELD(_x, NewProcessName)),
+            ParentProcessName = coalesce(tostring(EventData.ParentProcessName), XMLFIELD(_x, ParentProcessName)),
+            CommandLine = coalesce(tostring(EventData.CommandLine), XMLFIELD(_x, CommandLine)),
+            TaskName = coalesce(tostring(EventData.TaskName), XMLFIELD(_x, TaskName)),
+            TaskContent = coalesce(tostring(EventData.TaskContent), tostring(EventData.TaskContentNew), XMLFIELD(_x, TaskContent), XMLFIELD(_x, TaskContentNew)),
+            MemberName = coalesce(tostring(EventData.MemberName), XMLFIELD(_x, MemberName)),
+            MemberSid = coalesce(tostring(EventData.MemberSid), XMLFIELD(_x, MemberSid)),
+            ServiceFileName = coalesce(tostring(EventData.ServiceFileName), tostring(EventData.ImagePath), XMLFIELD(_x, ServiceFileName), XMLFIELD(_x, ImagePath)),
+            ShareName = coalesce(tostring(EventData.ShareName), XMLFIELD(_x, ShareName)),
+            RelativeTargetName = coalesce(tostring(EventData.RelativeTargetName), XMLFIELD(_x, RelativeTargetName)),
+            ObjectName = coalesce(tostring(EventData.ObjectName), XMLFIELD(_x, ObjectName)),
+            AccessMask = coalesce(tostring(EventData.AccessMask), XMLFIELD(_x, AccessMask)),
+            PrivilegeList = coalesce(tostring(EventData.PrivilegeList), XMLFIELD(_x, PrivilegeList))
+        | extend SourceTable = "WindowsEvent"
+    )
+    | extend IpAddress = iff(IpAddress == "-", "", trim_start(@"::ffff:", IpAddress))
+    | extend WorkstationName = iff(WorkstationName == "-", "", trim_start(@"\\\\", WorkstationName))
+    | extend TargetSam = tolower(tostring(split(TargetUserName, "@")[0])), SubjectSam = tolower(SubjectUserName)
+    | extend EventName = _WinEventName(EventID), LogonTypeName = _LogonTypeName(LogonType)
+    | project TimeGenerated, SourceTable, Computer, EventID, EventName, SubjectUserSid, SubjectUserName, SubjectDomainName, SubjectLogonId, TargetUserSid, TargetUserName, TargetDomainName, TargetLogonId, LogonType, LogonProcessName, AuthenticationPackageName, WorkstationName, IpAddress, IpPort, ProcessName, ElevatedToken, Status, SubStatus, ServiceName, TicketEncryptionType, TicketOptions, TargetServerName, NewProcessName, ParentProcessName, CommandLine, TaskName, TaskContent, MemberName, MemberSid, ServiceFileName, ShareName, RelativeTargetName, ObjectName, AccessMask, PrivilegeList, LogonTypeName, TargetSam, SubjectSam
+};

@@ -1,0 +1,36 @@
+id: MC-P1
+name: Comptes connectés à la machine
+indicators: [device]
+action: pivot
+description: >
+  Comptes qui ont ouvert ou tenté d'ouvrir une session sur la machine : Defender for Endpoint et Windows
+  (4624, 4625 via SecurityEvent et WindowsEvent), avec type d'ouverture, IP et poste source, et droits
+  d'administrateur local. Les comptes machine et les comptes système sont exclus.
+reading:
+  decisive: Compte inconnu de la machine en RemoteInteractive (RDP) ou réseau, depuis un poste utilisateur.
+  context: Compte administrateur local utilisé pour la première fois.
+  noise: Comptes de service, d'inventaire et de sauvegarde en ouverture de type réseau ou service.
+window: { before: 24h, after: 1h }
+uses: [win_security]
+query: |
+  union isfuzzy=true
+  (
+      DeviceLogonEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where DeviceName startswith ValueShort
+      | where _IsHost(DeviceName)
+      | project TimeGenerated, Account = tolower(strcat(AccountDomain, @"\", AccountName)), Source = "DeviceLogonEvents", LogonType,
+          Success = ActionType == "LogonSuccess", SourceIp = RemoteIP, SourceHost = tolower(RemoteDeviceName), IsLocalAdmin
+  ),
+  (
+      _WinSecurity(StartTime, EndTime, dynamic([4624, 4625]), ValueShort)
+      | where _IsHost(Computer)
+      | project TimeGenerated, Account = tolower(strcat(TargetDomainName, @"\", TargetUserName)), Source = SourceTable,
+          LogonType = LogonTypeName, Success = EventID == 4624, SourceIp = IpAddress, SourceHost = tolower(WorkstationName), IsLocalAdmin = bool(null)
+  )
+  | where not(Account endswith "$")
+  | where not(Account has_any (@"nt authority\", @"window manager\", @"font driver host\", @"nt service\"))
+  | summarize Logons = count(), Failures = countif(not(Success)), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
+      LogonTypes = make_set(LogonType), SourceIps = make_set(SourceIp, 10), SourceHosts = make_set(SourceHost, 10),
+      Sources = make_set(Source), LocalAdmin = max(toint(IsLocalAdmin)) by Account
+  | sort by FirstSeen asc

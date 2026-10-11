@@ -1,0 +1,48 @@
+id: IP-P2
+name: Comptes connectés depuis l'IP
+indicators: [ip]
+action: pivot
+description: >
+  Comptes qui ont tenté de s'authentifier depuis l'IP : Entra ID (interactif et non interactif), Windows
+  (4624, 4625, 4648, 4768, 4769, 4771, 4776 via SecurityEvent et WindowsEvent), Defender for Endpoint et
+  Defender for Identity. Donne tentatives, succès, échecs et premier succès par compte.
+reading:
+  decisive: Un succès précédé d'échecs sur de nombreux comptes depuis la même IP (spray réussi).
+  context: Plusieurs comptes d'une même campagne de phishing connectés depuis la même IP.
+  noise: IP de NAT, de VPN ou de serveur Citrix qui porte des centaines de comptes légitimes.
+v1: true
+window: { before: 24h, after: 1h }
+uses: [signins, win_security]
+query: |
+  union isfuzzy=true
+  (
+      _Signins(StartTime, EndTime, Value, "")
+      | project TimeGenerated, Account = tolower(UserPrincipalName), Source = strcat("Entra ID ", SignInType),
+          Success = Succeeded, Target = AppDisplayName, Detail = iff(Succeeded, Location, strcat(ResultType, " ", FailureReason))
+  ),
+  (
+      _WinSecurity(StartTime, EndTime, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776]), Value)
+      | where IpAddress == Value
+      | project TimeGenerated, Account = iff(isempty(TargetDomainName) or TargetDomainName == "-", TargetSam, tolower(strcat(TargetDomainName, @"\", TargetSam))),
+          Source = SourceTable, Success = EventID !in (4625, 4771) and Status in ("", "-", "0x0"),
+          Target = tolower(Computer), Detail = strcat(tostring(EventID), " ", LogonTypeName, " ", Status)
+  ),
+  (
+      DeviceLogonEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where RemoteIP == Value
+      | project TimeGenerated, Account = tolower(strcat(AccountDomain, @"\", AccountName)), Source = "DeviceLogonEvents",
+          Success = ActionType == "LogonSuccess", Target = tolower(DeviceName), Detail = strcat(LogonType, " ", FailureReason)
+  ),
+  (
+      IdentityLogonEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where IPAddress == Value
+      | project TimeGenerated, Account = tolower(coalesce(AccountUpn, AccountName)), Source = "IdentityLogonEvents",
+          Success = ActionType == "LogonSuccess", Target = tolower(coalesce(DestinationDeviceName, Application)), Detail = strcat(Protocol, " ", FailureReason)
+  )
+  | where isnotempty(Account) and Account !endswith "$"
+  | summarize Attempts = count(), Successes = countif(Success), Failures = countif(not(Success)),
+      FirstSeen = min(TimeGenerated), FirstSuccess = minif(TimeGenerated, Success), LastSeen = max(TimeGenerated),
+      Targets = make_set(Target, 20), Sources = make_set(Source), Details = make_set(Detail, 10) by Account
+  | sort by Successes desc, Attempts desc

@@ -1,0 +1,37 @@
+id: IP-T2
+name: Demandes de connexion par machine dans le temps
+indicators: [ip]
+action: timeline
+description: >
+  Courbe minute par minute des demandes de connexion venant de l'IP, une série par machine cible et par
+  résultat : authentifications Windows (SecurityEvent, WindowsEvent), Defender (DeviceLogonEvents) et
+  connexions entrantes acceptées (DeviceNetworkEvents).
+reading:
+  decisive: Une même source qui touche de nombreuses machines en quelques minutes.
+  context: Échecs sur une machine puis succès sur une autre (identifiants testés).
+  noise: Serveurs de déploiement ou de supervision qui contactent tout le parc à heure fixe.
+window: { before: 30m, after: 30m }
+render: timechart
+uses: [win_security]
+query: |
+  union isfuzzy=true
+  (
+      _WinSecurity(StartTime, EndTime, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776]), Value)
+      | where IpAddress == Value
+      | project TimeGenerated, Target = tolower(Computer),
+          Outcome = iff(EventID in (4625, 4771) or Status !in ("", "-", "0x0"), "échec", "succès")
+  ),
+  (
+      DeviceLogonEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where RemoteIP == Value
+      | project TimeGenerated, Target = tolower(DeviceName), Outcome = iff(ActionType == "LogonSuccess", "succès", "échec")
+  ),
+  (
+      DeviceNetworkEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where RemoteIP == Value and ActionType == "InboundConnectionAccepted"
+      | project TimeGenerated, Target = tolower(DeviceName), Outcome = "connexion entrante"
+  )
+  | summarize Requests = count() by bin(TimeGenerated, 1m), Serie = strcat(Target, " · ", Outcome)
+  | render timechart

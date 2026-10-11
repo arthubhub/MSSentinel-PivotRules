@@ -1,0 +1,21 @@
+id: AC-S1
+name: Connexions par application et par pays
+indicators: [account]
+action: statistics
+description: >
+  Connexions Entra ID du compte (interactives et non interactives) regroupées par pays et par application :
+  volume, échecs, jours actifs, IP distinctes, première et dernière apparition. Signale les combinaisons
+  apparues dans les deux derniers jours de la fenêtre.
+reading:
+  decisive: Pays ou application jamais utilisés par le compte, apparus juste avant l'alerte.
+  context: Hausse des échecs sur une application précise.
+  noise: Déplacements, VPN commerciaux, applications Microsoft qui se connectent en arrière-plan.
+window: { before: 14d, after: 1d }
+uses: [signins]
+query: |
+  _Signins(StartTime, EndTime, "", ValueUpn)
+  | summarize SignIns = count(), Failures = countif(not(Succeeded)), ActiveDays = dcount(bin(TimeGenerated, 1d)),
+      IPs = dcount(IPAddress), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated)
+      by Country = Location, App = AppDisplayName
+  | extend NewCombination = FirstSeen > T0 - 2d
+  | sort by NewCombination desc, SignIns desc

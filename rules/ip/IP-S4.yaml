@@ -1,0 +1,18 @@
+id: IP-S4
+name: Utilisation par jour, par compte
+indicators: [ip]
+action: statistics
+description: >
+  Tableau croisé compte × jour du nombre d'événements associant l'IP à un compte (connexions Entra ID,
+  ouvertures de session Windows et Defender, Microsoft 365, Azure).
+reading:
+  decisive: Des dizaines ou centaines de comptes différents avec 1 à 3 tentatives chacun (password spray).
+  context: Un seul compte avec un très grand nombre de tentatives (force brute).
+  noise: IP de NAT d'entreprise ou de VPN partagée par de nombreux utilisateurs légitimes.
+window: { before: 7d, after: 1d }
+uses: [ip_events]
+query: |
+  _IpEvents(StartTime, EndTime, Value)
+  | where isnotempty(Account) and Account != "-"
+  | summarize Events = count() by Account, Day = format_datetime(bin(TimeGenerated, 1d), "yyyy-MM-dd")
+  | evaluate pivot(Day, sum(Events), Account)

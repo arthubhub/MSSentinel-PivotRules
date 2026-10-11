@@ -1,0 +1,27 @@
+id: EM-P5
+name: Livraison et actions après livraison
+indicators: [email]
+action: pivot
+description: >
+  Pour chaque e-mail impliquant l'adresse : action et dossier de livraison initiaux, puis actions ultérieures
+  (ZAP, retrait manuel, déplacement par l'utilisateur) issues d'EmailPostDeliveryEvents.
+reading:
+  decisive: Message livré en boîte de réception puis retiré par ZAP après un clic de l'utilisateur.
+  context: Message déplacé hors du courrier indésirable par l'utilisateur.
+  noise: Purges administratives de campagnes déjà traitées.
+window: { before: 1h, after: 24h }
+query: |
+  EmailEvents
+  | where TimeGenerated between (StartTime .. EndTime)
+  | where RecipientEmailAddress =~ ValueMail or SenderFromAddress =~ ValueMail
+  | project MailTime = TimeGenerated, NetworkMessageId, RecipientEmailAddress, SenderFromAddress, Subject,
+      DeliveryAction, DeliveryLocation, LatestDeliveryAction, LatestDeliveryLocation, ThreatTypes
+  | join kind=leftouter (
+      EmailPostDeliveryEvents
+      | where TimeGenerated between (StartTime .. now())
+      | project PostTime = TimeGenerated, NetworkMessageId, RecipientEmailAddress, PostAction = Action, PostActionType = ActionType,
+          ActionTrigger, ActionResult, PostLocation = DeliveryLocation
+      ) on NetworkMessageId, RecipientEmailAddress
+  | project MailTime, SenderFromAddress, RecipientEmailAddress, Subject, DeliveryAction, DeliveryLocation, ThreatTypes,
+      PostTime, PostAction, PostActionType, ActionTrigger, ActionResult, PostLocation, LatestDeliveryLocation, NetworkMessageId
+  | sort by MailTime asc, PostTime asc

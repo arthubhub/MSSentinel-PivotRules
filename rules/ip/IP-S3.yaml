@@ -1,0 +1,18 @@
+id: IP-S3
+name: Utilisation par jour, par machine
+indicators: [ip]
+action: statistics
+description: >
+  Tableau croisé machine × jour du nombre d'événements où l'IP apparaît (connexions réseau Defender,
+  journaux Windows, Defender for Identity, pare-feu). Montre les machines contactées pour la première fois.
+reading:
+  decisive: Machines touchées uniquement le jour de l'alerte, alors que l'IP existait déjà avant.
+  context: Nombre de machines qui augmente d'un jour à l'autre (balayage, mouvement latéral).
+  noise: Serveurs de supervision, d'inventaire ou de sauvegarde contactés tous les jours.
+window: { before: 7d, after: 1d }
+uses: [ip_events]
+query: |
+  _IpEvents(StartTime, EndTime, Value)
+  | where isnotempty(Host)
+  | summarize Events = count() by Machine = tolower(Host), Day = format_datetime(bin(TimeGenerated, 1d), "yyyy-MM-dd")
+  | evaluate pivot(Day, sum(Events), Machine)

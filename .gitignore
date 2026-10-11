@@ -1,0 +1,6 @@
+
+# librairies
+node_modules/
+
+# build files (built by the CI job)
+dist/

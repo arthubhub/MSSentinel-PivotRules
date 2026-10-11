@@ -1,0 +1,67 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build (strict)
+        run: node scripts/build.mjs --strict
+
+      - name: Verify outputs
+        run: |
+          for f in dist/pivot-rules.json dist/pivot-rules.flat.json dist/CATALOGUE.md; do
+            test -s "$f" || { echo "::error::$f est absent ou vide"; exit 1; }
+          done
+          node -e "JSON.parse(require('fs').readFileSync('dist/pivot-rules.json','utf8')); JSON.parse(require('fs').readFileSync('dist/pivot-rules.flat.json','utf8'))"
+
+      - name: Generate release tag
+        id: tag
+        run: |
+          TAG="build-$(date -u +'%Y.%m.%d-%H%M%S')"
+          echo "TAG=$TAG" >> "$GITHUB_OUTPUT"
+          echo "DATE=$(date -u +'%B %d, %Y at %H:%M:%S UTC')" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.TAG }}
+          name: Build - ${{ steps.tag.outputs.DATE }}
+          body: |
+            ## Sentinel pivot rules : requêtes KQL de pivot
+
+            **Construit depuis** `${{ github.sha }}` le ${{ steps.tag.outputs.DATE }}
+
+            ### Fichiers
+            - `pivot-rules.flat.json` : format utilisé par l'userscript Tampermonkey (`[{ name, category, description, query }]`)
+            - `pivot-rules.json` : format complet (indicateurs, actions, paramètres, lecture des résultats, requêtes Sentinel et Defender)
+            - `CATALOGUE.md` : catalogue lisible des règles
+
+            ### Dernière version (URL stable)
+            ```
+            https://github.com/${{ github.repository }}/releases/latest/download/pivot-rules.flat.json
+            https://github.com/${{ github.repository }}/releases/latest/download/pivot-rules.json
+            https://github.com/${{ github.repository }}/releases/latest/download/CATALOGUE.md
+            ```
+          files: |
+            dist/pivot-rules.json
+            dist/pivot-rules.flat.json
+            dist/CATALOGUE.md
+          generate_release_notes: true
+          make_latest: true

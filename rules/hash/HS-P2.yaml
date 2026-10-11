@@ -1,0 +1,39 @@
+id: HS-P2
+name: Origine du fichier
+indicators: [hash]
+action: pivot
+description: >
+  D'où vient le fichier : URL, référent et IP d'origine du téléchargement, processus qui l'a écrit
+  (navigateur, Outlook, archiveur) et, s'il est arrivé par e-mail, expéditeur, destinataire et sujet.
+  Le contexte HOST restreint à une machine.
+reading:
+  decisive: URL d'origine sur un domaine récent ou typosquatté, référent publicitaire, ou pièce jointe d'un expéditeur nouveau.
+  context: Fichier extrait d'une archive (écrit par 7z.exe, WinRAR ou explorer.exe).
+  noise: Téléchargements depuis les sites officiels des éditeurs.
+window: { before: 7d, after: 1h }
+context: [HOST]
+query: |
+  union isfuzzy=true
+  (
+      DeviceFileEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where SHA256 == ValueHash or SHA1 == ValueHash or MD5 == ValueHash
+      | where isempty(HostFilter) or DeviceName startswith HostFilter
+      | project TimeGenerated, Source = "DeviceFileEvents", Where = tolower(DeviceName), FileName, FolderPath,
+          OriginUrl = FileOriginUrl, Referrer = FileOriginReferrerUrl, OriginIP = FileOriginIP,
+          Via = strcat(InitiatingProcessFileName, " · ", InitiatingProcessCommandLine), Detail = ActionType
+  ),
+  (
+      EmailAttachmentInfo
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where SHA256 == ValueHash
+      | join kind=leftouter (
+          EmailEvents
+          | where TimeGenerated between (StartTime .. EndTime)
+          | project NetworkMessageId, RecipientEmailAddress, Subject, DeliveryAction, SenderIPv4
+          ) on NetworkMessageId, RecipientEmailAddress
+      | project TimeGenerated, Source = "EmailAttachmentInfo", Where = tolower(RecipientEmailAddress), FileName, FolderPath = "",
+          OriginUrl = "", Referrer = "", OriginIP = SenderIPv4, Via = strcat("E-mail de ", SenderFromAddress),
+          Detail = strcat(Subject, " · ", DeliveryAction, " · ", ThreatTypes)
+  )
+  | sort by TimeGenerated asc

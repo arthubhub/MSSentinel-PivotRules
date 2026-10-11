@@ -1,0 +1,25 @@
+id: PR-P3
+name: Fichiers créés ou modifiés par le processus
+indicators: [process]
+action: pivot
+description: >
+  Fichiers créés, modifiés, renommés ou supprimés par le processus (DeviceFileEvents). Par exemple, depuis
+  notepad.exe on retrouve les fichiers modifiés ; depuis 7z.exe ou winrar.exe, les archives créées.
+reading:
+  decisive: Archive volumineuse créée dans un dossier temporaire ou public avant un transfert sortant, ou exécutable déposé dans AppData.
+  context: Fichiers renommés en masse (chiffrement), écriture dans le dossier Démarrage.
+  noise: Fichiers temporaires et caches de l'application.
+window: { before: 30m, after: 30m }
+context: [HOST]
+uses: [paths]
+query: |
+  DeviceFileEvents
+  | where TimeGenerated between (StartTime .. EndTime)
+  | where InitiatingProcessFileName =~ ValueFile
+  | where isempty(HostFilter) or DeviceName startswith HostFilter
+  | where isempty(ValuePath) or InitiatingProcessFolderPath =~ ValuePath
+  | summarize Events = count(), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), MaxSize = max(FileSize),
+      Hashes = make_set(SHA256, 5), OriginUrls = make_set_if(FileOriginUrl, isnotempty(FileOriginUrl), 5)
+      by DeviceName = tolower(DeviceName), ActionType, FolderPath, FileName
+  | extend UserWritablePath = _IsUserWritable(FolderPath)
+  | sort by FirstSeen asc

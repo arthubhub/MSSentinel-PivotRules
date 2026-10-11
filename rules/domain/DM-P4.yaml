@@ -1,0 +1,42 @@
+id: DM-P4
+name: Résolutions DNS et IP associées
+indicators: [domain, url]
+action: pivot
+description: >
+  Noms résolus dans le domaine et adresses IP obtenues : serveurs DNS Windows (DnsEvents), journaux DNS
+  normalisés ASIM (ASimDnsActivityLogs) et IP effectivement contactées par Defender (DeviceNetworkEvents).
+  Donne les IP à pivoter ensuite (IP-P1, IP-P4).
+reading:
+  decisive: IP de destination partagée avec d'autres domaines malveillants connus, ou hébergeur récent.
+  context: Nombreux sous-domaines distincts résolus (génération algorithmique, tunnel DNS).
+  noise: Résolutions de CDN qui renvoient des dizaines d'IP changeantes.
+window: { before: 7d, after: 1d }
+uses: [web_functions]
+query: |
+  union isfuzzy=true
+  (
+      DnsEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where SubType == "LookupQuery"
+      | where Name has ValueDomain
+      | where _InDomain(tolower(trim_end(@"\.", Name)), ValueDomain)
+      | project TimeGenerated, Source = "DnsEvents", Query = tolower(trim_end(@"\.", Name)), Answer = IPAddresses, Client = ClientIP
+  ),
+  (
+      ASimDnsActivityLogs
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where DnsQuery has ValueDomain
+      | where _InDomain(tolower(trim_end(@"\.", DnsQuery)), ValueDomain)
+      | project TimeGenerated, Source = "ASimDnsActivityLogs", Query = tolower(trim_end(@"\.", DnsQuery)), Answer = DnsResponseName,
+          Client = coalesce(SrcHostname, SrcIpAddr)
+  ),
+  (
+      DeviceNetworkEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where RemoteUrl has ValueDomain
+      | where _InDomain(_Host(RemoteUrl), ValueDomain)
+      | project TimeGenerated, Source = "DeviceNetworkEvents", Query = _Host(RemoteUrl), Answer = RemoteIP, Client = tolower(DeviceName)
+  )
+  | summarize Lookups = count(), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
+      ClientCount = dcount(Client), Clients = make_set(Client, 20) by Source, Query, Answer
+  | sort by FirstSeen asc

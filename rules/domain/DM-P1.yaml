@@ -1,0 +1,23 @@
+id: DM-P1
+name: Utilisateurs qui ont cliqué
+indicators: [domain, url]
+action: pivot
+description: >
+  Clics vers le domaine enregistrés par la protection des liens (UrlClickEvents), par utilisateur : clics
+  autorisés, bloqués, forcés malgré l'avertissement, URL, applications (Outlook, Teams, Office) et IP.
+reading:
+  decisive: Clics autorisés ou forcés (IsClickedThrough) par plusieurs utilisateurs de la même campagne.
+  context: Clic depuis une IP différente de celle du poste habituel (téléphone personnel).
+  noise: Clics bloqués seulement, clics de scanners automatiques.
+v1: true
+window: { before: 7d, after: 1d }
+uses: [web_functions]
+query: |
+  UrlClickEvents
+  | where TimeGenerated between (StartTime .. EndTime)
+  | where Url has ValueDomain
+  | where _InDomain(_Host(Url), ValueDomain)
+  | summarize Clicks = count(), Allowed = countif(ActionType == "ClickAllowed"), Blocked = countif(ActionType has "Blocked"),
+      ClickedThrough = countif(IsClickedThrough), FirstClick = min(TimeGenerated), LastClick = max(TimeGenerated),
+      Urls = make_set(Url, 10), Workloads = make_set(Workload), IPs = make_set(IPAddress, 5) by AccountUpn
+  | sort by Allowed desc, FirstClick asc

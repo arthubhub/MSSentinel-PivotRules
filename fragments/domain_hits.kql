@@ -1,0 +1,72 @@
+// Tous les journaux qui impliquant un domaine, avec mise en commun des colonnes : TimeGenerated, Source, Host, Account, Url, Action.
+// Sources : UrlClickEvents, URL d'e-mails et de messages Teams, connexions réseau, origine des fichiers téléchargés, DNS, proxy / pare-feu
+// @requires: web_functions
+let _DomainHits = (start:datetime, end:datetime, d:string) {
+    union isfuzzy=true
+    (
+        UrlClickEvents
+        | where TimeGenerated between (start .. end)
+        | where Url has d
+        | where _InDomain(_Host(Url), d)
+        | project TimeGenerated, Source = "UrlClickEvents", Host = "", Account = tolower(AccountUpn), Url, Action = strcat("Clic ", ActionType)
+    ),
+    (
+        EmailUrlInfo
+        | where TimeGenerated between (start .. end)
+        | where UrlDomain has d
+        | where _InDomain(tolower(UrlDomain), d)
+        | join kind=leftouter (
+            EmailEvents
+            | where TimeGenerated between (start .. end)
+            | project NetworkMessageId, RecipientEmailAddress
+            ) on NetworkMessageId
+        | project TimeGenerated, Source = "EmailUrlInfo", Host = "", Account = tolower(RecipientEmailAddress), Url, Action = strcat("URL dans un e-mail (", UrlLocation, ")")
+    ),
+    (
+        MessageUrlInfo
+        | where TimeGenerated between (start .. end)
+        | where UrlDomain has d
+        | where _InDomain(tolower(UrlDomain), d)
+        | project TimeGenerated, Source = "MessageUrlInfo", Host = "", Account = "", Url, Action = "URL dans un message Teams"
+    ),
+    (
+        DeviceNetworkEvents
+        | where TimeGenerated between (start .. end)
+        | where RemoteUrl has d
+        | where _InDomain(_Host(RemoteUrl), d)
+        | project TimeGenerated, Source = "DeviceNetworkEvents", Host = tolower(DeviceName), Account = tolower(InitiatingProcessAccountName),
+            Url = RemoteUrl, Action = strcat(ActionType, " · ", InitiatingProcessFileName)
+    ),
+    (
+        DeviceFileEvents
+        | where TimeGenerated between (start .. end)
+        | where FileOriginUrl has d or FileOriginReferrerUrl has d
+        | where _InDomain(_Host(FileOriginUrl), d) or _InDomain(_Host(FileOriginReferrerUrl), d)
+        | project TimeGenerated, Source = "DeviceFileEvents", Host = tolower(DeviceName), Account = tolower(InitiatingProcessAccountName),
+            Url = iff(_InDomain(_Host(FileOriginUrl), d), FileOriginUrl, FileOriginReferrerUrl), Action = strcat("Téléchargement ", FileName)
+    ),
+    (
+        DnsEvents
+        | where TimeGenerated between (start .. end)
+        | where SubType == "LookupQuery"
+        | where Name has d
+        | where _InDomain(tolower(trim_end(@"\.", Name)), d)
+        | project TimeGenerated, Source = "DnsEvents", Host = ClientIP, Account = "", Url = Name, Action = strcat("DNS ", QueryType)
+    ),
+    (
+        ASimDnsActivityLogs
+        | where TimeGenerated between (start .. end)
+        | where DnsQuery has d
+        | where _InDomain(tolower(trim_end(@"\.", DnsQuery)), d)
+        | project TimeGenerated, Source = "ASimDnsActivityLogs", Host = tolower(coalesce(SrcHostname, SrcIpAddr)), Account = tolower(SrcUsername),
+            Url = DnsQuery, Action = strcat("DNS ", DnsQueryTypeName)
+    ),
+    (
+        CommonSecurityLog
+        | where TimeGenerated between (start .. end)
+        | where RequestURL has d or DestinationHostName has d
+        | where _InDomain(_Host(RequestURL), d) or _InDomain(tolower(DestinationHostName), d)
+        | project TimeGenerated, Source = strcat("CommonSecurityLog (", DeviceVendor, ")"), Host = tolower(coalesce(SourceHostName, SourceIP)),
+            Account = tolower(SourceUserName), Url = coalesce(RequestURL, DestinationHostName), Action = coalesce(DeviceAction, Activity)
+    )
+};

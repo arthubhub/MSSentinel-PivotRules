@@ -1,0 +1,43 @@
+id: PR-P1
+name: Parents et enfants du processus
+indicators: [process]
+action: pivot
+description: >
+  Arbre autour du processus : ses parents et grands-parents (quand il est lancé) et ses enfants (ce qu'il
+  lance), avec lignes de commande, machines et comptes. Sources : DeviceProcessEvents et 4688 Windows.
+  Par exemple, depuis explorer.exe on voit les exécutables lancés par l'utilisateur ; depuis powershell.exe
+  on voit qui l'a lancé et avec quelles options. Si la valeur est un chemin complet, seul ce chemin est retenu.
+reading:
+  decisive: powershell, mshta ou cmd lancés par explorer ou un navigateur avec une URL ou du Base64 (ClickFix), ou par Office.
+  context: Enfant LOLBin (rundll32, regsvr32, certutil, msbuild, node) d'un processus inhabituel.
+  noise: Scripts d'administration lancés par les agents de gestion (SCCM, Intune, RMM).
+v1: true
+window: { before: 30m, after: 30m }
+context: [HOST]
+uses: [win_security]
+query: |
+  union isfuzzy=true
+  (
+      DeviceProcessEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where FileName =~ ValueFile or InitiatingProcessFileName =~ ValueFile
+      | where isempty(HostFilter) or DeviceName startswith HostFilter
+      | where isempty(ValuePath) or FolderPath =~ ValuePath or InitiatingProcessFolderPath =~ ValuePath
+      | extend Role = iff(FileName =~ ValueFile, "1 · Lancement du processus", "2 · Enfant")
+      | project TimeGenerated, Source = "DeviceProcessEvents", DeviceName = tolower(DeviceName), Role,
+          GrandParent = tolower(InitiatingProcessParentFileName), Parent = tolower(InitiatingProcessFileName), Process = tolower(FileName),
+          CommandLine = ProcessCommandLine, ParentCommandLine = InitiatingProcessCommandLine, Account = tolower(AccountName)
+  ),
+  (
+      _WinSecurity(StartTime, EndTime, dynamic([4688]), ValueFile)
+      | where tolower(NewProcessName) endswith strcat(@"\", ValueFile) or tolower(ParentProcessName) endswith strcat(@"\", ValueFile)
+      | where isempty(HostFilter) or Computer startswith HostFilter
+      | extend Role = iff(tolower(NewProcessName) endswith strcat(@"\", ValueFile), "1 · Lancement du processus", "2 · Enfant")
+      | project TimeGenerated, Source = SourceTable, DeviceName = tolower(Computer), Role, GrandParent = "",
+          Parent = tolower(tostring(split(ParentProcessName, @"\")[-1])), Process = tolower(tostring(split(NewProcessName, @"\")[-1])),
+          CommandLine, ParentCommandLine = "", Account = tolower(SubjectUserName)
+  )
+  | summarize Executions = count(), Machines = dcount(DeviceName), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
+      CommandLines = make_set(CommandLine, 5), ParentCommandLines = make_set(ParentCommandLine, 3),
+      SampleMachines = make_set(DeviceName, 5), Accounts = make_set(Account, 5) by Role, GrandParent, Parent, Process, Source
+  | sort by Role asc, Executions desc

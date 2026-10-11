@@ -1,0 +1,21 @@
+id: EM-P6
+name: Messages envoyés vers l'adresse
+indicators: [email]
+action: pivot
+description: >
+  Expéditeurs qui ont envoyé des messages à l'adresse : utile quand l'adresse est la cible d'une règle de
+  transfert (adresse externe). Indique le sens (sortant), le nombre de messages transférés et les sujets.
+reading:
+  decisive: Messages sortants vers une adresse externe juste après la création d'une règle de transfert.
+  context: Transferts depuis plusieurs boîtes vers la même adresse externe.
+  noise: Transferts autorisés vers des partenaires, copies vers des outils de ticketing.
+window: { before: 7d, after: 1d }
+query: |
+  EmailEvents
+  | where TimeGenerated between (StartTime .. EndTime)
+  | where RecipientEmailAddress =~ ValueMail
+  | summarize Mails = count(), Forwarded = countif(isnotempty(ForwardingInformation)), FirstSeen = min(TimeGenerated),
+      LastSeen = max(TimeGenerated), Subjects = make_set(Subject, 20), Directions = make_set(EmailDirection),
+      Actions = make_set(DeliveryAction) by SenderFromAddress
+  | extend Outbound = set_has_element(Directions, "Outbound")
+  | sort by Outbound desc, FirstSeen asc

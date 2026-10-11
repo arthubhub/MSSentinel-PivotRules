@@ -1,0 +1,34 @@
+id: MC-P4
+name: Fichiers téléchargés puis exécutés
+indicators: [device]
+action: pivot
+description: >
+  Fichiers écrits sur la machine (avec URL d'origine, ou dans Téléchargements, Temp, cache Outlook ou du
+  navigateur) puis exécutés dans les 10 minutes, rapprochés par SHA256. Donne le délai, l'URL, le processus
+  qui a écrit le fichier et celui qui l'a lancé.
+reading:
+  decisive: Exécutable ou script venant d'un domaine récent, lancé en moins de 10 minutes, avec enfant LOLBin ou connexion sortante.
+  context: Fichier écrit par 7-Zip, WinRAR ou l'explorateur depuis une archive téléchargée.
+  noise: Installations faites par l'utilisateur depuis le site officiel de l'éditeur.
+window: { before: 1h, after: 1h }
+query: |
+  let Downloads = DeviceFileEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where DeviceName startswith ValueShort
+      | where _IsHost(DeviceName)
+      | where ActionType in ("FileCreated", "FileRenamed", "FileModified") and isnotempty(SHA256)
+      | where isnotempty(FileOriginUrl) or FolderPath has_any (@"\Downloads\", @"\AppData\Local\Temp\", @"\Content.Outlook\", @"\INetCache\")
+      | project DownloadTime = TimeGenerated, DeviceId, SHA256, DownloadedFile = FileName, FolderPath, FileOriginUrl,
+          FileOriginReferrerUrl, Writer = InitiatingProcessFileName;
+  DeviceProcessEvents
+  | where TimeGenerated between (StartTime .. (EndTime + 10m))
+  | where DeviceName startswith ValueShort
+  | where _IsHost(DeviceName)
+  | project ExecTime = TimeGenerated, DeviceId, DeviceName, SHA256, ExecutedFile = FileName, ProcessCommandLine,
+      Parent = InitiatingProcessFileName, AccountName
+  | join kind=inner (Downloads) on DeviceId, SHA256
+  | where ExecTime between (DownloadTime .. (DownloadTime + 10m))
+  | extend DelaySeconds = datetime_diff("second", ExecTime, DownloadTime)
+  | project DownloadTime, ExecTime, DelaySeconds, DeviceName, AccountName, DownloadedFile, FolderPath, FileOriginUrl,
+      FileOriginReferrerUrl, Writer, Parent, ProcessCommandLine, SHA256
+  | sort by DownloadTime asc

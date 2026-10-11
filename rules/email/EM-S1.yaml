@@ -1,0 +1,21 @@
+id: EM-S1
+name: Volume de messages par jour et par verdict
+indicators: [email]
+action: statistics
+description: >
+  Nombre d'e-mails reçus et envoyés par l'adresse, par jour, ventilé par action de livraison et type de menace
+  détecté (EmailEvents).
+reading:
+  decisive: Pic d'envois sortants depuis l'adresse (compte compromis qui diffuse du phishing en interne ou en externe).
+  context: Hausse des messages mis en quarantaine ou marqués Phish à destination de l'adresse.
+  noise: Newsletters et notifications automatiques, rafales de fin de mois.
+window: { before: 7d, after: 1d }
+render: timechart
+query: |
+  EmailEvents
+  | where TimeGenerated between (StartTime .. EndTime)
+  | where RecipientEmailAddress =~ ValueMail or SenderFromAddress =~ ValueMail or SenderMailFromAddress =~ ValueMail
+  | extend Role = iff(RecipientEmailAddress =~ ValueMail, "Reçu", "Envoyé"),
+      Verdict = iff(isempty(ThreatTypes), DeliveryAction, strcat(DeliveryAction, " · ", ThreatTypes))
+  | summarize Mails = count() by bin(TimeGenerated, 1d), Serie = strcat(Role, " · ", Verdict)
+  | render timechart

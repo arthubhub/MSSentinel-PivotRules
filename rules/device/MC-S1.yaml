@@ -1,0 +1,33 @@
+id: MC-S1
+name: Volume de journaux de la machine par jour et par table
+indicators: [device]
+action: statistics
+description: >
+  Nombre d'événements de la machine par jour et par table : tables Defender for Endpoint (processus, réseau,
+  fichiers, ouvertures de session, registre, événements, chargements de DLL) et journaux Windows
+  (SecurityEvent, WindowsEvent). Révèle un trou de collecte, un pic d'activité ou un agent arrêté.
+reading:
+  decisive: Arrêt brutal de la télémétrie Defender juste après l'alerte (agent désactivé ou altéré).
+  context: Pic d'événements réseau ou fichiers inhabituel pour la machine.
+  noise: Mises à jour Windows, déploiements logiciels, analyses antivirus planifiées.
+window: { before: 7d, after: 1d }
+render: timechart
+query: |
+  union isfuzzy=true
+  (
+      union isfuzzy=true withsource=Source DeviceProcessEvents, DeviceNetworkEvents, DeviceFileEvents, DeviceLogonEvents,
+          DeviceRegistryEvents, DeviceEvents, DeviceImageLoadEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where DeviceName startswith ValueShort
+      | where _IsHost(DeviceName)
+      | project TimeGenerated, Source
+  ),
+  (
+      union isfuzzy=true withsource=Source SecurityEvent, WindowsEvent
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where Computer startswith ValueShort
+      | where _IsHost(Computer)
+      | project TimeGenerated, Source
+  )
+  | summarize Events = count() by bin(TimeGenerated, 1d), Source
+  | render timechart

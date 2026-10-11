@@ -1,0 +1,12 @@
+// _NormPath : chemin normalisé des chemins de fichiers
+// (c:\users\jdoe\appdata\… → c:\users\*\appdata\…) pour regrouper un même binaire entre utilisateurs.
+let _NormPath = (p:string) {
+    let l = tolower(p);
+    let u = indexof(l, @"\users\");
+    let next = iff(u < 0, -1, indexof(l, @"\", u + 7));
+    iff(u < 0 or next < 0, l, strcat(substring(l, 0, u + 7), "*", substring(l, next)))
+};
+// _IsUserWritable : dossier où un utilisateur standard peut écrire (emplacement inhabituel pour un exécutable).
+let _IsUserWritable = (p:string) {
+    tolower(p) has_any (@"\appdata\", @"\temp\", @"\downloads\", @"\programdata\", @"\users\public\", @"\desktop\", @"\perflogs\")
+};

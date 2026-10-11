@@ -1,0 +1,12 @@
+// Clés de registre et actions Defender associées à la persistance.
+let _PersistenceKeys = dynamic([
+    @"\CurrentVersion\Run", @"\CurrentVersion\RunOnce", @"\CurrentVersion\RunServices",
+    @"\Policies\Explorer\Run", @"\CurrentVersion\Winlogon", @"\Image File Execution Options",
+    @"\CurrentControlSet\Services", @"\Explorer\Shell Folders", @"\Explorer\User Shell Folders",
+    @"\Session Manager\BootExecute", @"\Windows\AppInit_DLLs", @"\Environment\UserInitMprLogonScript"]);
+let _PersistenceActions = dynamic(["ScheduledTaskCreated", "ScheduledTaskUpdated", "ServiceInstalled",
+    "WmiBindEventFilterToConsumer"]);
+let _IsPersistenceKey = (key:string, valueName:string) {
+    key has_any (_PersistenceKeys)
+    and (key !has @"\CurrentControlSet\Services" or valueName in~ ("ImagePath", "ServiceDll", "FailureCommand"))
+};

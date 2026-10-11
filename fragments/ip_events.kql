@@ -1,0 +1,80 @@
+// Toutes les source de journaux où apparaîssent une adresse IP, ramenée à des colonnes communes :
+// TimeGenerated, Source, EventType (EventID, ActionType ou opération), Host, Account, Detail.
+// @requires: win_security, signins
+let _IpEvents = (start:datetime, end:datetime, ip:string) {
+    union isfuzzy=true
+    (
+        _Signins(start, end, ip, "")
+        | project TimeGenerated, Source = strcat("Entra ID (", SignInType, ")"), EventType = iff(Succeeded, "Connexion réussie", strcat("Échec ", ResultType)),
+            Host = DeviceName, Account = tolower(UserPrincipalName), Detail = AppDisplayName
+    ),
+    (
+        _WinSecurity(start, end, dynamic([]), ip)
+        | where IpAddress == ip
+        | project TimeGenerated, Source = SourceTable, EventType = strcat(tostring(EventID), " ", EventName),
+            Host = Computer, Account = TargetSam, Detail = LogonTypeName
+    ),
+    (
+        DeviceNetworkEvents
+        | where TimeGenerated between (start .. end)
+        | where RemoteIP == ip or LocalIP == ip
+        | project TimeGenerated, Source = "DeviceNetworkEvents", EventType = ActionType, Host = DeviceName,
+            Account = tolower(InitiatingProcessAccountName), Detail = strcat(InitiatingProcessFileName, " → ", RemoteIP, ":", tostring(RemotePort))
+    ),
+    (
+        DeviceLogonEvents
+        | where TimeGenerated between (start .. end)
+        | where RemoteIP == ip
+        | project TimeGenerated, Source = "DeviceLogonEvents", EventType = ActionType, Host = DeviceName,
+            Account = tolower(AccountName), Detail = LogonType
+    ),
+    (
+        IdentityLogonEvents
+        | where TimeGenerated between (start .. end)
+        | where IPAddress == ip or DestinationIPAddress == ip
+        | project TimeGenerated, Source = "IdentityLogonEvents", EventType = ActionType, Host = coalesce(DeviceName, DestinationDeviceName),
+            Account = tolower(coalesce(AccountUpn, AccountName)), Detail = strcat(Application, " ", Protocol)
+    ),
+    (
+        CloudAppEvents
+        | where TimeGenerated between (start .. end)
+        | where IPAddress == ip
+        | project TimeGenerated, Source = "CloudAppEvents", EventType = ActionType, Host = "",
+            Account = tolower(coalesce(tostring(RawEventData.UserId), AccountDisplayName)), Detail = Application
+    ),
+    (
+        OfficeActivity
+        | where TimeGenerated between (start .. end)
+        | where ClientIP has ip
+        | project TimeGenerated, Source = "OfficeActivity", EventType = Operation, Host = "",
+            Account = tolower(UserId), Detail = OfficeWorkload
+    ),
+    (
+        AzureActivity
+        | where TimeGenerated between (start .. end)
+        | where CallerIpAddress == ip
+        | project TimeGenerated, Source = "AzureActivity", EventType = OperationNameValue, Host = "",
+            Account = tolower(Caller), Detail = ResourceGroup
+    ),
+    (
+        CommonSecurityLog
+        | where TimeGenerated between (start .. end)
+        | where SourceIP == ip or DestinationIP == ip
+        | project TimeGenerated, Source = strcat("CommonSecurityLog (", DeviceVendor, ")"), EventType = coalesce(DeviceAction, Activity), Host = DeviceName,
+            Account = tolower(coalesce(SourceUserName, DestinationUserName)), Detail = strcat(SourceIP, " → ", DestinationIP, ":", tostring(DestinationPort))
+    ),
+    (
+        EmailEvents
+        | where TimeGenerated between (start .. end)
+        | where SenderIPv4 == ip or SenderIPv6 == ip
+        | project TimeGenerated, Source = "EmailEvents", EventType = DeliveryAction, Host = "",
+            Account = tolower(SenderFromAddress), Detail = Subject
+    ),
+    (
+        UrlClickEvents
+        | where TimeGenerated between (start .. end)
+        | where IPAddress == ip
+        | project TimeGenerated, Source = "UrlClickEvents", EventType = ActionType, Host = "",
+            Account = tolower(AccountUpn), Detail = Url
+    )
+};

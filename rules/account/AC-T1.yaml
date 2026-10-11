@@ -1,0 +1,65 @@
+id: AC-T1
+name: Timeline du compte
+indicators: [account]
+action: timeline
+description: >
+  Déroulé chronologique de l'activité du compte : connexions Entra ID, audit Entra ID, Microsoft 365,
+  Azure, ouvertures de session Defender et clics sur des liens.
+reading:
+  decisive: Connexion inhabituelle → ajout d'une méthode MFA → règle de boîte → consentement, en moins d'une heure.
+  context: Lecture de secrets ou opérations Azure dans la foulée d'une première connexion depuis une IP.
+  noise: Activité de bureautique ordinaire (consultation de fichiers, réunions Teams).
+v1: true
+window: { before: 2h, after: 2h }
+uses: [signins]
+query: |
+  union isfuzzy=true
+  (
+      _Signins(StartTime, EndTime, "", ValueUpn)
+      | project TimeGenerated, Source = strcat("Entra ID ", SignInType), Host = DeviceName, Account = tolower(UserPrincipalName),
+          Action = iff(Succeeded, "Connexion réussie", strcat("Connexion échouée ", ResultType)),
+          Detail = strcat(AppDisplayName, " · ", IPAddress, " · ", Location, " · ", OperatingSystem, " ", Browser)
+  ),
+  (
+      AuditLogs
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where InitiatedBy has ValueUpn or TargetResources has ValueUpn
+      | project TimeGenerated, Source = "AuditLogs", Host = "", Account = ValueUpn, Action = OperationName,
+          Detail = strcat(tostring(TargetResources[0].displayName), " · ", Result, " · ", tostring(InitiatedBy.user.ipAddress))
+  ),
+  (
+      OfficeActivity
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where UserId =~ ValueUpn
+      | project TimeGenerated, Source = strcat("OfficeActivity (", OfficeWorkload, ")"), Host = "", Account = tolower(UserId), Action = Operation,
+          Detail = strcat(coalesce(OfficeObjectId, SourceFileName), " · ", ClientIP)
+  ),
+  (
+      CloudAppEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where tostring(RawEventData.UserId) =~ ValueUpn
+      | project TimeGenerated, Source = strcat("CloudAppEvents (", Application, ")"), Host = "", Account = ValueUpn, Action = ActionType,
+          Detail = strcat(ObjectName, " · ", IPAddress, " · ", CountryCode)
+  ),
+  (
+      AzureActivity
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where Caller =~ ValueUpn
+      | project TimeGenerated, Source = "AzureActivity", Host = "", Account = tolower(Caller), Action = OperationNameValue,
+          Detail = strcat(_ResourceId, " · ", ActivityStatusValue, " · ", CallerIpAddress)
+  ),
+  (
+      DeviceLogonEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where AccountName =~ ValueSam
+      | project TimeGenerated, Source = "DeviceLogonEvents", Host = tolower(DeviceName), Account = tolower(AccountName),
+          Action = strcat(ActionType, " ", LogonType), Detail = strcat(RemoteIP, " ", RemoteDeviceName)
+  ),
+  (
+      UrlClickEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where AccountUpn =~ ValueUpn
+      | project TimeGenerated, Source = "UrlClickEvents", Host = "", Account = tolower(AccountUpn),
+          Action = strcat("Clic ", ActionType), Detail = Url
+  )
+  | sort by TimeGenerated asc

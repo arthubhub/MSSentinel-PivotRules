@@ -1,0 +1,43 @@
+id: HS-S1
+name: Prévalence du hash
+indicators: [hash]
+action: statistics
+description: >
+  Présence du fichier (MD5, SHA1 ou SHA256) sur 30 jours, par source : fichiers écrits, processus lancés,
+  DLL chargées, événements Defender et pièces jointes d'e-mails (SHA256 seulement). Donne machines, noms
+  et chemins, et une ligne de total. Le contexte HOST restreint à une machine.
+reading:
+  decisive: Fichier vu sur une seule machine, sous un nom de logiciel connu, dans un dossier utilisateur.
+  context: Même hash reçu en pièce jointe puis exécuté sur plusieurs machines.
+  noise: Binaires de mises à jour récentes encore peu répandus.
+window: { before: 30d, after: 1d }
+context: [HOST]
+query: |
+  let H = materialize(union isfuzzy=true
+  (
+      union isfuzzy=true withsource=Source DeviceFileEvents, DeviceProcessEvents, DeviceImageLoadEvents, DeviceEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where SHA256 == ValueHash or SHA1 == ValueHash or MD5 == ValueHash
+      | where isempty(HostFilter) or DeviceName startswith HostFilter
+      | project TimeGenerated, Source, DeviceName = tolower(DeviceName), FileName, FolderPath
+  ),
+  (
+      EmailAttachmentInfo
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where SHA256 == ValueHash
+      | project TimeGenerated, Source = "EmailAttachmentInfo", DeviceName = tolower(RecipientEmailAddress), FileName, FolderPath = ""
+  ));
+  union
+  (
+      H
+      | summarize Events = count(), Machines = dcount(DeviceName), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
+          FileNames = make_set(FileName, 10), Paths = make_set(FolderPath, 10) by Source
+  ),
+  (
+      H
+      | summarize Events = count(), Machines = dcount(DeviceName), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
+          FileNames = make_set(FileName, 10), Paths = make_set(FolderPath, 10)
+      | extend Source = "Total"
+  )
+  | project Source, Events, Machines, FirstSeen, LastSeen, FileNames, Paths
+  | sort by Source == "Total" desc, Events desc

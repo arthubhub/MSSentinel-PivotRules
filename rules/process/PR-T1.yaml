@@ -1,0 +1,58 @@
+id: PR-T1
+name: Timeline du processus
+indicators: [process]
+action: timeline
+description: >
+  Déroulé autour de T0 de ce que fait le processus : lancements (avec son parent), enfants, connexions réseau
+  (premier contact par destination), fichiers écrits et clés de registre modifiées. Limité à 5 000 lignes.
+  Renseigner le contexte HOST pour suivre une seule machine.
+reading:
+  decisive: Lancement depuis un parent inhabituel → fichier déposé → enfant LOLBin → connexion sortante.
+  context: Écriture de clés de persistance par le processus.
+  noise: Activité normale d'un processus très répandu (explorer, svchost) sans filtre de machine.
+window: { before: 30m, after: 30m }
+context: [HOST]
+uses: [persistence]
+query: |
+  union isfuzzy=true
+  (
+      DeviceProcessEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where FileName =~ ValueFile or InitiatingProcessFileName =~ ValueFile
+      | where isempty(HostFilter) or DeviceName startswith HostFilter
+      | project TimeGenerated, Source = "DeviceProcessEvents", Host = tolower(DeviceName), Account = tolower(AccountName),
+          Action = iff(FileName =~ ValueFile, strcat("Lancé par ", InitiatingProcessFileName), strcat("Lance ", FileName)),
+          Detail = ProcessCommandLine
+  ),
+  (
+      DeviceNetworkEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where InitiatingProcessFileName =~ ValueFile
+      | where isempty(ValuePath) or InitiatingProcessFolderPath =~ ValuePath
+      | where isempty(HostFilter) or DeviceName startswith HostFilter
+      | summarize TimeGenerated = min(TimeGenerated), Account = take_any(InitiatingProcessAccountName)
+          by DeviceName, Destination = coalesce(RemoteUrl, RemoteIP), RemotePort, ActionType
+      | project TimeGenerated, Source = "DeviceNetworkEvents", Host = tolower(DeviceName), Account = tolower(Account),
+          Action = strcat("Réseau ", ActionType), Detail = strcat(Destination, ":", tostring(RemotePort))
+  ),
+  (
+      DeviceFileEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where InitiatingProcessFileName =~ ValueFile
+      | where isempty(ValuePath) or InitiatingProcessFolderPath =~ ValuePath
+      | where isempty(HostFilter) or DeviceName startswith HostFilter
+      | project TimeGenerated, Source = "DeviceFileEvents", Host = tolower(DeviceName), Account = tolower(InitiatingProcessAccountName),
+          Action = strcat("Fichier ", ActionType), Detail = FolderPath
+  ),
+  (
+      DeviceRegistryEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where InitiatingProcessFileName =~ ValueFile
+      | where isempty(ValuePath) or InitiatingProcessFolderPath =~ ValuePath
+      | where isempty(HostFilter) or DeviceName startswith HostFilter
+      | project TimeGenerated, Source = "DeviceRegistryEvents", Host = tolower(DeviceName), Account = tolower(InitiatingProcessAccountName),
+          Action = strcat(ActionType, iff(_IsPersistenceKey(RegistryKey, RegistryValueName), " (persistance)", "")),
+          Detail = strcat(RegistryKey, @"\", RegistryValueName, " = ", RegistryValueData)
+  )
+  | sort by TimeGenerated asc
+  | take 5000

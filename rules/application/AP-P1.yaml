@@ -1,0 +1,31 @@
+id: AP-P1
+name: Consentements, permissions et secrets de l'application
+indicators: [application]
+action: pivot
+description: >
+  Événements d'audit Entra ID qui concernent l'application : consentements (utilisateur ou administrateur),
+  permissions déléguées et rôles d'application accordés, ajout de propriétaires, de secrets et de certificats.
+  Extrait le type de consentement et les étendues (scopes).
+reading:
+  decisive: Consentement utilisateur à une application multi-tenant inconnue avec Mail.Read, Files.ReadWrite.All ou offline_access.
+  context: Nouveau secret ajouté à une application existante par un compte qui n'en est pas propriétaire.
+  noise: Consentements d'applications d'entreprise validées (visioconférence, CRM, signature électronique).
+window: { before: 30d, after: 1d }
+query: |
+  let Ops = dynamic(["Consent to application", "Add delegated permission grant", "Add app role assignment grant to user",
+      "Add app role assignment to service principal", "Add service principal", "Add service principal credentials",
+      "Add owner to application", "Add owner to service principal", "Update application", "Add application"]);
+  AuditLogs
+  | where TimeGenerated between (StartTime .. EndTime)
+  | where OperationName in (Ops) or OperationName has "Certificates and secrets management"
+  | where TargetResources has ValueApp or AdditionalDetails has ValueApp
+  | extend Changes = tostring(TargetResources[0].modifiedProperties)
+  | project TimeGenerated, OperationName, Result,
+      Initiator = coalesce(tostring(InitiatedBy.user.userPrincipalName), tostring(InitiatedBy.app.displayName)),
+      InitiatorIP = tostring(InitiatedBy.user.ipAddress),
+      Target = tostring(TargetResources[0].displayName),
+      ConsentType = extract(@"ConsentType: (\w+)", 1, Changes),
+      IsAdminConsent = extract(@"IsAdminConsent[^A-Za-z]+(True|False)", 1, Changes),
+      Scopes = extract_all(@"Scope: ([^,\]]+)", Changes),
+      Changes = substring(Changes, 0, 1500)
+  | sort by TimeGenerated asc

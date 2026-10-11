@@ -1,0 +1,3 @@
+// Indicateur Application : AppId (GUID), identifiant de service principal ou nom affiché.
+let ValueApp = Value;
+let ValueAppLower = tolower(Value);

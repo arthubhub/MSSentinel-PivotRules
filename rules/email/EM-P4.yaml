@@ -1,0 +1,37 @@
+id: EM-P4
+name: URL et pièces jointes des messages
+indicators: [email]
+action: pivot
+description: >
+  URL (EmailUrlInfo) et pièces jointes (EmailAttachmentInfo) des e-mails impliquant l'adresse, avec le
+  nombre de clics sur chaque URL depuis la réception.
+reading:
+  decisive: URL cliquée vers un domaine nouveau, ou pièce jointe HTML, SVG, ISO, archive ou script signalée par Defender.
+  context: QR code (URL extraite d'une image), chaîne de redirections.
+  noise: Liens de désinscription, pixels de suivi, signatures avec liens vers les réseaux sociaux.
+window: { before: 4h, after: 1h }
+query: |
+  let Msgs = EmailEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where RecipientEmailAddress =~ ValueMail or SenderFromAddress =~ ValueMail or SenderMailFromAddress =~ ValueMail
+      | summarize MailTime = min(TimeGenerated), Subject = take_any(Subject), Sender = take_any(SenderFromAddress) by NetworkMessageId;
+  let Clicks = UrlClickEvents
+      | where TimeGenerated between (StartTime .. now())
+      | summarize Clicks = count(), Clickers = make_set(AccountUpn, 10) by NetworkMessageId, Url;
+  union isfuzzy=true
+  (
+      EmailUrlInfo
+      | where TimeGenerated between (StartTime .. EndTime)
+      | join kind=inner (Msgs) on NetworkMessageId
+      | join kind=leftouter (Clicks) on NetworkMessageId, Url
+      | project MailTime, Sender, Subject, Kind = "URL", Item = Url, Info = strcat(UrlDomain, " · ", UrlLocation),
+          SHA256 = "", Threat = "", Clicks = coalesce(Clicks, 0), Clickers, NetworkMessageId
+  ),
+  (
+      EmailAttachmentInfo
+      | where TimeGenerated between (StartTime .. EndTime)
+      | join kind=inner (Msgs) on NetworkMessageId
+      | project MailTime, Sender, Subject, Kind = "Pièce jointe", Item = FileName, Info = strcat(FileType, " · ", tostring(FileSize), " octets"),
+          SHA256, Threat = strcat(ThreatTypes, " ", ThreatNames), Clicks = long(null), Clickers = dynamic(null), NetworkMessageId
+  )
+  | sort by MailTime asc, Kind asc

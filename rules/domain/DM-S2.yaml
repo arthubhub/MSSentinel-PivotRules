@@ -1,0 +1,33 @@
+id: DM-S2
+name: Prévalence du domaine
+indicators: [domain, url]
+action: statistics
+description: >
+  Première et dernière apparition du domaine sur 30 jours, nombre de machines et de comptes distincts, par
+  source et au total, avec les sous-domaines vus et le nombre de correspondances exactes de l'URL sélectionnée.
+reading:
+  decisive: Domaine vu pour la première fois dans la fenêtre, sur 1 à 3 machines, nom proche d'une marque connue.
+  context: Sous-domaines aléatoires ou très longs (génération algorithmique, tunnel DNS).
+  noise: Nouveaux services SaaS adoptés par une équipe, domaines de CDN.
+v1: true
+window: { before: 30d, after: 1d }
+uses: [domain_hits]
+query: |
+  let Hits = materialize(_DomainHits(StartTime, EndTime, ValueDomain) | extend Fqdn = _Host(Url));
+  union
+  (
+      Hits
+      | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count(),
+          Machines = dcountif(Host, isnotempty(Host)), Accounts = dcountif(Account, isnotempty(Account)),
+          ExactUrlHits = countif(Url =~ ValueUrl), Subdomains = make_set(Fqdn, 20) by Source
+  ),
+  (
+      Hits
+      | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count(),
+          Machines = dcountif(Host, isnotempty(Host)), Accounts = dcountif(Account, isnotempty(Account)),
+          ExactUrlHits = countif(Url =~ ValueUrl), Subdomains = make_set(Fqdn, 20)
+      | extend Source = "Total"
+  )
+  | extend NewInWindow = FirstSeen > T0 - 2d
+  | project Source, NewInWindow, FirstSeen, LastSeen, Events, Machines, Accounts, ExactUrlHits, Subdomains
+  | sort by Source == "Total" desc, Events desc

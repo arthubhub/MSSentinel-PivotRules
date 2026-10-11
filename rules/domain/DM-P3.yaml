@@ -1,0 +1,43 @@
+id: DM-P3
+name: Machines et processus en contact avec le domaine
+indicators: [domain, url]
+action: pivot
+description: >
+  Machines, comptes et processus qui ont contacté le domaine (DeviceNetworkEvents), téléchargé un fichier depuis
+  ce domaine (DeviceFileEvents, origine ou référent) ou l'ont cité dans une ligne de commande (DeviceProcessEvents).
+reading:
+  decisive: Processus non navigateur (powershell, mshta, curl, rclone, node) qui contacte le domaine.
+  context: Fichier téléchargé depuis le domaine puis exécuté sur la même machine.
+  noise: Navigateurs qui chargent des ressources tierces de la page.
+v1: true
+window: { before: 7d, after: 1d }
+uses: [web_functions]
+query: |
+  union isfuzzy=true
+  (
+      DeviceNetworkEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where RemoteUrl has ValueDomain
+      | where _InDomain(_Host(RemoteUrl), ValueDomain)
+      | project TimeGenerated, Source = "DeviceNetworkEvents", DeviceName = tolower(DeviceName), Account = tolower(InitiatingProcessAccountName),
+          Process = tolower(InitiatingProcessFileName), CommandLine = InitiatingProcessCommandLine, Evidence = strcat(RemoteUrl, " (", RemoteIP, ")")
+  ),
+  (
+      DeviceFileEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where FileOriginUrl has ValueDomain or FileOriginReferrerUrl has ValueDomain
+      | where _InDomain(_Host(FileOriginUrl), ValueDomain) or _InDomain(_Host(FileOriginReferrerUrl), ValueDomain)
+      | project TimeGenerated, Source = "DeviceFileEvents", DeviceName = tolower(DeviceName), Account = tolower(InitiatingProcessAccountName),
+          Process = tolower(InitiatingProcessFileName), CommandLine = InitiatingProcessCommandLine,
+          Evidence = strcat(FolderPath, " ← ", FileOriginUrl, " · SHA256 ", SHA256)
+  ),
+  (
+      DeviceProcessEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where ProcessCommandLine has ValueDomain
+      | project TimeGenerated, Source = "DeviceProcessEvents", DeviceName = tolower(DeviceName), Account = tolower(AccountName),
+          Process = tolower(FileName), CommandLine = ProcessCommandLine, Evidence = "Domaine dans la ligne de commande"
+  )
+  | summarize Events = count(), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
+      Evidence = make_set(Evidence, 10), CommandLines = make_set(CommandLine, 5) by DeviceName, Account, Process, Source
+  | sort by FirstSeen asc

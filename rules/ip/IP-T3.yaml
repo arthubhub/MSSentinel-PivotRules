@@ -1,0 +1,43 @@
+id: IP-T3
+name: Comptes vus depuis l'IP dans le temps
+indicators: [ip]
+action: timeline
+description: >
+  Liste des comptes associés à l'IP dans l'ordre de leur première apparition, avec tentatives, succès et
+  sources (Entra ID, Windows, Defender for Endpoint, Defender for Identity).
+reading:
+  decisive: Comptes qui apparaissent l'un après l'autre à quelques secondes d'intervalle (spray automatisé).
+  context: Premier succès après une série d'échecs sur d'autres comptes.
+  noise: Rotation normale des utilisateurs derrière un proxy ou un serveur de terminaux.
+window: { before: 2h, after: 2h }
+uses: [signins, win_security]
+query: |
+  union isfuzzy=true
+  (
+      _Signins(StartTime, EndTime, Value, "")
+      | project TimeGenerated, Account = tolower(UserPrincipalName), Source = "Entra ID", Success = Succeeded
+  ),
+  (
+      _WinSecurity(StartTime, EndTime, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776]), Value)
+      | where IpAddress == Value
+      | project TimeGenerated, Account = TargetSam, Source = SourceTable,
+          Success = EventID !in (4625, 4771) and Status in ("", "-", "0x0")
+  ),
+  (
+      DeviceLogonEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where RemoteIP == Value
+      | project TimeGenerated, Account = tolower(AccountName), Source = "DeviceLogonEvents", Success = ActionType == "LogonSuccess"
+  ),
+  (
+      IdentityLogonEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where IPAddress == Value
+      | project TimeGenerated, Account = tolower(coalesce(AccountUpn, AccountName)), Source = "IdentityLogonEvents", Success = ActionType == "LogonSuccess"
+  )
+  | where isnotempty(Account) and Account !endswith "$"
+  | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Attempts = count(),
+      Successes = countif(Success), FirstSuccess = minif(TimeGenerated, Success), Sources = make_set(Source) by Account
+  | sort by FirstSeen asc
+  | extend Order = row_number()
+  | project Order, FirstSeen, Account, Attempts, Successes, FirstSuccess, LastSeen, Sources

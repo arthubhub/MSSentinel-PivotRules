@@ -1,0 +1,4 @@
+// Indicateur Adresse e-mail.
+let ValueMail = tolower(Value);
+let ValueMailDomain = tostring(split(ValueMail, "@")[1]);
+let ValueMailLocal = tostring(split(ValueMail, "@")[0]);

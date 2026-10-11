@@ -1,0 +1,50 @@
+id: PR-P4
+name: Registre, tâches et services modifiés par le processus
+indicators: [process]
+action: pivot
+description: >
+  Modifications de persistance faites par le processus : clés de registre sensibles (DeviceRegistryEvents),
+  tâches planifiées et services (DeviceEvents), et commandes schtasks, reg, sc qu'il a lancées (DeviceProcessEvents).
+reading:
+  decisive: Script ou binaire inconnu qui crée une tâche planifiée ou une clé Run pointant vers un fichier qu'il vient de déposer.
+  context: Modification d'Image File Execution Options ou de Winlogon.
+  noise: Installateurs signés qui créent leurs tâches de mise à jour.
+window: { before: 30m, after: 30m }
+context: [HOST]
+uses: [persistence]
+query: |
+  union isfuzzy=true
+  (
+      DeviceRegistryEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where InitiatingProcessFileName =~ ValueFile
+      | where isempty(ValuePath) or InitiatingProcessFolderPath =~ ValuePath
+      | where isempty(HostFilter) or DeviceName startswith HostFilter
+      | where ActionType in ("RegistryValueSet", "RegistryKeyCreated", "RegistryKeyDeleted", "RegistryValueDeleted")
+      | extend Persistence = _IsPersistenceKey(RegistryKey, RegistryValueName)
+      | project TimeGenerated, DeviceName = tolower(DeviceName), Kind = "Registre", Persistence, Action = ActionType,
+          Item = strcat(RegistryKey, @"\", RegistryValueName), Detail = RegistryValueData, CommandLine = InitiatingProcessCommandLine
+  ),
+  (
+      DeviceEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where InitiatingProcessFileName =~ ValueFile
+      | where isempty(ValuePath) or InitiatingProcessFolderPath =~ ValuePath
+      | where isempty(HostFilter) or DeviceName startswith HostFilter
+      | where ActionType in (_PersistenceActions)
+      | extend AF = parse_json(tostring(AdditionalFields))
+      | project TimeGenerated, DeviceName = tolower(DeviceName), Kind = "Tâche ou service", Persistence = true, Action = ActionType,
+          Item = coalesce(tostring(AF.TaskName), tostring(AF.ServiceName), FileName),
+          Detail = substring(coalesce(tostring(AF.TaskContent), tostring(AF)), 0, 1000), CommandLine = InitiatingProcessCommandLine
+  ),
+  (
+      DeviceProcessEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where InitiatingProcessFileName =~ ValueFile
+      | where isempty(ValuePath) or InitiatingProcessFolderPath =~ ValuePath
+      | where isempty(HostFilter) or DeviceName startswith HostFilter
+      | where FileName in~ ("schtasks.exe", "reg.exe", "sc.exe", "at.exe", "wmic.exe")
+      | project TimeGenerated, DeviceName = tolower(DeviceName), Kind = "Commande", Persistence = ProcessCommandLine has_any ("/create", "add", "create", "config"),
+          Action = FileName, Item = FileName, Detail = ProcessCommandLine, CommandLine = InitiatingProcessCommandLine
+  )
+  | sort by Persistence desc, TimeGenerated asc

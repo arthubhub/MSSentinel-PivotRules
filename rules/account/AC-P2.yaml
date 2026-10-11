@@ -1,0 +1,45 @@
+id: AC-P2
+name: Machines où le compte s'est connecté
+indicators: [account]
+action: pivot
+description: >
+  Machines sur lesquelles le compte a ouvert (ou tenté d'ouvrir) une session : Defender for Endpoint
+  (DeviceLogonEvents), Windows 4624, 4625 et 4648 (SecurityEvent et WindowsEvent) et Defender for Identity.
+  Donne le type d'ouverture, l'IP et le poste source, et si le compte est administrateur local.
+reading:
+  decisive: Compte standard ouvert sur des serveurs sensibles ou contrôleurs de domaine hors de son périmètre.
+  context: Ouvertures RemoteInteractive (RDP) ou NewCredentials (runas /netonly) inhabituelles pour ce compte.
+  noise: Postes partagés, serveurs de fichiers ou d'impression en ouverture réseau (type 3).
+v1: true
+window: { before: 24h, after: 1h }
+uses: [win_security]
+query: |
+  union isfuzzy=true
+  (
+      DeviceLogonEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where AccountName =~ ValueSam
+      | project TimeGenerated, Machine = tolower(DeviceName), Source = "DeviceLogonEvents", LogonType,
+          Success = ActionType == "LogonSuccess", SourceIp = RemoteIP, SourceHost = tolower(RemoteDeviceName), IsLocalAdmin
+  ),
+  (
+      _WinSecurity(StartTime, EndTime, dynamic([4624, 4625, 4648]), ValueSam)
+      | where TargetSam == ValueSam
+      | project TimeGenerated, Machine = tolower(iff(EventID == 4648 and isnotempty(TargetServerName), TargetServerName, Computer)),
+          Source = SourceTable, LogonType = iff(EventID == 4648, "Identifiants explicites (4648)", LogonTypeName),
+          Success = EventID != 4625, SourceIp = IpAddress, SourceHost = tolower(iff(EventID == 4648, Computer, WorkstationName)),
+          IsLocalAdmin = bool(null)
+  ),
+  (
+      IdentityLogonEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where AccountUpn =~ ValueUpn or AccountName =~ ValueSam
+      | project TimeGenerated, Machine = tolower(coalesce(DestinationDeviceName, TargetDeviceName)), Source = "IdentityLogonEvents",
+          LogonType = strcat(Protocol, " ", LogonType), Success = ActionType == "LogonSuccess", SourceIp = IPAddress,
+          SourceHost = tolower(DeviceName), IsLocalAdmin = bool(null)
+  )
+  | where isnotempty(Machine) and Machine != "-"
+  | summarize Logons = count(), Failures = countif(not(Success)), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
+      LogonTypes = make_set(LogonType), SourceIps = make_set(SourceIp, 10), SourceHosts = make_set(SourceHost, 10),
+      Sources = make_set(Source), LocalAdmin = max(toint(IsLocalAdmin)) by Machine
+  | sort by FirstSeen asc

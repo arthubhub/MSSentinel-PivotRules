@@ -1,0 +1,42 @@
+id: IP-P5
+name: Alertes et renseignement sur l'IP
+indicators: [ip]
+action: pivot
+description: >
+  Alertes Sentinel et Defender XDR qui citent l'IP, et indicateurs de menace (ThreatIntelIndicators, format STIX)
+  qui la contiennent. La table historique ThreatIntelligenceIndicator n'est plus alimentée depuis le 31 juillet 2025.
+reading:
+  decisive: Indicateur actif à confiance élevée, ou alerte déjà confirmée sur la même IP.
+  context: Alertes anciennes ou indicateurs expirés.
+  noise: IP de CDN ou d'hébergeurs mutualisés présentes dans des flux de renseignement génériques.
+window: { before: 30d, after: 1d }
+query: |
+  union isfuzzy=true
+  (
+      SecurityAlert
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where Entities has Value or CompromisedEntity == Value
+      | summarize arg_max(TimeGenerated, AlertName, AlertSeverity, ProductName, CompromisedEntity, Status) by SystemAlertId
+      | project TimeGenerated, Source = "SecurityAlert", Title = AlertName, Severity = AlertSeverity, Provider = ProductName,
+          Detail = strcat(CompromisedEntity, " · ", Status), Reference = SystemAlertId
+  ),
+  (
+      AlertEvidence
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where RemoteIP == Value or LocalIP == Value
+      | summarize arg_min(TimeGenerated, Title, Severity, ServiceSource, EntityType, EvidenceRole, DeviceName) by AlertId
+      | project TimeGenerated, Source = "AlertEvidence", Title, Severity, Provider = ServiceSource,
+          Detail = strcat(EntityType, " · ", EvidenceRole, " · ", DeviceName), Reference = AlertId
+  ),
+  (
+      ThreatIntelIndicators
+      | where TimeGenerated between ((StartTime - 60d) .. EndTime)
+      | where ObservableValue == Value or Pattern has Value
+      | summarize arg_max(TimeGenerated, *) by Id
+      | where not(IsDeleted) and not(Revoked)
+      | project TimeGenerated, Source = "ThreatIntelIndicators", Title = tostring(Data.name),
+          Severity = strcat("Confiance ", tostring(Confidence)), Provider = SourceSystem,
+          Detail = strcat(Pattern, " · valide jusqu'au ", format_datetime(ValidUntil, "yyyy-MM-dd"), iff(IsActive, "", " · inactif")),
+          Reference = Id
+  )
+  | sort by TimeGenerated desc

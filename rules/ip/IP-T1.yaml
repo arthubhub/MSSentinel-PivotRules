@@ -1,0 +1,42 @@
+id: IP-T1
+name: Chaîne d'authentification Windows depuis l'IP
+indicators: [ip]
+action: timeline
+description: >
+  Enchaînement des événements d'authentification Windows liés à l'IP : 4625 (échec), 4624 (succès), 4648
+  (identifiants explicites), 4768 et 4769 (Kerberos), 4771, 4776 (NTLM), puis, pour chaque session ouverte,
+  les 4672 (privilèges), 4688 (processus lancés dans la session) et 4634 ou 4647 (fermeture), rattachés par
+  l'identifiant de session sur la même machine. Couvre SecurityEvent et WindowsEvent, y compris quand les
+  colonnes ne sont remplies que dans le XML brut.
+reading:
+  decisive: Série de 4625 puis 4624 de type 3 ou 10, suivie d'un 4672 et de 4688 dans la même session.
+  context: Ticket 4769 demandé avec un chiffrement RC4 (0x17) vers un compte de service (Kerberoasting).
+  noise: Ouvertures de type 3 répétées par des serveurs de fichiers, d'impression ou de supervision.
+v1: true
+window: { before: 30m, after: 30m }
+uses: [win_security]
+query: |
+  let Auth = _WinSecurity(StartTime, EndTime, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776]), Value)
+      | where IpAddress == Value;
+  let Sessions = Auth
+      | where EventID == 4624 and isnotempty(TargetLogonId)
+      | distinct SessionComputer = Computer, SessionLogonId = TargetLogonId;
+  let SessionHosts = Sessions | distinct SessionComputer;
+  let Linked = _WinSecurity(StartTime, EndTime, dynamic([4672, 4688, 4634, 4647]), "")
+      | where Computer in (SessionHosts)
+      | extend LinkId = iff(EventID in (4672, 4688), SubjectLogonId, TargetLogonId)
+      | join kind=inner (Sessions) on $left.Computer == $right.SessionComputer, $left.LinkId == $right.SessionLogonId;
+  union Auth, Linked
+  | extend AccountName = iff(EventID in (4672, 4688), strcat(SubjectDomainName, @"\", SubjectUserName), strcat(TargetDomainName, @"\", TargetUserName))
+  | project TimeGenerated, Source = SourceTable, Host = tolower(Computer), Account = tolower(AccountName),
+      Action = strcat(tostring(EventID), " · ", EventName),
+      Detail = case(
+          EventID in (4624, 4625), strcat(LogonTypeName, " · ", AuthenticationPackageName, " · poste ", WorkstationName, iff(EventID == 4625, strcat(" · ", Status, "/", SubStatus), "")),
+          EventID == 4648, strcat("vers ", TargetServerName, " · ", ProcessName),
+          EventID in (4768, 4769, 4771), strcat(ServiceName, " · chiffrement ", TicketEncryptionType, " · statut ", Status),
+          EventID == 4776, strcat("poste ", WorkstationName, " · statut ", Status),
+          EventID == 4672, PrivilegeList,
+          EventID == 4688, strcat(NewProcessName, " ← ", ParentProcessName, " · ", CommandLine),
+          ""),
+      LogonId = iff(EventID in (4672, 4688), SubjectLogonId, TargetLogonId)
+  | sort by TimeGenerated asc

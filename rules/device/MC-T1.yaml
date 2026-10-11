@@ -1,0 +1,89 @@
+id: MC-T1
+name: Timeline de la machine
+indicators: [device]
+action: timeline
+description: >
+  Déroulé autour de T0 sur la machine : processus, premier contact avec chaque destination publique, fichiers
+  exécutables, scripts et archives écrits, ouvertures de session, clés de persistance, événements Defender
+  notables (antivirus, ASR, altération, injection, tâches, services), alertes et événements Windows clés
+  (4624, 4625, 4672, 4688, 4697, 4698, 4720, 4732). Limité à 5 000 lignes.
+reading:
+  decisive: Enchaînement processus inhabituel → fichier déposé → persistance → connexion sortante, avec alerte associée.
+  context: Ouverture de session distante juste avant l'activité suspecte (mouvement latéral entrant).
+  noise: Activité de fond (mises à jour, agents de gestion, antivirus).
+v1: true
+window: { before: 30m, after: 30m }
+uses: [persistence, win_security]
+query: |
+  let Notable = dynamic(["Antivirus", "Asr", "Tamper", "Injection", "ScheduledTask", "ServiceInstalled", "Exploit",
+      "SmartScreen", "PowerShellCommand", "Amsi", "Wmi", "Lsass", "Credential"]);
+  union isfuzzy=true
+  (
+      DeviceProcessEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where DeviceName startswith ValueShort and _IsHost(DeviceName)
+      | project TimeGenerated, Source = "DeviceProcessEvents", Host = tolower(DeviceName), Account = tolower(AccountName),
+          Action = strcat("Processus ", FileName), Detail = strcat(InitiatingProcessFileName, " → ", ProcessCommandLine)
+  ),
+  (
+      DeviceNetworkEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where DeviceName startswith ValueShort and _IsHost(DeviceName)
+      | where RemoteIPType == "Public"
+      | summarize TimeGenerated = min(TimeGenerated), Account = take_any(InitiatingProcessAccountName)
+          by DeviceName, InitiatingProcessFileName, Destination = coalesce(RemoteUrl, RemoteIP), RemotePort
+      | project TimeGenerated, Source = "DeviceNetworkEvents", Host = tolower(DeviceName), Account = tolower(Account),
+          Action = strcat("Premier contact · ", InitiatingProcessFileName), Detail = strcat(Destination, ":", tostring(RemotePort))
+  ),
+  (
+      DeviceFileEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where DeviceName startswith ValueShort and _IsHost(DeviceName)
+      | where FileName matches regex @"(?i)\.(exe|dll|sys|ps1|psm1|bat|cmd|vbs|vbe|js|jse|wsf|hta|msi|lnk|scr|zip|iso|img|rar|7z)$"
+      | project TimeGenerated, Source = "DeviceFileEvents", Host = tolower(DeviceName), Account = tolower(InitiatingProcessAccountName),
+          Action = strcat("Fichier ", ActionType), Detail = strcat(FolderPath, " ← ", InitiatingProcessFileName, iff(isempty(FileOriginUrl), "", strcat(" ← ", FileOriginUrl)))
+  ),
+  (
+      DeviceLogonEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where DeviceName startswith ValueShort and _IsHost(DeviceName)
+      | project TimeGenerated, Source = "DeviceLogonEvents", Host = tolower(DeviceName), Account = tolower(strcat(AccountDomain, @"\", AccountName)),
+          Action = strcat(ActionType, " ", LogonType), Detail = strcat(RemoteIP, " ", RemoteDeviceName)
+  ),
+  (
+      DeviceRegistryEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where DeviceName startswith ValueShort and _IsHost(DeviceName)
+      | where _IsPersistenceKey(RegistryKey, RegistryValueName)
+      | project TimeGenerated, Source = "DeviceRegistryEvents", Host = tolower(DeviceName), Account = tolower(InitiatingProcessAccountName),
+          Action = ActionType, Detail = strcat(RegistryKey, @"\", RegistryValueName, " = ", RegistryValueData)
+  ),
+  (
+      DeviceEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where DeviceName startswith ValueShort and _IsHost(DeviceName)
+      | where ActionType has_any (Notable)
+      | project TimeGenerated, Source = "DeviceEvents", Host = tolower(DeviceName), Account = tolower(InitiatingProcessAccountName),
+          Action = ActionType, Detail = strcat(FileName, " · ", InitiatingProcessFileName, " · ", substring(tostring(AdditionalFields), 0, 300))
+  ),
+  (
+      AlertEvidence
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where DeviceName startswith ValueShort and _IsHost(DeviceName)
+      | summarize arg_min(TimeGenerated, Title, Severity, DeviceName) by AlertId
+      | project TimeGenerated, Source = "AlertEvidence", Host = tolower(DeviceName), Account = "",
+          Action = strcat("Alerte ", Severity), Detail = Title
+  ),
+  (
+      _WinSecurity(StartTime, EndTime, dynamic([4624, 4625, 4672, 4688, 4697, 4698, 4720, 4732]), ValueShort)
+      | where _IsHost(Computer)
+      | where EventID == 4688 or not(TargetUserName endswith "$" or SubjectUserName endswith "$")
+      | project TimeGenerated, Source = SourceTable, Host = tolower(Computer),
+          Account = tolower(iff(EventID in (4672, 4688, 4697, 4698), SubjectUserName, TargetUserName)),
+          Action = strcat(tostring(EventID), " · ", EventName),
+          Detail = case(EventID == 4688, strcat(ParentProcessName, " → ", CommandLine),
+              EventID in (4624, 4625), strcat(LogonTypeName, " · ", IpAddress, " ", WorkstationName),
+              EventID == 4698, TaskName, EventID == 4697, strcat(ServiceName, " · ", ServiceFileName), "")
+  )
+  | sort by TimeGenerated asc
+  | take 5000

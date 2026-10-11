@@ -1,0 +1,20 @@
+id: IP-S2
+name: Volume par 10 minutes, par table et par événement
+indicators: [ip]
+action: statistics
+description: >
+  Nombre d'événements contenant l'IP par tranche de 10 minutes, ventilé par table et par type d'événement
+  (EventID, ActionType ou opération). Montre un pic d'échecs, un balisage régulier ou une activité inhabituelle.
+reading:
+  decisive: Pic d'échecs 4625 ou ResultType 50126 concentré sur quelques minutes, suivi d'un succès.
+  context: Intervalles réguliers entre événements réseau (balisage C2).
+  noise: NAT d'entreprise, scanners internes et passerelles qui produisent un fond constant.
+scenarios: [S1, S6]
+v1: true
+window: { before: 24h, after: 1h }
+render: timechart
+uses: [ip_events]
+query: |
+  _IpEvents(StartTime, EndTime, Value)
+  | summarize Events = count() by bin(TimeGenerated, 10m), Serie = strcat(Source, " · ", EventType)
+  | render timechart

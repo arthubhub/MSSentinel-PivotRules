@@ -1,0 +1,32 @@
+id: AC-P1
+name: IP et appareils utilisés par le compte
+indicators: [account]
+action: pivot
+description: >
+  IP, pays, opérateur (ASN), appareil, système et navigateur des connexions Entra ID du compte, comparés aux
+  30 jours qui précèdent la fenêtre : chaque ligne indique si l'IP, le pays, l'ASN ou l'appareil sont nouveaux.
+reading:
+  decisive: Connexion réussie depuis une IP, un ASN et un appareil tous nouveaux, peu après un clic ou un spray.
+  context: Appareil non géré ou non conforme, agent utilisateur d'outil en ligne de commande ou de script.
+  noise: Nouvelle IP résidentielle (télétravail), partage de connexion mobile, nouveau poste.
+v1: true
+window: { before: 24h, after: 1h }
+uses: [signins]
+query: |
+  let Baseline = _Signins(StartTime - 30d, StartTime, "", ValueUpn)
+      | summarize KnownIPs = make_set(IPAddress, 2000), KnownCountries = make_set(Location, 200),
+          KnownAsn = make_set(AutonomousSystemNumber, 500), KnownDevices = make_set(DeviceId, 200)
+      | extend JoinKey = 1;
+  _Signins(StartTime, EndTime, "", ValueUpn)
+  | summarize SignIns = count(), Successes = countif(Succeeded), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
+      Apps = make_set(AppDisplayName, 10), ClientApps = make_set(ClientAppUsed, 5), UserAgents = make_set(UserAgent, 5)
+      by IPAddress, Location, City, AutonomousSystemNumber, DeviceName, DeviceId, OperatingSystem, Browser, IsManaged, IsCompliant
+  | extend JoinKey = 1
+  | join kind=leftouter (Baseline) on JoinKey
+  | extend NewIP = not(set_has_element(KnownIPs, IPAddress)),
+      NewCountry = not(set_has_element(KnownCountries, Location)),
+      NewASN = not(set_has_element(KnownAsn, AutonomousSystemNumber)),
+      UnknownDevice = isempty(DeviceId) or not(set_has_element(KnownDevices, DeviceId))
+  | project FirstSeen, LastSeen, IPAddress, NewIP, Location, NewCountry, City, AutonomousSystemNumber, NewASN,
+      DeviceName, UnknownDevice, OperatingSystem, Browser, IsManaged, IsCompliant, SignIns, Successes, Apps, ClientApps, UserAgents
+  | sort by FirstSeen asc

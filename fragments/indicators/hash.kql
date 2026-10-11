@@ -1,0 +1,2 @@
+// Indicateur Hash : MD5 (32), SHA1 (40) ou SHA256 (64).
+let ValueHash = tolower(Value);

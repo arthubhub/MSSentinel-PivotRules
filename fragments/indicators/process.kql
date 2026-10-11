@@ -1,0 +1,3 @@
+// Indicateur Processus : nom de fichier (powershell.exe) ou chemin complet
+let ValueFile = tolower(tostring(split(replace_string(Value, "/", @"\"), @"\")[-1]));
+let ValuePath = iff(Value contains @"\" or Value contains "/", tolower(replace_string(Value, "/", @"\")), "");

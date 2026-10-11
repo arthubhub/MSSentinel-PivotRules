@@ -1,0 +1,41 @@
+id: EM-P7
+name: Messages Teams impliquant l'adresse
+indicators: [email]
+action: pivot
+description: >
+  Messages et conversations Teams envoyés par l'adresse ou qui l'incluent : MessageEvents (Defender for Office 365,
+  si disponible), audit Teams d'OfficeActivity et CloudAppEvents. Indique si le fil est externe.
+reading:
+  decisive: Expéditeur d'un tenant externe se présentant comme support, qui contacte plusieurs employés dans l'heure.
+  context: Premier échange avec cet expéditeur, nom affiché générique (Help Desk, IT Support).
+  noise: Conversations avec des partenaires et éditeurs connus.
+window: { before: 4h, after: 1h }
+query: |
+  union isfuzzy=true
+  (
+      MessageEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where SenderEmailAddress =~ ValueMail or RecipientDetails has ValueMail
+      | project TimeGenerated, Source = "MessageEvents", Sender = SenderEmailAddress, SenderName = SenderDisplayName, SenderType,
+          Recipients = tostring(RecipientDetails), Subject = coalesce(MessageSubject, Subject), Thread = ThreadName,
+          ExternalThread = tostring(IsExternalThread), Action = DeliveryAction, ThreatTypes
+  ),
+  (
+      OfficeActivity
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where OfficeWorkload == "MicrosoftTeams"
+      | where UserId =~ ValueMail or Members has ValueMail
+      | project TimeGenerated, Source = "OfficeActivity", Sender = UserId, SenderName = "", SenderType = UserType,
+          Recipients = tostring(Members), Subject = ChatName, Thread = ChatThreadId, ExternalThread = "",
+          Action = Operation, ThreatTypes = ""
+  ),
+  (
+      CloudAppEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where Application == "Microsoft Teams"
+      | where RawEventData has ValueMail
+      | project TimeGenerated, Source = "CloudAppEvents", Sender = tostring(RawEventData.UserId), SenderName = AccountDisplayName,
+          SenderType = AccountType, Recipients = tostring(RawEventData.Members), Subject = tostring(RawEventData.ChatName),
+          Thread = tostring(RawEventData.ChatThreadId), ExternalThread = tostring(IsExternalUser), Action = ActionType, ThreatTypes = ""
+  )
+  | sort by TimeGenerated asc

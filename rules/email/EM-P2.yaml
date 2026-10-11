@@ -1,0 +1,26 @@
+id: EM-P2
+name: Clics sur des liens autour de T0
+indicators: [email]
+action: pivot
+description: >
+  Clics enregistrés par la protection des liens pour l'adresse (UrlClickEvents), par défaut 30 minutes avant et
+  après T0, rapprochés de l'e-mail d'origine (expéditeur, sujet, heure de réception).
+reading:
+  decisive: Clic autorisé (ClickAllowed) ou forcé malgré l'avertissement (IsClickedThrough) sur l'URL du message suspect.
+  context: Clic depuis Teams ou Office plutôt que depuis Outlook.
+  noise: Clics de scanners de sécurité quelques secondes après la livraison, depuis des IP de centre de données.
+window: { before: 30m, after: 30m }
+query: |
+  UrlClickEvents
+  | where TimeGenerated between (StartTime .. EndTime)
+  | where AccountUpn =~ ValueMail
+  | join kind=leftouter (
+      EmailEvents
+      | where TimeGenerated between ((StartTime - 7d) .. EndTime)
+      | where RecipientEmailAddress =~ ValueMail
+      | summarize arg_min(TimeGenerated, Subject, SenderFromAddress) by NetworkMessageId
+      | project NetworkMessageId, MailTime = TimeGenerated, Subject, SenderFromAddress
+      ) on NetworkMessageId
+  | project TimeGenerated, Url, ActionType, IsClickedThrough, Workload, ThreatTypes, DetectionMethods, IPAddress,
+      MailTime, SenderFromAddress, Subject, UrlChain, NetworkMessageId
+  | sort by TimeGenerated asc

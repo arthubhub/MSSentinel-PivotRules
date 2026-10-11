@@ -1,0 +1,48 @@
+id: AC-P3
+name: Actions d'administration et de fichiers du compte
+indicators: [account]
+action: pivot
+description: >
+  Opérations réalisées par le compte, ou qui le visent : audit Entra ID (AuditLogs), Microsoft 365
+  (OfficeActivity et CloudAppEvents, qui se recoupent selon les connecteurs activés) et Azure Resource Manager.
+reading:
+  decisive: Ajout d'une méthode MFA, attribution de rôle, lecture massive de fichiers ou de secrets juste après une connexion suspecte.
+  context: Opérations sur des ressources hors du périmètre habituel du compte.
+  noise: Synchronisation OneDrive, opérations d'administration planifiées, comptes d'automatisation.
+v1: true
+window: { before: 4h, after: 4h }
+query: |
+  union isfuzzy=true
+  (
+      AuditLogs
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where InitiatedBy has ValueUpn or TargetResources has ValueUpn
+      | project TimeGenerated, Source = "AuditLogs (Entra ID)", Operation = OperationName,
+          Role = iff(tostring(InitiatedBy.user.userPrincipalName) =~ ValueUpn, "Auteur", "Cible"),
+          Target = coalesce(tostring(TargetResources[0].userPrincipalName), tostring(TargetResources[0].displayName)),
+          Result, IP = tostring(InitiatedBy.user.ipAddress)
+  ),
+  (
+      OfficeActivity
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where UserId =~ ValueUpn
+      | project TimeGenerated, Source = strcat("OfficeActivity (", OfficeWorkload, ")"), Operation, Role = "Auteur",
+          Target = coalesce(OfficeObjectId, SourceFileName), Result = ResultStatus, IP = ClientIP
+  ),
+  (
+      CloudAppEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where tostring(RawEventData.UserId) =~ ValueUpn
+      | project TimeGenerated, Source = strcat("CloudAppEvents (", Application, ")"), Operation = ActionType, Role = "Auteur",
+          Target = ObjectName, Result = "", IP = IPAddress
+  ),
+  (
+      AzureActivity
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where Caller =~ ValueUpn
+      | project TimeGenerated, Source = "AzureActivity", Operation = OperationNameValue, Role = "Auteur",
+          Target = _ResourceId, Result = ActivityStatusValue, IP = CallerIpAddress
+  )
+  | summarize Events = count(), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
+      Targets = make_set(Target, 10), IPs = make_set(IP, 5), Results = make_set(Result, 5) by Source, Operation, Role
+  | sort by Events desc

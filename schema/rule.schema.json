@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Règle de pivot (source YAML)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "indicators", "action", "description", "window", "query"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^(IP|AC|EM|DM|MC|PR|AP|HS)-[SPT][0-9]+$" },
+    "name": { "type": "string", "minLength": 3 },
+    "indicators": {
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": { "enum": ["ip", "account", "email", "url", "domain", "device", "process", "application", "hash"] }
+    },
+    "action": { "enum": ["statistics", "pivot", "timeline"] },
+    "description": { "type": "string" },
+    "reading": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "decisive": { "type": "string", "description": "Ce qui permet de trancher" },
+        "context": { "type": "string", "description": "Ce qui oriente sans conclure" },
+        "noise": { "type": "string", "description": "Bruit fréquent en production saine" }
+      }
+    },
+    "scenarios": { "type": "array", "items": { "type": "string", "pattern": "^S[0-9]+$" } },
+    "v1": { "type": "boolean" },
+    "window": {
+      "type": "object", "additionalProperties": false, "required": ["before", "after"],
+      "properties": {
+        "before": { "type": "string", "pattern": "^[0-9]+(m|h|d)$" },
+        "after": { "type": "string", "pattern": "^[0-9]+(m|h|d)$" }
+      }
+    },
+    "render": { "enum": ["table", "timechart", "columnchart", "barchart"] },
+    "context": { "type": "array", "items": { "enum": ["HOST"] } },
+    "uses": { "type": "array", "items": { "type": "string", "pattern": "^[a-z0-9_]+$" } },
+    "notes": { "type": "string" },
+    "query": { "type": "string", "minLength": 10 }
+  }
+}

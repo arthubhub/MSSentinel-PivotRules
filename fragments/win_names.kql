@@ -1,0 +1,42 @@
+let _WinEventName = (id:int) {
+    case(
+        id == 4624, "Ouverture de session réussie",
+        id == 4625, "Échec d'ouverture de session",
+        id == 4634, "Fermeture de session",
+        id == 4647, "Déconnexion initiée par l'utilisateur",
+        id == 4648, "Ouverture avec identifiants explicites",
+        id == 4672, "Privilèges spéciaux attribués",
+        id == 4688, "Création de processus",
+        id == 4697, "Service installé",
+        id == 4698, "Tâche planifiée créée",
+        id == 4702, "Tâche planifiée modifiée",
+        id == 4720, "Compte utilisateur créé",
+        id == 4722, "Compte utilisateur activé",
+        id == 4724, "Réinitialisation de mot de passe",
+        id == 4728, "Membre ajouté à un groupe global de sécurité",
+        id == 4732, "Membre ajouté à un groupe local de sécurité",
+        id == 4740, "Compte verrouillé",
+        id == 4756, "Membre ajouté à un groupe universel de sécurité",
+        id == 4768, "Ticket Kerberos TGT demandé",
+        id == 4769, "Ticket de service Kerberos demandé",
+        id == 4771, "Échec de pré-authentification Kerberos",
+        id == 4776, "Validation d'identifiants NTLM",
+        id == 4778, "Session RDP reconnectée",
+        id == 4779, "Session RDP déconnectée",
+        id == 5140, "Accès à un partage réseau",
+        id == 5145, "Contrôle d'accès à un objet de partage",
+        strcat("EventID ", tostring(id)))
+};
+let _LogonTypeName = (t:string) {
+    case(
+        t == "2", "Interactive",
+        t == "3", "Network",
+        t == "4", "Batch",
+        t == "5", "Service",
+        t == "7", "Unlock",
+        t == "8", "NetworkCleartext",
+        t == "9", "NewCredentials",
+        t == "10", "RemoteInteractive",
+        t == "11", "CachedInteractive",
+        t)
+};

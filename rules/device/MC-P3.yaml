@@ -1,0 +1,70 @@
+id: MC-P3
+name: Persistance installée sur la machine
+indicators: [device]
+action: pivot
+description: >
+  Mécanismes de persistance créés ou modifiés : clés de registre Run, RunOnce, Winlogon, IFEO et ImagePath de
+  services (DeviceRegistryEvents), tâches planifiées et services (DeviceEvents), commandes schtasks, sc, reg, wmic
+  et PowerShell (DeviceProcessEvents), raccourcis du dossier Démarrage (DeviceFileEvents) et événements
+  Windows 4697, 4698, 4702, 4720, 4732 (SecurityEvent et WindowsEvent).
+reading:
+  decisive: Tâche ou clé Run pointant vers un fichier déposé dans AppData, Temp ou ProgramData dans l'heure.
+  context: Tâche au nom d'un composant système (GoogleUpdate, OneDrive) mais binaire non signé ou hors de son dossier.
+  noise: Installations et mises à jour de logiciels signés, tâches créées par l'IT.
+v1: true
+window: { before: 1h, after: 24h }
+uses: [persistence, win_security, paths]
+query: |
+  union isfuzzy=true
+  (
+      DeviceRegistryEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where DeviceName startswith ValueShort
+      | where _IsHost(DeviceName)
+      | where ActionType in ("RegistryValueSet", "RegistryKeyCreated")
+      | where _IsPersistenceKey(RegistryKey, RegistryValueName)
+      | project TimeGenerated, Mechanism = "Registre", Item = strcat(RegistryKey, @"\", RegistryValueName), Detail = RegistryValueData,
+          Process = InitiatingProcessFileName, CommandLine = InitiatingProcessCommandLine
+  ),
+  (
+      DeviceEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where DeviceName startswith ValueShort
+      | where _IsHost(DeviceName)
+      | where ActionType in (_PersistenceActions)
+      | extend AF = parse_json(tostring(AdditionalFields))
+      | project TimeGenerated, Mechanism = ActionType, Item = coalesce(tostring(AF.TaskName), tostring(AF.ServiceName), FileName),
+          Detail = substring(coalesce(tostring(AF.TaskContent), FolderPath, tostring(AF)), 0, 1000),
+          Process = InitiatingProcessFileName, CommandLine = InitiatingProcessCommandLine
+  ),
+  (
+      DeviceProcessEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where DeviceName startswith ValueShort
+      | where _IsHost(DeviceName)
+      | where (FileName in~ ("schtasks.exe", "at.exe") and ProcessCommandLine has "/create")
+          or (FileName =~ "sc.exe" and ProcessCommandLine has_any ("create", "config"))
+          or (FileName =~ "reg.exe" and ProcessCommandLine has "add" and ProcessCommandLine has_any ("CurrentVersion\\Run", "Winlogon", "Image File Execution Options"))
+          or (FileName in~ ("powershell.exe", "pwsh.exe", "wmic.exe") and ProcessCommandLine has_any ("Register-ScheduledTask", "New-ScheduledTask", "New-Service", "__EventFilter", "CommandLineEventConsumer"))
+      | project TimeGenerated, Mechanism = "Commande", Item = FileName, Detail = ProcessCommandLine,
+          Process = InitiatingProcessFileName, CommandLine = InitiatingProcessCommandLine
+  ),
+  (
+      DeviceFileEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where DeviceName startswith ValueShort
+      | where _IsHost(DeviceName)
+      | where ActionType == "FileCreated" and FolderPath has @"\Start Menu\Programs\Startup"
+      | project TimeGenerated, Mechanism = "Dossier Démarrage", Item = FileName, Detail = FolderPath,
+          Process = InitiatingProcessFileName, CommandLine = InitiatingProcessCommandLine
+  ),
+  (
+      _WinSecurity(StartTime, EndTime, dynamic([4697, 4698, 4702, 4720, 4732]), ValueShort)
+      | where _IsHost(Computer)
+      | project TimeGenerated, Mechanism = strcat(tostring(EventID), " ", EventName),
+          Item = coalesce(TaskName, ServiceName, TargetUserName),
+          Detail = substring(coalesce(TaskContent, ServiceFileName, MemberName), 0, 1000),
+          Process = strcat(SubjectDomainName, @"\", SubjectUserName), CommandLine = ""
+  )
+  | extend UserWritablePath = _IsUserWritable(Detail)
+  | sort by TimeGenerated asc

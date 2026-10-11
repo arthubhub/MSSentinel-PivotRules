@@ -1,0 +1,33 @@
+id: AC-S2
+name: Échecs et succès d'authentification par heure
+indicators: [account]
+action: statistics
+description: >
+  Courbe horaire des succès et échecs d'authentification du compte : Entra ID, Windows (4624, 4625, 4771, 4776
+  via SecurityEvent et WindowsEvent) et Defender for Endpoint.
+reading:
+  decisive: Série d'échecs suivie d'un succès, ou succès Entra ID juste après une rafale d'échecs MFA.
+  context: Échecs nocturnes réguliers.
+  noise: Compte de service au mot de passe expiré qui échoue à heure fixe depuis la même machine.
+window: { before: 24h, after: 1h }
+render: timechart
+uses: [signins, win_security]
+query: |
+  union isfuzzy=true
+  (
+      _Signins(StartTime, EndTime, "", ValueUpn)
+      | project TimeGenerated, Serie = strcat("Entra ID · ", iff(Succeeded, "succès", "échec"))
+  ),
+  (
+      _WinSecurity(StartTime, EndTime, dynamic([4624, 4625, 4771, 4776]), ValueSam)
+      | where TargetSam == ValueSam
+      | project TimeGenerated, Serie = strcat("Windows · ", iff(EventID in (4625, 4771) or Status !in ("", "-", "0x0"), "échec", "succès"))
+  ),
+  (
+      DeviceLogonEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where AccountName =~ ValueSam
+      | project TimeGenerated, Serie = strcat("Defender · ", iff(ActionType == "LogonSuccess", "succès", "échec"))
+  )
+  | summarize Events = count() by bin(TimeGenerated, 1h), Serie
+  | render timechart

@@ -1,0 +1,40 @@
+id: PR-S1
+name: Prévalence du processus
+indicators: [process]
+action: statistics
+description: >
+  Exécutions du binaire sur 30 jours, par chemin (profil utilisateur remplacé par *) : machines, comptes,
+  jours actifs, hash, éditeurs et parents. Repère un binaire légitime lancé depuis un emplacement anormal
+  (node.exe dans AppData, copie de rundll32). Couvre aussi les 4688 Windows. Le contexte HOST restreint à une machine.
+reading:
+  decisive: Chemin modifiable par l'utilisateur (AppData, Temp, ProgramData) vu sur 1 à 3 machines, sans éditeur connu.
+  context: Plusieurs hash pour un même nom et un même chemin, nom d'origine (OriginalFileName) différent du nom.
+  noise: Outils de développement (node, python) sur les postes des développeurs.
+v1: true
+window: { before: 30d, after: 1d }
+context: [HOST]
+uses: [paths, win_security]
+query: |
+  union isfuzzy=true
+  (
+      DeviceProcessEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where FileName =~ ValueFile
+      | where isempty(HostFilter) or DeviceName startswith HostFilter
+      | project TimeGenerated, Source = "DeviceProcessEvents", DeviceName = tolower(DeviceName), AccountName = tolower(AccountName),
+          FolderPath, SHA256, Company = ProcessVersionInfoCompanyName, OriginalName = ProcessVersionInfoOriginalFileName, Parent = InitiatingProcessFileName
+  ),
+  (
+      _WinSecurity(StartTime, EndTime, dynamic([4688]), ValueFile)
+      | where tolower(NewProcessName) endswith strcat(@"\", ValueFile)
+      | where isempty(HostFilter) or Computer startswith HostFilter
+      | project TimeGenerated, Source = SourceTable, DeviceName = tolower(Computer), AccountName = tolower(SubjectUserName),
+          FolderPath = NewProcessName, SHA256 = "", Company = "", OriginalName = "", Parent = tostring(split(ParentProcessName, @"\")[-1])
+  )
+  | extend NormPath = _NormPath(FolderPath)
+  | summarize Executions = count(), Machines = dcount(DeviceName), Accounts = dcount(AccountName), ActiveDays = dcount(bin(TimeGenerated, 1d)),
+      FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Hashes = make_set_if(SHA256, isnotempty(SHA256), 10),
+      Companies = make_set_if(Company, isnotempty(Company), 5), OriginalNames = make_set_if(OriginalName, isnotempty(OriginalName), 5),
+      Parents = make_set(Parent, 10), SampleMachines = make_set(DeviceName, 10), Sources = make_set(Source) by NormPath
+  | extend UserWritablePath = _IsUserWritable(NormPath)
+  | sort by UserWritablePath desc, Machines asc

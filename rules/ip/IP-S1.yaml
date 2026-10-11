@@ -1,0 +1,18 @@
+id: IP-S1
+name: Activité de l'IP par jour
+indicators: [ip]
+action: statistics
+description: >
+  Nombre d'événements contenant l'IP par jour et par table (Entra ID, Windows, Defender, Microsoft 365,
+  Azure, pare-feu, messagerie). Montre si l'IP est nouvelle, dormante ou habituelle.
+reading:
+  decisive: Première apparition dans les dernières 24 heures après plusieurs jours d'absence.
+  context: Changement brutal de volume ou apparition dans une nouvelle table (par exemple Azure après Entra ID).
+  noise: IP de proxy, de NAT ou de VPN d'entreprise présentes tous les jours dans toutes les tables.
+window: { before: 7d, after: 1d }
+render: timechart
+uses: [ip_events]
+query: |
+  _IpEvents(StartTime, EndTime, Value)
+  | summarize Events = count() by bin(TimeGenerated, 1d), Source
+  | render timechart

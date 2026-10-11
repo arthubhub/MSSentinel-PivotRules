@@ -1,0 +1,36 @@
+// Connexions Entra ID interactives et non interactives, normalisées.
+// Dans AADNonInteractiveUserSignInLogs, DeviceDetail, Status et LocationDetails sont des chaînes JSON :
+// elles sont analysées pour obtenir les mêmes colonnes que SigninLogs.
+// Paramètres : start, end, ip (vide = toutes), upn (vide = tous). Résultat : 0 = succès.
+let _Signins = (start:datetime, end:datetime, ip:string, upn:string) {
+    union isfuzzy=true
+    (
+        SigninLogs
+        | where TimeGenerated between (start .. end)
+        | where isempty(ip) or IPAddress == ip
+        | where isempty(upn) or UserPrincipalName =~ upn
+        | extend _dev = DeviceDetail, _loc = LocationDetails, _st = Status, SignInType = "Interactive"
+    ),
+    (
+        AADNonInteractiveUserSignInLogs
+        | where TimeGenerated between (start .. end)
+        | where isempty(ip) or IPAddress == ip
+        | where isempty(upn) or UserPrincipalName =~ upn
+        | extend _dev = parse_json(DeviceDetail), _loc = parse_json(LocationDetails), _st = parse_json(Status), SignInType = "NonInteractive"
+    )
+    | extend
+        DeviceName = tostring(_dev.displayName),
+        DeviceId = tostring(_dev.deviceId),
+        OperatingSystem = tostring(_dev.operatingSystem),
+        Browser = tostring(_dev.browser),
+        IsManaged = tostring(_dev.isManaged),
+        IsCompliant = tostring(_dev.isCompliant),
+        TrustType = tostring(_dev.trustType),
+        City = tostring(_loc.city),
+        FailureReason = tostring(_st.failureReason),
+        Succeeded = ResultType == "0"
+    | project TimeGenerated, SignInType, UserPrincipalName, UserId, AppDisplayName, AppId, ResourceDisplayName,
+        ResultType, ResultDescription, FailureReason, Succeeded, IPAddress, Location, City, AutonomousSystemNumber,
+        ClientAppUsed, UserAgent, DeviceName, DeviceId, OperatingSystem, Browser, IsManaged, IsCompliant, TrustType,
+        ConditionalAccessStatus, AuthenticationRequirement, RiskLevelDuringSignIn, SessionId, CorrelationId
+};
