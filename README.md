@@ -1,4 +1,4 @@
-# sentinel-pivot-rules
+# MSSentinel-PivotRules
 
 Ce répertoire contient des query KQL destinées à pivoter autour des indicateurs recensés lors d'investigations SOC sur Microsoft Sentinel.
 
