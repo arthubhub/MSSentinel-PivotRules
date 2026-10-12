@@ -108,11 +108,11 @@ Chaque push sur `master` déclenche le workflow [`Build & Release`](.github/work
 Les URL ci-dessous pointent toujours vers la dernière version :
 
 ```
-https://github.com/arthubhub/MicrosoftSentinel-EasyPivot/releases/latest/download/pivot-rules.flat.json
-https://github.com/arthubhub/MicrosoftSentinel-EasyPivot/releases/latest/download/pivot-rules.json
-https://github.com/arthubhub/MicrosoftSentinel-EasyPivot/releases/latest/download/CATALOGUE.md
+https://github.com/arthubhub/MSSentinel-PivotRules/releases/latest/download/pivot-rules.flat.json
+https://github.com/arthubhub/MSSentinel-PivotRules/releases/latest/download/pivot-rules.json
+https://github.com/arthubhub/MSSentinel-PivotRules/releases/latest/download/CATALOGUE.md
 ```
 
-Par exemple, en ligne de commande : `curl -L -O https://github.com/arthubhub/MicrosoftSentinel-EasyPivot/releases/latest/download/pivot-rules.flat.json`.
+Par exemple, en ligne de commande : `curl -L -O https://github.com/arthubhub/MSSentinel-PivotRules/releases/latest/download/pivot-rules.flat.json`.
 
 Pour générer les fichiers vous-même : `npm ci && npm run build`, la sortie est dans `dist/`.
