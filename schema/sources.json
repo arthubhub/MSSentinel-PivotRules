@@ -1,0 +1,501 @@
+{
+ "_comment": "Familles de sources : ce que chaque table permet de voir. Une famille est couverte dès qu'un de ses membres est alimenté ; les membres d'une même famille sont des équivalents (ou des points de vue complémentaires). Un membre est une table entière (`tables`, ou { table }) ou une partie d'une table : canal (`security` : journal Sécurité, `sysmon` : Microsoft-Windows-Sysmon, `system` : Service Control Manager) et liste d'EventID, ou filtre `where` libre. Une table journalisée (SecurityEvent, WindowsEvent, Event) ne couvre une famille que si ses événements sont réellement collectés : la règle de couverture le vérifie membre par membre. Toute table lue par une règle doit appartenir à une famille (contrôlé au build). Une famille « optional » enrichit les résultats (rôles) sans être une source d'événements.",
+ "families": {
+  "signins_user": {
+   "label": "Connexions Entra ID des utilisateurs",
+   "tables": [
+    "SigninLogs",
+    "AADNonInteractiveUserSignInLogs",
+    "EntraIdSignInEvents"
+   ],
+   "hint": "Connecteur Microsoft Entra ID de Sentinel (journaux SignInLogs et NonInteractiveUserSignInLogs), ou EntraIdSignInEvents dans Defender XDR."
+  },
+  "signins_app": {
+   "label": "Connexions Entra ID des applications et identités managées",
+   "tables": [
+    "AADServicePrincipalSignInLogs",
+    "AADManagedIdentitySignInLogs",
+    "EntraIdSpnSignInEvents"
+   ],
+   "hint": "Connecteur Microsoft Entra ID (ServicePrincipalSignInLogs, ManagedIdentitySignInLogs), ou EntraIdSpnSignInEvents dans Defender XDR."
+  },
+  "entra_audit": {
+   "label": "Audit de l'annuaire Entra ID",
+   "tables": [
+    "AuditLogs"
+   ],
+   "hint": "Connecteur Microsoft Entra ID, journal AuditLogs."
+  },
+  "windows_auth": {
+   "label": "Authentifications Windows et Active Directory",
+   "hint": "Événements de sécurité Windows via AMA (SecurityEvent ou WindowsEvent, contrôleurs de domaine compris), Defender for Endpoint, Defender for Identity, ou table ASIM d'authentification.",
+   "members": [
+    {
+     "table": "SecurityEvent",
+     "channel": "security",
+     "ids": [
+      4624,
+      4625,
+      4648,
+      4768,
+      4769,
+      4771,
+      4776
+     ],
+     "label": "authentifications",
+     "hint": "Audit « Ouverture de session » et « Validation des informations d'identification / Kerberos » ; les 4768, 4769, 4771 et 4776 ne sont produits que par les contrôleurs de domaine : collecter aussi leurs journaux."
+    },
+    {
+     "table": "WindowsEvent",
+     "channel": "security",
+     "ids": [
+      4624,
+      4625,
+      4648,
+      4768,
+      4769,
+      4771,
+      4776
+     ],
+     "label": "authentifications",
+     "hint": "Audit « Ouverture de session » et « Validation des informations d'identification / Kerberos » ; les 4768, 4769, 4771 et 4776 ne sont produits que par les contrôleurs de domaine : collecter aussi leurs journaux."
+    },
+    {
+     "table": "DeviceLogonEvents"
+    },
+    {
+     "table": "IdentityLogonEvents"
+    },
+    {
+     "table": "ASimAuthenticationEventLogs"
+    }
+   ]
+  },
+  "windows_activity": {
+   "label": "Comptes, groupes, privilèges et verrouillages (journal Sécurité)",
+   "hint": "Audit « Gestion des comptes » et « Utilisation des privilèges » ; 4720 à 4756 et 4740 sont produits par les contrôleurs de domaine.",
+   "members": [
+    {
+     "table": "SecurityEvent",
+     "channel": "security",
+     "ids": [
+      4672,
+      4720,
+      4722,
+      4724,
+      4728,
+      4732,
+      4740,
+      4756
+     ],
+     "label": "comptes et groupes"
+    },
+    {
+     "table": "WindowsEvent",
+     "channel": "security",
+     "ids": [
+      4672,
+      4720,
+      4722,
+      4724,
+      4728,
+      4732,
+      4740,
+      4756
+     ],
+     "label": "comptes et groupes"
+    }
+   ]
+  },
+  "domain_controllers": {
+   "label": "Contrôleurs de domaine (Defender for Identity)",
+   "tables": [
+    "IdentityLogonEvents",
+    "IdentityQueryEvents",
+    "IdentityDirectoryEvents"
+   ],
+   "hint": "Capteur Defender for Identity sur les contrôleurs de domaine, tables diffusées par le connecteur Defender XDR."
+  },
+  "endpoint_process": {
+   "label": "Exécution de processus",
+   "hint": "Defender for Endpoint, 4688 avec ligne de commande (audit « Création du processus » + GPO « Inclure la ligne de commande »), Sysmon 1, ou table ASIM de processus.",
+   "members": [
+    {
+     "table": "DeviceProcessEvents"
+    },
+    {
+     "table": "SecurityEvent",
+     "channel": "security",
+     "ids": [
+      4688
+     ],
+     "label": "création de processus"
+    },
+    {
+     "table": "WindowsEvent",
+     "channel": "security",
+     "ids": [
+      4688
+     ],
+     "label": "création de processus"
+    },
+    {
+     "table": "Event",
+     "channel": "sysmon",
+     "ids": [
+      1
+     ],
+     "label": "création de processus",
+     "hint": "Sysmon installé avec une configuration qui journalise ces ID, collecté par l'agent Azure Monitor (table Event, journal Microsoft-Windows-Sysmon/Operational) ou par transfert d'événements (WindowsEvent)."
+    },
+    {
+     "table": "WindowsEvent",
+     "channel": "sysmon",
+     "ids": [
+      1
+     ],
+     "label": "création de processus",
+     "hint": "Sysmon installé avec une configuration qui journalise ces ID, collecté par l'agent Azure Monitor (table Event, journal Microsoft-Windows-Sysmon/Operational) ou par transfert d'événements (WindowsEvent)."
+    },
+    {
+     "table": "ASimProcessEventLogs"
+    }
+   ]
+  },
+  "endpoint_file": {
+   "label": "Fichiers, partages et bibliothèques",
+   "hint": "Defender for Endpoint, audit Windows de l'accès aux objets (fichiers avec SACL, partages réseau), Sysmon, ou table ASIM de fichiers.",
+   "members": [
+    {
+     "table": "DeviceFileEvents"
+    },
+    {
+     "table": "DeviceImageLoadEvents"
+    },
+    {
+     "table": "SecurityEvent",
+     "channel": "security",
+     "ids": [
+      4656,
+      4660,
+      4663,
+      4670
+     ],
+     "label": "accès aux fichiers (SACL)",
+     "hint": "Audit « Système de fichiers » (Accès à l'objet) et SACL d'audit sur les dossiers à surveiller (partages, données sensibles, profils) ; sans SACL, aucun 4663 n'est produit. Stratégie d'audit avancée correspondante sur les machines (et les contrôleurs de domaine), et collecte de ces ID par la règle de collecte de l'agent (niveau « All » ou requête XPath)."
+    },
+    {
+     "table": "WindowsEvent",
+     "channel": "security",
+     "ids": [
+      4656,
+      4660,
+      4663,
+      4670
+     ],
+     "label": "accès aux fichiers (SACL)",
+     "hint": "Audit « Système de fichiers » (Accès à l'objet) et SACL d'audit sur les dossiers à surveiller (partages, données sensibles, profils) ; sans SACL, aucun 4663 n'est produit. Stratégie d'audit avancée correspondante sur les machines (et les contrôleurs de domaine), et collecte de ces ID par la règle de collecte de l'agent (niveau « All » ou requête XPath)."
+    },
+    {
+     "table": "SecurityEvent",
+     "channel": "security",
+     "ids": [
+      5140,
+      5145
+     ],
+     "label": "partages réseau",
+     "hint": "Audit « Partage de fichiers » et « Partage de fichiers détaillé » sur les serveurs de fichiers et les contrôleurs de domaine. Stratégie d'audit avancée correspondante sur les machines (et les contrôleurs de domaine), et collecte de ces ID par la règle de collecte de l'agent (niveau « All » ou requête XPath)."
+    },
+    {
+     "table": "WindowsEvent",
+     "channel": "security",
+     "ids": [
+      5140,
+      5145
+     ],
+     "label": "partages réseau",
+     "hint": "Audit « Partage de fichiers » et « Partage de fichiers détaillé » sur les serveurs de fichiers et les contrôleurs de domaine. Stratégie d'audit avancée correspondante sur les machines (et les contrôleurs de domaine), et collecte de ces ID par la règle de collecte de l'agent (niveau « All » ou requête XPath)."
+    },
+    {
+     "table": "Event",
+     "channel": "sysmon",
+     "ids": [
+      2,
+      7,
+      11,
+      15,
+      23,
+      26,
+      29
+     ],
+     "label": "fichiers et DLL",
+     "hint": "Sysmon installé avec une configuration qui journalise ces ID, collecté par l'agent Azure Monitor (table Event, journal Microsoft-Windows-Sysmon/Operational) ou par transfert d'événements (WindowsEvent)."
+    },
+    {
+     "table": "WindowsEvent",
+     "channel": "sysmon",
+     "ids": [
+      2,
+      7,
+      11,
+      15,
+      23,
+      26,
+      29
+     ],
+     "label": "fichiers et DLL",
+     "hint": "Sysmon installé avec une configuration qui journalise ces ID, collecté par l'agent Azure Monitor (table Event, journal Microsoft-Windows-Sysmon/Operational) ou par transfert d'événements (WindowsEvent)."
+    },
+    {
+     "table": "ASimFileEventLogs"
+    }
+   ]
+  },
+  "endpoint_registry": {
+   "label": "Registre, services, tâches et persistance",
+   "hint": "Defender for Endpoint, audit Windows (4657 avec SACL de registre, 4697, 4698, 4702), Sysmon 12 à 14, ou journal Système (7045, service installé).",
+   "members": [
+    {
+     "table": "DeviceRegistryEvents"
+    },
+    {
+     "table": "DeviceEvents"
+    },
+    {
+     "table": "SecurityEvent",
+     "channel": "security",
+     "ids": [
+      4657,
+      4697,
+      4698,
+      4702
+     ],
+     "label": "registre, services et tâches"
+    },
+    {
+     "table": "WindowsEvent",
+     "channel": "security",
+     "ids": [
+      4657,
+      4697,
+      4698,
+      4702
+     ],
+     "label": "registre, services et tâches"
+    },
+    {
+     "table": "Event",
+     "channel": "sysmon",
+     "ids": [
+      12,
+      13,
+      14
+     ],
+     "label": "registre",
+     "hint": "Sysmon installé avec une configuration qui journalise ces ID, collecté par l'agent Azure Monitor (table Event, journal Microsoft-Windows-Sysmon/Operational) ou par transfert d'événements (WindowsEvent)."
+    },
+    {
+     "table": "WindowsEvent",
+     "channel": "sysmon",
+     "ids": [
+      12,
+      13,
+      14
+     ],
+     "label": "registre",
+     "hint": "Sysmon installé avec une configuration qui journalise ces ID, collecté par l'agent Azure Monitor (table Event, journal Microsoft-Windows-Sysmon/Operational) ou par transfert d'événements (WindowsEvent)."
+    },
+    {
+     "table": "Event",
+     "channel": "system",
+     "ids": [
+      7045
+     ],
+     "label": "service installé",
+     "hint": "Journal Système collecté par l'agent Azure Monitor (table Event)."
+    },
+    {
+     "table": "WindowsEvent",
+     "channel": "system",
+     "ids": [
+      7045
+     ],
+     "label": "service installé",
+     "hint": "Journal Système transféré (WindowsEvent)."
+    }
+   ]
+  },
+  "endpoint_network": {
+   "label": "Connexions réseau des postes et serveurs",
+   "hint": "Defender for Endpoint, Sysmon 3, ou table ASIM de sessions réseau.",
+   "members": [
+    {
+     "table": "DeviceNetworkEvents"
+    },
+    {
+     "table": "ASimNetworkSessionLogs"
+    },
+    {
+     "table": "Event",
+     "channel": "sysmon",
+     "ids": [
+      3
+     ],
+     "label": "connexions réseau",
+     "hint": "Sysmon installé avec une configuration qui journalise ces ID, collecté par l'agent Azure Monitor (table Event, journal Microsoft-Windows-Sysmon/Operational) ou par transfert d'événements (WindowsEvent)."
+    },
+    {
+     "table": "WindowsEvent",
+     "channel": "sysmon",
+     "ids": [
+      3
+     ],
+     "label": "connexions réseau",
+     "hint": "Sysmon installé avec une configuration qui journalise ces ID, collecté par l'agent Azure Monitor (table Event, journal Microsoft-Windows-Sysmon/Operational) ou par transfert d'événements (WindowsEvent)."
+    }
+   ]
+  },
+  "perimeter": {
+   "label": "Pare-feu, proxy et flux réseau",
+   "tables": [
+    "CommonSecurityLog",
+    "ASimNetworkSessionLogs",
+    "ASimWebSessionLogs",
+    "AZFWNetworkRule",
+    "AZFWApplicationRule",
+    "AZFWNatRule"
+   ],
+   "hint": "Pare-feu et proxy en CEF (CommonSecurityLog), Azure Firewall (tables AZFW*), ou tables ASIM réseau et web."
+  },
+  "dns": {
+   "label": "Résolutions DNS",
+   "hint": "Connecteur DNS Windows (DnsEvents ou ASimDnsActivityLogs), réponses DNS de Defender for Endpoint (DeviceEvents, DnsQueryResponse) ou Sysmon 22.",
+   "members": [
+    {
+     "table": "DnsEvents"
+    },
+    {
+     "table": "ASimDnsActivityLogs"
+    },
+    {
+     "table": "DeviceEvents",
+     "where": "ActionType == \"DnsQueryResponse\"",
+     "label": "réponses DNS"
+    },
+    {
+     "table": "Event",
+     "channel": "sysmon",
+     "ids": [
+      22
+     ],
+     "label": "requêtes DNS",
+     "hint": "Sysmon installé avec une configuration qui journalise ces ID, collecté par l'agent Azure Monitor (table Event, journal Microsoft-Windows-Sysmon/Operational) ou par transfert d'événements (WindowsEvent)."
+    },
+    {
+     "table": "WindowsEvent",
+     "channel": "sysmon",
+     "ids": [
+      22
+     ],
+     "label": "requêtes DNS",
+     "hint": "Sysmon installé avec une configuration qui journalise ces ID, collecté par l'agent Azure Monitor (table Event, journal Microsoft-Windows-Sysmon/Operational) ou par transfert d'événements (WindowsEvent)."
+    }
+   ]
+  },
+  "inventory": {
+   "label": "Inventaire des machines",
+   "tables": [
+    "DeviceInfo",
+    "DeviceNetworkInfo",
+    "Heartbeat"
+   ],
+   "hint": "Defender for Endpoint (DeviceInfo, DeviceNetworkInfo) ou agent Azure Monitor (Heartbeat)."
+  },
+  "identity_directory": {
+   "label": "Référentiel des comptes",
+   "tables": [
+    "IdentityInfo"
+   ],
+   "hint": "UEBA de Sentinel ou Defender for Identity (IdentityInfo).",
+   "optional": true
+  },
+  "roles_watchlist": {
+   "label": "Rôles déclarés (watchlist EasyPivotRoles)",
+   "tables": [
+    "Watchlist"
+   ],
+   "hint": "Watchlist Sentinel d'alias EasyPivotRoles, modèle dans watchlists/EasyPivotRoles.csv. Facultative : les contrôleurs de domaine sont détectés sans elle.",
+   "optional": true
+  },
+  "linux": {
+   "label": "Journaux Linux",
+   "tables": [
+    "Syslog"
+   ],
+   "hint": "Syslog via l'agent Azure Monitor."
+  },
+  "m365_activity": {
+   "label": "Activité Microsoft 365",
+   "tables": [
+    "OfficeActivity",
+    "CloudAppEvents"
+   ],
+   "hint": "Connecteur Microsoft 365 (OfficeActivity) ou Defender for Cloud Apps (CloudAppEvents)."
+  },
+  "mail": {
+   "label": "Messagerie (Defender for Office 365)",
+   "tables": [
+    "EmailEvents",
+    "EmailUrlInfo",
+    "EmailAttachmentInfo",
+    "EmailPostDeliveryEvents",
+    "UrlClickEvents"
+   ],
+   "hint": "Defender for Office 365, tables diffusées par le connecteur Defender XDR."
+  },
+  "teams": {
+   "label": "Messages Teams",
+   "tables": [
+    "MessageEvents",
+    "MessageUrlInfo",
+    "OfficeActivity",
+    "CloudAppEvents"
+   ],
+   "hint": "Defender for Office 365 (MessageEvents), connecteur Microsoft 365 (OfficeActivity) ou Defender for Cloud Apps."
+  },
+  "azure": {
+   "label": "Plan de contrôle Azure, Key Vault et stockage",
+   "tables": [
+    "AzureActivity",
+    "AZKVAuditLogs",
+    "AzureDiagnostics",
+    "StorageBlobLogs"
+   ],
+   "hint": "Journal d'activité Azure, paramètres de diagnostic des coffres Key Vault et des comptes de stockage."
+  },
+  "graph": {
+   "label": "Appels Microsoft Graph",
+   "tables": [
+    "MicrosoftGraphActivityLogs"
+   ],
+   "hint": "Paramètre de diagnostic Entra ID « MicrosoftGraphActivityLogs »."
+  },
+  "alerts": {
+   "label": "Alertes",
+   "tables": [
+    "SecurityAlert",
+    "AlertEvidence",
+    "AlertInfo"
+   ],
+   "hint": "Alertes Sentinel (SecurityAlert) ou Defender XDR (AlertInfo, AlertEvidence)."
+  },
+  "threat_intel": {
+   "label": "Renseignement sur les menaces",
+   "tables": [
+    "ThreatIntelIndicators",
+    "ThreatIntelligenceIndicator"
+   ],
+   "hint": "Connecteurs de renseignement de Sentinel (format STIX : ThreatIntelIndicators)."
+  }
+ }
+}

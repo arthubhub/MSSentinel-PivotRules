@@ -5,35 +5,30 @@ action: pivot
 description: >
   Connexions du service principal ou de l'identité managée (IP, ressource, résultat, type d'identifiant) et
   requêtes Microsoft Graph de l'application regroupées par méthode et chemin (identifiants remplacés par {id}).
+  Connexions lues dans AADServicePrincipalSignInLogs et AADManagedIdentitySignInLogs, ou dans EntraIdSpnSignInEvents
+  (Defender XDR) quand elles manquent. AppOrigin dit si l'application est éditée par Microsoft, par le tenant ou par un
+  autre tenant (application tierce multi-tenant).
 reading:
   decisive: Connexions réussies avec secret client depuis une IP hors de la base, suivies d'appels Graph de lecture massive (messages, fichiers, utilisateurs).
   context: Taux d'échec élevé (secret testé), ressources inhabituelles (Key Vault, Azure Resource Manager).
   noise: Rotation de secrets, déploiements automatisés.
 window: { before: 7d, after: 1d }
+uses: [spn_signins]
 query: |
   union isfuzzy=true
   (
-      AADServicePrincipalSignInLogs
-      | where TimeGenerated between (StartTime .. EndTime)
-      | where AppId == ValueApp or ServicePrincipalId == ValueApp or ServicePrincipalName =~ ValueApp
-      | project TimeGenerated, Source = "Service principal", Identity = ServicePrincipalName, IPAddress, Location,
-          Operation = strcat("Connexion à ", ResourceDisplayName), Result = ResultType, Credential = ClientCredentialType
-  ),
-  (
-      AADManagedIdentitySignInLogs
-      | where TimeGenerated between (StartTime .. EndTime)
-      | where AppId == ValueApp or ServicePrincipalId == ValueApp or ServicePrincipalName =~ ValueApp
-      | project TimeGenerated, Source = "Identité managée", Identity = ServicePrincipalName, IPAddress, Location,
-          Operation = strcat("Connexion à ", ResourceDisplayName), Result = ResultType, Credential = "Identité managée"
+      _SpnSignins(StartTime, EndTime, ValueApp, "")
+      | project TimeGenerated, Source = SignInType, Identity = ServicePrincipalName, AppOrigin, IPAddress, Location,
+          Operation = strcat("Connexion à ", ResourceDisplayName), Result = ResultType, Credential
   ),
   (
       MicrosoftGraphActivityLogs
       | where TimeGenerated between (StartTime .. EndTime)
       | where AppId == ValueApp or ServicePrincipalId == ValueApp
-      | project TimeGenerated, Source = "Microsoft Graph", Identity = coalesce(UserId, ServicePrincipalId), IPAddress, Location = "",
+      | project TimeGenerated, Source = "Microsoft Graph", Identity = coalesce(UserId, ServicePrincipalId), AppOrigin = "", IPAddress, Location = "",
           Operation = strcat(RequestMethod, " ", replace_regex(tostring(parse_url(RequestUri).Path), @"[0-9a-fA-F-]{36}", "{id}")),
           Result = tostring(ResponseStatusCode), Credential = ""
   )
   | summarize Events = count(), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), IPs = make_set(IPAddress, 10),
-      Locations = make_set(Location, 5), Results = make_set(Result, 5) by Source, Identity, Operation, Credential
+      Locations = make_set(Location, 5), Results = make_set(Result, 5), AppOrigin = take_any(AppOrigin) by Source, Identity, Operation, Credential
   | sort by Source asc, Events desc

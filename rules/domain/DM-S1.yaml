@@ -4,7 +4,8 @@ indicators: [domain, url]
 action: statistics
 description: >
   Nombre de traces du domaine (et de ses sous-domaines) par jour et par source : clics, URL d'e-mails et de
-  messages Teams, connexions Defender, origine de fichiers, DNS (DnsEvents, ASimDnsActivityLogs) et proxy (CEF).
+  messages Teams, connexions Defender, origine de fichiers, DNS (DnsEvents, ASimDnsActivityLogs, réponses DNS de
+  Defender for Endpoint) et proxy ou pare-feu (CEF, ASIM web, Azure Firewall).
   Pour une URL, c'est son domaine qui est compté.
 reading:
   decisive: Domaine absent jusqu'à la veille puis présent dans plusieurs sources le jour de l'alerte.

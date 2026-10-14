@@ -4,14 +4,16 @@ indicators: [domain, url]
 action: pivot
 description: >
   Noms résolus dans le domaine et adresses IP obtenues : serveurs DNS Windows (DnsEvents), journaux DNS
-  normalisés ASIM (ASimDnsActivityLogs) et IP effectivement contactées par Defender (DeviceNetworkEvents).
+  normalisés ASIM (ASimDnsActivityLogs), réponses DNS vues par Defender for Endpoint (DeviceEvents), requêtes DNS des
+  postes vues par Sysmon 22 (avec le processus qui résout) et IP
+  effectivement contactées par Defender (DeviceNetworkEvents).
   Donne les IP à pivoter ensuite (IP-P1, IP-P4).
 reading:
   decisive: IP de destination partagée avec d'autres domaines malveillants connus, ou hébergeur récent.
   context: Nombreux sous-domaines distincts résolus (génération algorithmique, tunnel DNS).
   noise: Résolutions de CDN qui renvoient des dizaines d'IP changeantes.
 window: { before: 7d, after: 1d }
-uses: [web_functions]
+uses: [web_functions, sysmon]
 query: |
   union isfuzzy=true
   (
@@ -31,11 +33,27 @@ query: |
           Client = coalesce(SrcHostname, SrcIpAddr)
   ),
   (
+      DeviceEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where ActionType == "DnsQueryResponse"
+      | where AdditionalFields has ValueDomain
+      | extend AF = parse_json(tostring(AdditionalFields))
+      | extend Query = tolower(trim_end(@"\.", tostring(AF.DnsQueryString)))
+      | where _InDomain(Query, ValueDomain)
+      | project TimeGenerated, Source = "DeviceEvents (DNS)", Query, Answer = tostring(AF.DnsQueryResult), Client = tolower(DeviceName)
+  ),
+  (
       DeviceNetworkEvents
       | where TimeGenerated between (StartTime .. EndTime)
       | where RemoteUrl has ValueDomain
       | where _InDomain(_Host(RemoteUrl), ValueDomain)
       | project TimeGenerated, Source = "DeviceNetworkEvents", Query = _Host(RemoteUrl), Answer = RemoteIP, Client = tolower(DeviceName)
+  ),
+  (
+      _Sysmon(StartTime, EndTime, dynamic([22]), ValueDomain)
+      | extend Query = tolower(trim_end(@"\.", QueryName))
+      | where _InDomain(Query, ValueDomain)
+      | project TimeGenerated, Source = "Sysmon 22", Query, Answer = QueryResults, Client = tolower(Computer)
   )
   | summarize Lookups = count(), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
       ClientCount = dcount(Client), Clients = make_set(Client, 20) by Source, Query, Answer

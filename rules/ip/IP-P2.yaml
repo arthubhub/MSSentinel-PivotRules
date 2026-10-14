@@ -3,46 +3,75 @@ name: Comptes connectés depuis l'IP
 indicators: [ip]
 action: pivot
 description: >
-  Comptes qui ont tenté de s'authentifier depuis l'IP : Entra ID (interactif et non interactif), Windows
-  (4624, 4625, 4648, 4768, 4769, 4771, 4776 via SecurityEvent et WindowsEvent), Defender for Endpoint et
-  Defender for Identity. Donne tentatives, succès, échecs et premier succès par compte.
+  Comptes et identités qui ont tenté de s'authentifier depuis l'IP : Entra ID (utilisateurs, applications et identités
+  managées), Windows (4624, 4625, 4648, 4768, 4769, 4771, 4776 via SecurityEvent et WindowsEvent), Defender for Endpoint,
+  Defender for Identity, journaux d'authentification ASIM et connexions SSH Linux (Syslog). Donne tentatives, succès, échecs,
+  premier succès, les machines réellement visées (Targets, avec leur rôle) séparées des contrôleurs de domaine qui ont
+  seulement validé les identifiants (ValidatedBy), et le rôle connu du compte.
 reading:
-  decisive: Un succès précédé d'échecs sur de nombreux comptes depuis la même IP (spray réussi).
-  context: Plusieurs comptes d'une même campagne de phishing connectés depuis la même IP.
-  noise: IP de NAT, de VPN ou de serveur Citrix qui porte des centaines de comptes légitimes.
+  decisive: Un succès précédé d'échecs sur de nombreux comptes depuis la même IP (spray réussi), ou un compte privilégié parmi eux.
+  context: Plusieurs comptes d'une même campagne de phishing connectés depuis la même IP ; ticket 4769 vers un serveur inhabituel.
+  noise: IP de NAT, de VPN ou de serveur Citrix qui porte des centaines de comptes légitimes (voir IP-P6).
 v1: true
 window: { before: 24h, after: 1h }
-uses: [signins, win_security]
+uses: [signins, spn_signins, win_security, roles]
 query: |
   union isfuzzy=true
   (
       _Signins(StartTime, EndTime, Value, "")
       | project TimeGenerated, Account = tolower(UserPrincipalName), Source = strcat("Entra ID ", SignInType),
-          Success = Succeeded, Target = AppDisplayName, Detail = iff(Succeeded, Location, strcat(ResultType, " ", FailureReason))
+          Success = Succeeded, Target = "", AuthBy = "", App = AppDisplayName, Detail = iff(Succeeded, Location, strcat(ResultType, " ", FailureReason))
+  ),
+  (
+      _SpnSignins(StartTime, EndTime, "", Value)
+      | project TimeGenerated, Account = tolower(ServicePrincipalName), Source = strcat("Entra ID ", SignInType),
+          Success = Succeeded, Target = "", AuthBy = "", App = ResourceDisplayName, Detail = strcat(Credential, " ", ResultType)
   ),
   (
       _WinSecurity(StartTime, EndTime, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776]), Value)
       | where IpAddress == Value
       | project TimeGenerated, Account = iff(isempty(TargetDomainName) or TargetDomainName == "-", TargetSam, tolower(strcat(TargetDomainName, @"\", TargetSam))),
           Source = SourceTable, Success = EventID !in (4625, 4771) and Status in ("", "-", "0x0"),
-          Target = tolower(Computer), Detail = strcat(tostring(EventID), " ", LogonTypeName, " ", Status)
+          Target = TargetHost, AuthBy = AuthAuthority, App = "", Detail = strcat(tostring(EventID), " ", LogonTypeName, " ", Status)
   ),
   (
       DeviceLogonEvents
       | where TimeGenerated between (StartTime .. EndTime)
       | where RemoteIP == Value
       | project TimeGenerated, Account = tolower(strcat(AccountDomain, @"\", AccountName)), Source = "DeviceLogonEvents",
-          Success = ActionType == "LogonSuccess", Target = tolower(DeviceName), Detail = strcat(LogonType, " ", FailureReason)
+          Success = ActionType == "LogonSuccess", Target = tolower(DeviceName), AuthBy = "", App = "", Detail = strcat(LogonType, " ", FailureReason)
   ),
   (
       IdentityLogonEvents
       | where TimeGenerated between (StartTime .. EndTime)
       | where IPAddress == Value
       | project TimeGenerated, Account = tolower(coalesce(AccountUpn, AccountName)), Source = "IdentityLogonEvents",
-          Success = ActionType == "LogonSuccess", Target = tolower(coalesce(DestinationDeviceName, Application)), Detail = strcat(Protocol, " ", FailureReason)
+          Success = ActionType == "LogonSuccess", Target = tolower(TargetDeviceName), AuthBy = tolower(DestinationDeviceName),
+          App = Application, Detail = strcat(Protocol, " ", FailureReason)
+  ),
+  (
+      ASimAuthenticationEventLogs
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where SrcIpAddr == Value
+      | project TimeGenerated, Account = tolower(TargetUsername), Source = strcat("ASIM ", EventProduct), Success = EventResult == "Success",
+          Target = tolower(coalesce(TargetHostname, DvcHostname)), AuthBy = "", App = TargetAppName, Detail = strcat(LogonProtocol, " ", EventResultDetails)
+  ),
+  (
+      Syslog
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where SyslogMessage has Value and ProcessName in~ ("sshd", "sshd-session")
+      | extend User = extract(@"(?:Accepted|Failed) \S+ for (?:invalid user )?(\S+) from", 1, SyslogMessage)
+      | where isnotempty(User)
+      | project TimeGenerated, Account = tolower(User), Source = "Syslog (sshd)", Success = SyslogMessage startswith "Accepted",
+          Target = tolower(Computer), AuthBy = "", App = "SSH", Detail = substring(SyslogMessage, 0, 200)
   )
   | where isnotempty(Account) and Account !endswith "$"
+  | extend MachineKey = _HostKey(Target), AccountKey = _SamOf(Account)
+  | lookup kind=leftouter (_MachineRoles(EndTime)) on MachineKey
+  | lookup kind=leftouter (_AccountRoles(EndTime)) on AccountKey
   | summarize Attempts = count(), Successes = countif(Success), Failures = countif(not(Success)),
       FirstSeen = min(TimeGenerated), FirstSuccess = minif(TimeGenerated, Success), LastSeen = max(TimeGenerated),
-      Targets = make_set(Target, 20), Sources = make_set(Source), Details = make_set(Detail, 10) by Account
+      Targets = make_set_if(_Labeled(Target, MachineRole), isnotempty(Target), 20), ValidatedBy = make_set_if(AuthBy, isnotempty(AuthBy), 5),
+      Apps = make_set_if(App, isnotempty(App), 10), Sources = make_set(Source), Details = make_set(Detail, 10),
+      AccountRole = take_any(_JoinRoles(_AccountKind(AccountKey), AccountRole)) by Account
   | sort by Successes desc, Attempts desc

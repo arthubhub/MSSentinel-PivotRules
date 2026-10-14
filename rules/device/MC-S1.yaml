@@ -4,11 +4,13 @@ indicators: [device]
 action: statistics
 description: >
   Nombre d'événements de la machine par jour et par table : tables Defender for Endpoint (processus, réseau,
-  fichiers, ouvertures de session, registre, événements, chargements de DLL) et journaux Windows
-  (SecurityEvent, WindowsEvent). Révèle un trou de collecte, un pic d'activité ou un agent arrêté.
+  fichiers, ouvertures de session, registre, événements, chargements de DLL, inventaire), journaux Windows
+  (SecurityEvent, WindowsEvent, Event), Linux (Syslog), agent Azure Monitor (Heartbeat), Defender for Identity
+  (machine source ou cible), tables ASIM et pare-feu CEF qui la nomment. Révèle un trou de collecte, un pic d'activité
+  ou un agent arrêté, et montre quelles sources couvrent réellement cette machine.
 reading:
-  decisive: Arrêt brutal de la télémétrie Defender juste après l'alerte (agent désactivé ou altéré).
-  context: Pic d'événements réseau ou fichiers inhabituel pour la machine.
+  decisive: Arrêt brutal de la télémétrie Defender ou de l'agent juste après l'alerte (agent désactivé ou altéré).
+  context: Pic d'événements réseau ou fichiers inhabituel pour la machine ; machine visible seulement par Defender for Identity.
   noise: Mises à jour Windows, déploiements logiciels, analyses antivirus planifiées.
 window: { before: 7d, after: 1d }
 render: timechart
@@ -16,18 +18,39 @@ query: |
   union isfuzzy=true
   (
       union isfuzzy=true withsource=Source DeviceProcessEvents, DeviceNetworkEvents, DeviceFileEvents, DeviceLogonEvents,
-          DeviceRegistryEvents, DeviceEvents, DeviceImageLoadEvents
+          DeviceRegistryEvents, DeviceEvents, DeviceImageLoadEvents, DeviceInfo, DeviceNetworkInfo
       | where TimeGenerated between (StartTime .. EndTime)
       | where DeviceName startswith ValueShort
       | where _IsHost(DeviceName)
       | project TimeGenerated, Source
   ),
   (
-      union isfuzzy=true withsource=Source SecurityEvent, WindowsEvent
+      union isfuzzy=true withsource=Source SecurityEvent, WindowsEvent, Event, Syslog, Heartbeat
       | where TimeGenerated between (StartTime .. EndTime)
       | where Computer startswith ValueShort
       | where _IsHost(Computer)
       | project TimeGenerated, Source
+  ),
+  (
+      union isfuzzy=true withsource=Source IdentityLogonEvents, IdentityQueryEvents, IdentityDirectoryEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where DeviceName has ValueShort or TargetDeviceName has ValueShort or DestinationDeviceName has ValueShort
+      | where _IsHost(DeviceName) or _IsHost(TargetDeviceName) or _IsHost(DestinationDeviceName)
+      | project TimeGenerated, Source
+  ),
+  (
+      union isfuzzy=true withsource=Source ASimAuthenticationEventLogs, ASimProcessEventLogs, ASimFileEventLogs
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where DvcHostname startswith ValueShort
+      | where _IsHost(DvcHostname)
+      | project TimeGenerated, Source
+  ),
+  (
+      CommonSecurityLog
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where SourceHostName has ValueShort or DestinationHostName has ValueShort
+      | where _IsHost(SourceHostName) or _IsHost(DestinationHostName)
+      | project TimeGenerated, Source = strcat("CommonSecurityLog (", DeviceVendor, ")")
   )
   | summarize Events = count() by bin(TimeGenerated, 1d), Source
   | render timechart

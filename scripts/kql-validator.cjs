@@ -17,7 +17,7 @@ function loadTables(root) {
   const over = JSON.parse(fs.readFileSync(path.join(root, 'schema/overrides.json'), 'utf8'));
   const tables = JSON.parse(JSON.stringify(base));
   for (const [t, cols] of Object.entries(over.add || {})) tables[t] = Object.assign(tables[t] || {}, cols);
-  return { tables, xdrTables: over.xdrTables || [] };
+  return { tables, xdrTables: over.xdrTables || [], defenderOptional: over.defenderOptional || [] };
 }
 
 function makeGlobals(tables) {
@@ -29,7 +29,10 @@ function makeGlobals(tables) {
     syms.push(S.TableSymbol.From(`(${decl})`).WithName(name));
   }
   const db = new S.DatabaseSymbol.$ctor2('workspace', null, syms);
-  return K.GlobalState.Default.WithDatabase(db);
+  // Colonne déclarée -> table, pour retrouver les colonnes qu'une requête lit réellement dans chaque table
+  const owner = new Map();
+  for (const t of syms) for (let i = 0; i < t.Columns.Count; i++) owner.set(t.Columns.getItem(i), t.Name);
+  return { globals: K.GlobalState.Default.WithDatabase(db), owner };
 }
 
 function lineCol(text, offset) {
@@ -38,11 +41,22 @@ function lineCol(text, offset) {
 }
 
 function createValidator(root) {
-  const { tables, xdrTables } = loadTables(root);
-  const globals = makeGlobals(tables);
+  const { tables, xdrTables, defenderOptional } = loadTables(root);
+  const { globals, owner } = makeGlobals(tables);
   return {
     tables,
     xdrTables,
+    defenderOptional,
+    // { Table: Set(colonnes) } : colonnes des tables effectivement référencées (résolution par le service de langage Kusto)
+    columnsUsed(query) {
+      const code = K.KustoCode.ParseAndAnalyze(query, globals);
+      const used = {};
+      code.Syntax.WalkElements((el) => {
+        const s = el.ReferencedSymbol;
+        if (s && owner.has(s)) (used[owner.get(s)] ||= new Set()).add(s.Name);
+      });
+      return used;
+    },
     validate(query) {
       const code = K.KustoCode.ParseAndAnalyze(query, globals);
       const diags = code.GetDiagnostics();

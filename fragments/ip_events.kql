@@ -1,80 +1,179 @@
-// Toutes les source de journaux où apparaîssent une adresse IP, ramenée à des colonnes communes :
-// TimeGenerated, Source, EventType (EventID, ActionType ou opération), Host, Account, Detail.
-// @requires: win_security, signins
+// Toutes les sources de journaux où apparaît une adresse IP, ramenées à des colonnes communes :
+// TimeGenerated, Source, EventType (EventID, ActionType ou opération), Host, AuthBy, Account, Detail.
+// - Host : machine concernée par l'événement (la cible quand l'IP est la source, la machine de l'IP quand elle est la cible),
+//   jamais le contrôleur de domaine qui a seulement validé des identifiants.
+// - AuthBy : contrôleur de domaine (ou machine locale) qui a validé les identifiants (4768, 4769, 4771, 4776, Defender for Identity).
+// Sources : Entra ID (utilisateurs et applications), audit Entra ID, Microsoft Graph, Windows, Defender for Endpoint et
+// Defender for Identity, Sysmon 3, accès aux partages (5140, 5145), Microsoft 365, Azure, pare-feu et proxy (CEF, Azure
+// Firewall, ASIM), messagerie, Linux (Syslog).
+// @requires: win_security, sysmon, signins, spn_signins
 let _IpEvents = (start:datetime, end:datetime, ip:string) {
     union isfuzzy=true
     (
         _Signins(start, end, ip, "")
         | project TimeGenerated, Source = strcat("Entra ID (", SignInType, ")"), EventType = iff(Succeeded, "Connexion réussie", strcat("Échec ", ResultType)),
-            Host = DeviceName, Account = tolower(UserPrincipalName), Detail = AppDisplayName
+            Host = DeviceName, AuthBy = "", Account = tolower(UserPrincipalName), Detail = AppDisplayName
+    ),
+    (
+        _SpnSignins(start, end, "", ip)
+        | project TimeGenerated, Source = strcat("Entra ID (", SignInType, ")"), EventType = iff(Succeeded, "Connexion réussie", strcat("Échec ", ResultType)),
+            Host = "", AuthBy = "", Account = tolower(ServicePrincipalName), Detail = ResourceDisplayName
+    ),
+    (
+        AuditLogs
+        | where TimeGenerated between (start .. end)
+        | where tostring(InitiatedBy.user.ipAddress) == ip or tostring(InitiatedBy.app.ipAddress) == ip
+        | project TimeGenerated, Source = "AuditLogs", EventType = OperationName, Host = "", AuthBy = "",
+            Account = tolower(coalesce(tostring(InitiatedBy.user.userPrincipalName), tostring(InitiatedBy.app.displayName))),
+            Detail = tostring(TargetResources[0].displayName)
+    ),
+    (
+        MicrosoftGraphActivityLogs
+        | where TimeGenerated between (start .. end)
+        | where IPAddress == ip
+        | project TimeGenerated, Source = "MicrosoftGraphActivityLogs", EventType = strcat(RequestMethod, " ", tostring(ResponseStatusCode)),
+            Host = "", AuthBy = "", Account = coalesce(UserId, ServicePrincipalId),
+            Detail = replace_regex(tostring(parse_url(RequestUri).Path), @"[0-9a-fA-F-]{36}", "{id}")
     ),
     (
         _WinSecurity(start, end, dynamic([]), ip)
         | where IpAddress == ip
         | project TimeGenerated, Source = SourceTable, EventType = strcat(tostring(EventID), " ", EventName),
-            Host = Computer, Account = TargetSam, Detail = LogonTypeName
+            Host = TargetHost, AuthBy = AuthAuthority, Account = coalesce(TargetSam, SubjectSam),
+            Detail = case(EventID in (5140, 5145), strcat(ShareName, " ", RelativeTargetName, " · ", ObjectAccess), LogonTypeName)
+    ),
+    (
+        _Sysmon(start, end, dynamic([3]), ip)
+        | where DestinationIp == ip or SourceIp == ip
+        | project TimeGenerated, Source = "Sysmon 3", EventType = iff(Initiated == "true", "Connexion sortante", "Connexion entrante"),
+            Host = Computer, AuthBy = "", Account = UserSam,
+            Detail = strcat(ProcessFile, " → ", DestinationIp, ":", DestinationPort, iff(isempty(DestinationHostname), "", strcat(" (", DestinationHostname, ")")))
     ),
     (
         DeviceNetworkEvents
         | where TimeGenerated between (start .. end)
         | where RemoteIP == ip or LocalIP == ip
-        | project TimeGenerated, Source = "DeviceNetworkEvents", EventType = ActionType, Host = DeviceName,
+        | project TimeGenerated, Source = "DeviceNetworkEvents", EventType = ActionType, Host = DeviceName, AuthBy = "",
             Account = tolower(InitiatingProcessAccountName), Detail = strcat(InitiatingProcessFileName, " → ", RemoteIP, ":", tostring(RemotePort))
     ),
     (
         DeviceLogonEvents
         | where TimeGenerated between (start .. end)
         | where RemoteIP == ip
-        | project TimeGenerated, Source = "DeviceLogonEvents", EventType = ActionType, Host = DeviceName,
+        | project TimeGenerated, Source = "DeviceLogonEvents", EventType = ActionType, Host = DeviceName, AuthBy = "",
             Account = tolower(AccountName), Detail = LogonType
     ),
     (
         IdentityLogonEvents
         | where TimeGenerated between (start .. end)
         | where IPAddress == ip or DestinationIPAddress == ip
-        | project TimeGenerated, Source = "IdentityLogonEvents", EventType = ActionType, Host = coalesce(DeviceName, DestinationDeviceName),
+        // IP source : la machine concernée est la cible (le DC de destination n'a fait que valider) ; IP destination : la machine source
+        | project TimeGenerated, Source = "IdentityLogonEvents", EventType = ActionType,
+            Host = iff(IPAddress == ip, TargetDeviceName, DeviceName),
+            AuthBy = iff(IPAddress == ip, DestinationDeviceName, ""),
             Account = tolower(coalesce(AccountUpn, AccountName)), Detail = strcat(Application, " ", Protocol)
+    ),
+    (
+        IdentityQueryEvents
+        | where TimeGenerated between (start .. end)
+        | where IPAddress == ip
+        | project TimeGenerated, Source = "IdentityQueryEvents", EventType = strcat(ActionType, " ", QueryType), Host = DeviceName,
+            AuthBy = DestinationDeviceName, Account = tolower(coalesce(AccountUpn, AccountName)), Detail = strcat(Protocol, " ", QueryTarget)
+    ),
+    (
+        IdentityDirectoryEvents
+        | where TimeGenerated between (start .. end)
+        | where IPAddress == ip
+        | project TimeGenerated, Source = "IdentityDirectoryEvents", EventType = ActionType, Host = coalesce(TargetDeviceName, DeviceName),
+            AuthBy = DestinationDeviceName, Account = tolower(coalesce(AccountUpn, AccountName)), Detail = strcat(Application, " ", Protocol)
+    ),
+    (
+        ASimAuthenticationEventLogs
+        | where TimeGenerated between (start .. end)
+        | where SrcIpAddr == ip or TargetIpAddr == ip
+        | project TimeGenerated, Source = strcat("ASimAuthenticationEventLogs (", EventProduct, ")"), EventType = strcat(EventType, " ", EventResult),
+            Host = iff(SrcIpAddr == ip, coalesce(TargetHostname, DvcHostname), SrcHostname), AuthBy = "",
+            Account = tolower(TargetUsername), Detail = strcat(LogonProtocol, " ", LogonMethod)
     ),
     (
         CloudAppEvents
         | where TimeGenerated between (start .. end)
         | where IPAddress == ip
-        | project TimeGenerated, Source = "CloudAppEvents", EventType = ActionType, Host = "",
+        | project TimeGenerated, Source = "CloudAppEvents", EventType = ActionType, Host = "", AuthBy = "",
             Account = tolower(coalesce(tostring(RawEventData.UserId), AccountDisplayName)), Detail = Application
     ),
     (
         OfficeActivity
         | where TimeGenerated between (start .. end)
         | where ClientIP has ip
-        | project TimeGenerated, Source = "OfficeActivity", EventType = Operation, Host = "",
+        | project TimeGenerated, Source = "OfficeActivity", EventType = Operation, Host = "", AuthBy = "",
             Account = tolower(UserId), Detail = OfficeWorkload
     ),
     (
         AzureActivity
         | where TimeGenerated between (start .. end)
         | where CallerIpAddress == ip
-        | project TimeGenerated, Source = "AzureActivity", EventType = OperationNameValue, Host = "",
+        | project TimeGenerated, Source = "AzureActivity", EventType = OperationNameValue, Host = "", AuthBy = "",
             Account = tolower(Caller), Detail = ResourceGroup
     ),
     (
         CommonSecurityLog
         | where TimeGenerated between (start .. end)
         | where SourceIP == ip or DestinationIP == ip
-        | project TimeGenerated, Source = strcat("CommonSecurityLog (", DeviceVendor, ")"), EventType = coalesce(DeviceAction, Activity), Host = DeviceName,
+        | project TimeGenerated, Source = strcat("CommonSecurityLog (", DeviceVendor, ")"), EventType = coalesce(DeviceAction, Activity),
+            Host = iff(SourceIP == ip, DestinationHostName, SourceHostName), AuthBy = "",
             Account = tolower(coalesce(SourceUserName, DestinationUserName)), Detail = strcat(SourceIP, " → ", DestinationIP, ":", tostring(DestinationPort))
+    ),
+    (
+        ASimNetworkSessionLogs
+        | where TimeGenerated between (start .. end)
+        | where SrcIpAddr == ip or DstIpAddr == ip or SrcNatIpAddr == ip or DstNatIpAddr == ip
+        | project TimeGenerated, Source = strcat("ASimNetworkSessionLogs (", EventProduct, ")"), EventType = coalesce(DvcAction, EventResult),
+            Host = iff(DstIpAddr == ip or DstNatIpAddr == ip, SrcHostname, DstHostname), AuthBy = "", Account = tolower(SrcUsername),
+            Detail = strcat(SrcIpAddr, " → ", DstIpAddr, ":", tostring(DstPortNumber))
+    ),
+    (
+        ASimWebSessionLogs
+        | where TimeGenerated between (start .. end)
+        | where SrcIpAddr == ip or DstIpAddr == ip
+        | project TimeGenerated, Source = strcat("ASimWebSessionLogs (", EventProduct, ")"), EventType = coalesce(DvcAction, EventResult),
+            Host = SrcHostname, AuthBy = "", Account = tolower(SrcUsername), Detail = Url
+    ),
+    (
+        AZFWNetworkRule
+        | where TimeGenerated between (start .. end)
+        | where SourceIp == ip or DestinationIp == ip
+        | project TimeGenerated, Source = "AZFWNetworkRule", EventType = Action, Host = "", AuthBy = "", Account = "",
+            Detail = strcat(SourceIp, " → ", DestinationIp, ":", tostring(DestinationPort), " ", Protocol)
+    ),
+    (
+        AZFWApplicationRule
+        | where TimeGenerated between (start .. end)
+        | where SourceIp == ip
+        | project TimeGenerated, Source = "AZFWApplicationRule", EventType = Action, Host = "", AuthBy = "", Account = "",
+            Detail = coalesce(TargetUrl, Fqdn)
     ),
     (
         EmailEvents
         | where TimeGenerated between (start .. end)
         | where SenderIPv4 == ip or SenderIPv6 == ip
-        | project TimeGenerated, Source = "EmailEvents", EventType = DeliveryAction, Host = "",
+        | project TimeGenerated, Source = "EmailEvents", EventType = DeliveryAction, Host = "", AuthBy = "",
             Account = tolower(SenderFromAddress), Detail = Subject
     ),
     (
         UrlClickEvents
         | where TimeGenerated between (start .. end)
         | where IPAddress == ip
-        | project TimeGenerated, Source = "UrlClickEvents", EventType = ActionType, Host = "",
+        | project TimeGenerated, Source = "UrlClickEvents", EventType = ActionType, Host = "", AuthBy = "",
             Account = tolower(AccountUpn), Detail = Url
+    ),
+    (
+        Syslog
+        | where TimeGenerated between (start .. end)
+        | where SyslogMessage has ip or HostIP == ip
+        | project TimeGenerated, Source = strcat("Syslog (", ProcessName, ")"), EventType = SeverityLevel, Host = Computer, AuthBy = "",
+            Account = tolower(extract(@"(?:Accepted|Failed) \S+ for (?:invalid user )?(\S+) from", 1, SyslogMessage)),
+            Detail = substring(SyslogMessage, 0, 300)
     )
+    | extend Host = tolower(Host), AuthBy = tolower(AuthBy)
 };

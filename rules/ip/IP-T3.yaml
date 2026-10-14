@@ -3,19 +3,24 @@ name: Comptes vus depuis l'IP dans le temps
 indicators: [ip]
 action: timeline
 description: >
-  Liste des comptes associés à l'IP dans l'ordre de leur première apparition, avec tentatives, succès et
-  sources (Entra ID, Windows, Defender for Endpoint, Defender for Identity).
+  Liste des comptes et identités associés à l'IP dans l'ordre de leur première apparition, avec tentatives, succès,
+  sources (Entra ID utilisateurs et applications, Windows, Defender for Endpoint, Defender for Identity, ASIM, SSH Linux)
+  et rôle connu du compte (compte de service, groupe privilégié, watchlist).
 reading:
   decisive: Comptes qui apparaissent l'un après l'autre à quelques secondes d'intervalle (spray automatisé).
-  context: Premier succès après une série d'échecs sur d'autres comptes.
+  context: Premier succès après une série d'échecs sur d'autres comptes ; compte privilégié dans la série.
   noise: Rotation normale des utilisateurs derrière un proxy ou un serveur de terminaux.
 window: { before: 2h, after: 2h }
-uses: [signins, win_security]
+uses: [signins, spn_signins, win_security, roles]
 query: |
   union isfuzzy=true
   (
       _Signins(StartTime, EndTime, Value, "")
       | project TimeGenerated, Account = tolower(UserPrincipalName), Source = "Entra ID", Success = Succeeded
+  ),
+  (
+      _SpnSignins(StartTime, EndTime, "", Value)
+      | project TimeGenerated, Account = tolower(ServicePrincipalName), Source = strcat("Entra ID ", SignInType), Success = Succeeded
   ),
   (
       _WinSecurity(StartTime, EndTime, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776]), Value)
@@ -34,10 +39,27 @@ query: |
       | where TimeGenerated between (StartTime .. EndTime)
       | where IPAddress == Value
       | project TimeGenerated, Account = tolower(coalesce(AccountUpn, AccountName)), Source = "IdentityLogonEvents", Success = ActionType == "LogonSuccess"
+  ),
+  (
+      ASimAuthenticationEventLogs
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where SrcIpAddr == Value
+      | project TimeGenerated, Account = tolower(TargetUsername), Source = strcat("ASIM ", EventProduct), Success = EventResult == "Success"
+  ),
+  (
+      Syslog
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where SyslogMessage has Value and ProcessName in~ ("sshd", "sshd-session")
+      | extend User = extract(@"(?:Accepted|Failed) \S+ for (?:invalid user )?(\S+) from", 1, SyslogMessage)
+      | where isnotempty(User)
+      | project TimeGenerated, Account = tolower(User), Source = "Syslog (sshd)", Success = SyslogMessage startswith "Accepted"
   )
   | where isnotempty(Account) and Account !endswith "$"
   | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Attempts = count(),
       Successes = countif(Success), FirstSuccess = minif(TimeGenerated, Success), Sources = make_set(Source) by Account
+  | extend AccountKey = _SamOf(Account)
+  | lookup kind=leftouter (_AccountRoles(EndTime)) on AccountKey
+  | extend AccountRole = _JoinRoles(_AccountKind(AccountKey), AccountRole)
   | sort by FirstSeen asc
   | extend Order = row_number()
-  | project Order, FirstSeen, Account, Attempts, Successes, FirstSuccess, LastSeen, Sources
+  | project Order, FirstSeen, Account, AccountRole, Attempts, Successes, FirstSuccess, LastSeen, Sources

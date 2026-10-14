@@ -4,15 +4,26 @@ indicators: [account]
 action: pivot
 description: >
   Opérations réalisées par le compte, ou qui le visent : audit Entra ID (AuditLogs), Microsoft 365
-  (OfficeActivity et CloudAppEvents, qui se recoupent selon les connecteurs activés) et Azure Resource Manager.
+  (OfficeActivity et CloudAppEvents, qui se recoupent selon les connecteurs activés), Azure Resource Manager et appels
+  Microsoft Graph (MicrosoftGraphActivityLogs, rattachés au compte par son identifiant d'objet trouvé dans ses connexions).
 reading:
   decisive: Ajout d'une méthode MFA, attribution de rôle, lecture massive de fichiers ou de secrets juste après une connexion suspecte.
   context: Opérations sur des ressources hors du périmètre habituel du compte.
   noise: Synchronisation OneDrive, opérations d'administration planifiées, comptes d'automatisation.
 v1: true
 window: { before: 4h, after: 4h }
+uses: [signins]
 query: |
+  let UserIds = _Signins(StartTime - 1d, EndTime, "", ValueUpn) | where isnotempty(UserId) | distinct UserId;
   union isfuzzy=true
+  (
+      MicrosoftGraphActivityLogs
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where UserId in (UserIds)
+      | project TimeGenerated, Source = "MicrosoftGraphActivityLogs", Operation = strcat(RequestMethod, " ",
+              replace_regex(tostring(parse_url(RequestUri).Path), @"[0-9a-fA-F-]{36}", "{id}")),
+          Role = "Auteur", Target = AppId, Result = tostring(ResponseStatusCode), IP = IPAddress
+  ),
   (
       AuditLogs
       | where TimeGenerated between (StartTime .. EndTime)

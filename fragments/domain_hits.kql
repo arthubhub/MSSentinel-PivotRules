@@ -1,6 +1,8 @@
 // Tous les journaux qui impliquant un domaine, avec mise en commun des colonnes : TimeGenerated, Source, Host, Account, Url, Action.
-// Sources : UrlClickEvents, URL d'e-mails et de messages Teams, connexions réseau, origine des fichiers téléchargés, DNS, proxy / pare-feu
-// @requires: web_functions
+// Sources : UrlClickEvents, URL d'e-mails et de messages Teams, connexions réseau, origine des fichiers téléchargés,
+// DNS (serveurs DNS Windows, ASIM, réponses DNS vues par Defender for Endpoint, Sysmon 22), connexions Sysmon 3, proxy et pare-feu (CEF, ASIM web,
+// Azure Firewall).
+// @requires: web_functions, sysmon
 let _DomainHits = (start:datetime, end:datetime, d:string) {
     union isfuzzy=true
     (
@@ -60,6 +62,39 @@ let _DomainHits = (start:datetime, end:datetime, d:string) {
         | where _InDomain(tolower(trim_end(@"\.", DnsQuery)), d)
         | project TimeGenerated, Source = "ASimDnsActivityLogs", Host = tolower(coalesce(SrcHostname, SrcIpAddr)), Account = tolower(SrcUsername),
             Url = DnsQuery, Action = strcat("DNS ", DnsQueryTypeName)
+    ),
+    (
+        DeviceEvents
+        | where TimeGenerated between (start .. end)
+        | where ActionType == "DnsQueryResponse"
+        | where AdditionalFields has d
+        | extend Q = tolower(trim_end(@"\.", tostring(parse_json(tostring(AdditionalFields)).DnsQueryString)))
+        | where _InDomain(Q, d)
+        | project TimeGenerated, Source = "DeviceEvents (DNS)", Host = tolower(DeviceName), Account = tolower(InitiatingProcessAccountName),
+            Url = Q, Action = strcat("DNS · ", InitiatingProcessFileName)
+    ),
+    (
+        ASimWebSessionLogs
+        | where TimeGenerated between (start .. end)
+        | where Url has d or DstHostname has d or HttpHost has d
+        | where _InDomain(_Host(Url), d) or _InDomain(tolower(DstHostname), d) or _InDomain(tolower(HttpHost), d)
+        | project TimeGenerated, Source = strcat("ASimWebSessionLogs (", EventProduct, ")"), Host = tolower(coalesce(SrcHostname, SrcIpAddr)),
+            Account = tolower(SrcUsername), Url = coalesce(Url, HttpHost, DstHostname), Action = coalesce(DvcAction, EventResult)
+    ),
+    (
+        AZFWApplicationRule
+        | where TimeGenerated between (start .. end)
+        | where Fqdn has d or TargetUrl has d
+        | where _InDomain(tolower(Fqdn), d) or _InDomain(_Host(TargetUrl), d)
+        | project TimeGenerated, Source = "AZFWApplicationRule", Host = SourceIp, Account = "", Url = coalesce(TargetUrl, Fqdn),
+            Action = strcat("Azure Firewall ", Action)
+    ),
+    (
+        _Sysmon(start, end, dynamic([3, 22]), d)
+        | extend Q = tolower(trim_end(@"\.", iff(EventID == 22, QueryName, DestinationHostname)))
+        | where _InDomain(Q, d)
+        | project TimeGenerated, Source = strcat("Sysmon ", tostring(EventID)), Host = tolower(Computer), Account = UserSam, Url = Q,
+            Action = strcat(iff(EventID == 22, "DNS · ", "Connexion · "), ProcessFile)
     ),
     (
         CommonSecurityLog

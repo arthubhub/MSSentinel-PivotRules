@@ -4,7 +4,10 @@ indicators: [hash]
 action: pivot
 description: >
   Machines, chemins et noms sous lesquels le fichier apparaît, avec les actions vues (écrit, exécuté, chargé),
-  les comptes et les processus à l'origine. Le contexte HOST restreint à une machine.
+  les comptes et les processus à l'origine. Defender for Endpoint, complété dans Sentinel par les fichiers et processus
+  normalisés ASIM et par Sysmon (1 processus, 7 DLL chargée, 15 flux de fichier, 23 et 26 suppression, 29 exécutable
+  détecté). MachineRole donne le rôle connu de la machine (DC, serveur déclaré).
+  Le contexte HOST restreint à une machine.
 reading:
   decisive: Même fichier dans le même chemin sur plusieurs machines, exécuté (propagation ou campagne).
   context: Fichier renommé (noms différents pour un même hash).
@@ -12,6 +15,7 @@ reading:
 v1: true
 window: { before: 30d, after: 1d }
 context: [HOST]
+uses: [roles, sysmon]
 query: |
   union isfuzzy=true
   (
@@ -38,6 +42,35 @@ query: |
       | project TimeGenerated, DeviceName = tolower(DeviceName), FolderPath, FileName, Action = "Chargé (DLL)",
           Account = tolower(InitiatingProcessAccountName), Process = InitiatingProcessFileName
   )
+  // @sentinel-only:begin
+  , (
+      ASimFileEventLogs
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where TargetFileSHA256 =~ ValueHash or TargetFileSHA1 =~ ValueHash or TargetFileMD5 =~ ValueHash
+      | where isempty(HostFilter) or DvcHostname startswith HostFilter
+      | project TimeGenerated, DeviceName = tolower(DvcHostname), FolderPath = TargetFilePath, FileName = TargetFileName,
+          Action = strcat("Fichier ", EventType, " (ASIM)"), Account = tolower(ActorUsername), Process = ActingProcessName
+  ),
+  (
+      ASimProcessEventLogs
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where TargetProcessSHA256 =~ ValueHash or TargetProcessSHA1 =~ ValueHash or TargetProcessMD5 =~ ValueHash
+      | where isempty(HostFilter) or DvcHostname startswith HostFilter
+      | project TimeGenerated, DeviceName = tolower(DvcHostname), FolderPath = TargetProcessName, FileName = TargetProcessFilename,
+          Action = "Exécuté (ASIM)", Account = tolower(ActorUsername), Process = ActingProcessFilename
+  ),
+  (
+      _Sysmon(StartTime, EndTime, dynamic([1, 7, 15, 23, 26, 29]), ValueHash)
+      | where SHA256 == ValueHash or SHA1 == ValueHash or MD5 == ValueHash
+      | where isempty(HostFilter) or Computer startswith HostFilter
+      | extend Path = case(EventID == 1, Image, EventID == 7, ImageLoaded, TargetFilename)
+      | project TimeGenerated, DeviceName = tolower(Computer), FolderPath = Path, FileName = tolower(tostring(split(Path, @"\")[-1])),
+          Action = strcat(EventName, " (Sysmon)"), Account = UserSam, Process = iff(EventID == 1, ParentFile, ProcessFile)
+  )
+  // @sentinel-only:end
   | summarize Events = count(), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Actions = make_set(Action),
       Accounts = make_set(Account, 5), Processes = make_set(Process, 5) by DeviceName, FolderPath, FileName
+  | extend MachineKey = _HostKey(DeviceName)
+  | lookup kind=leftouter (_MachineRoles(EndTime)) on MachineKey
+  | project-away MachineKey, MachineRoleBasis
   | sort by FirstSeen asc

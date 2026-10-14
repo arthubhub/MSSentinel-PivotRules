@@ -4,7 +4,8 @@ indicators: [process]
 action: timeline
 description: >
   Déroulé autour de T0 de ce que fait le processus : lancements (avec son parent), enfants, connexions réseau
-  (premier contact par destination), fichiers écrits et clés de registre modifiées. Limité à 5 000 lignes.
+  (premier contact par destination), fichiers écrits et clés de registre modifiées (Defender for Endpoint), complété
+  dans Sentinel par Sysmon (1, 3, 11, 13, 22, 23, 26) et les processus normalisés ASIM. La machine porte son rôle connu (DC, serveur déclaré). Limité à 5 000 lignes.
   Renseigner le contexte HOST pour suivre une seule machine.
 reading:
   decisive: Lancement depuis un parent inhabituel → fichier déposé → enfant LOLBin → connexion sortante.
@@ -12,7 +13,7 @@ reading:
   noise: Activité normale d'un processus très répandu (explorer, svchost) sans filtre de machine.
 window: { before: 30m, after: 30m }
 context: [HOST]
-uses: [persistence]
+uses: [persistence, roles, sysmon]
 query: |
   union isfuzzy=true
   (
@@ -54,5 +55,32 @@ query: |
           Action = strcat(ActionType, iff(_IsPersistenceKey(RegistryKey, RegistryValueName), " (persistance)", "")),
           Detail = strcat(RegistryKey, @"\", RegistryValueName, " = ", RegistryValueData)
   )
+  // @sentinel-only:begin
+  , (
+      ASimProcessEventLogs
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where TargetProcessName has ValueFile or ActingProcessName has ValueFile
+      | where tolower(TargetProcessFilename) == ValueFile or tolower(ActingProcessFilename) == ValueFile
+      | where isempty(HostFilter) or DvcHostname startswith HostFilter
+      | project TimeGenerated, Source = strcat("ASIM ", EventProduct), Host = tolower(DvcHostname), Account = tolower(ActorUsername),
+          Action = iff(tolower(TargetProcessFilename) == ValueFile, strcat("Lancé par ", ActingProcessFilename), strcat("Lance ", TargetProcessFilename)),
+          Detail = TargetProcessCommandLine
+  ),
+  (
+      _Sysmon(StartTime, EndTime, dynamic([1, 3, 11, 13, 22, 23, 26]), ValueFile)
+      | where ProcessFile == ValueFile or (EventID == 1 and ParentFile == ValueFile)
+      | where isempty(ValuePath) or tolower(Image) == ValuePath or tolower(ParentImage) == ValuePath
+      | where isempty(HostFilter) or Computer startswith HostFilter
+      | project TimeGenerated, Source = strcat("Sysmon ", tostring(EventID)), Host = tolower(Computer), Account = UserSam,
+          Action = case(EventID == 1 and ProcessFile == ValueFile, strcat("Lancé par ", ParentFile), EventID == 1, strcat("Lance ", ProcessFile),
+              EventName),
+          Detail = case(EventID == 1, CommandLine, EventID == 3, strcat(coalesce(DestinationHostname, DestinationIp), ":", DestinationPort),
+              EventID == 13, strcat(TargetObject, " = ", Details), EventID == 22, strcat(QueryName, " → ", QueryResults), TargetFilename)
+  )
+  // @sentinel-only:end
+  | extend MachineKey = _HostKey(Host)
+  | lookup kind=leftouter (_MachineRoles(EndTime)) on MachineKey
+  | extend Host = _Labeled(Host, MachineRole)
+  | project-away MachineKey, MachineRole, MachineRoleBasis
   | sort by TimeGenerated asc
   | take 5000

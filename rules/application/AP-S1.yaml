@@ -6,44 +6,37 @@ description: >
   Connexions et appels de l'application (AppId, identifiant de service principal ou nom) sur 14 jours, par
   source et par IP : service principal, identité managée, utilisateurs via l'application, Microsoft Graph.
   Établit la base des IP habituelles (CI, serveurs) et signale les IP apparues dans les deux derniers jours.
+  Les connexions d'applications viennent de Sentinel ou, à défaut, de EntraIdSpnSignInEvents (Defender XDR) ;
+  AppOrigin dit si l'application est éditée par Microsoft, par le tenant ou par un autre tenant.
 reading:
   decisive: IP jamais vue pour cette application, d'un hébergeur ou d'un pays inhabituel, utilisant un secret client.
   context: Hausse soudaine des appels Graph ou des échecs d'authentification.
   noise: Exécuteurs CI/CD dont les IP changent, poste du développeur qui teste en local.
 v1: true
 window: { before: 14d, after: 1d }
-uses: [signins]
+uses: [signins, spn_signins]
 query: |
   union isfuzzy=true
   (
-      AADServicePrincipalSignInLogs
-      | where TimeGenerated between (StartTime .. EndTime)
-      | where AppId == ValueApp or ServicePrincipalId == ValueApp or ServicePrincipalName =~ ValueApp
-      | project TimeGenerated, Source = "Service principal", IPAddress, Location, Identity = ServicePrincipalName,
-          Success = ResultType == "0", Detail = strcat(ResourceDisplayName, " · ", ClientCredentialType)
-  ),
-  (
-      AADManagedIdentitySignInLogs
-      | where TimeGenerated between (StartTime .. EndTime)
-      | where AppId == ValueApp or ServicePrincipalId == ValueApp or ServicePrincipalName =~ ValueApp
-      | project TimeGenerated, Source = "Identité managée", IPAddress, Location, Identity = ServicePrincipalName,
-          Success = ResultType == "0", Detail = ResourceDisplayName
+      _SpnSignins(StartTime, EndTime, ValueApp, "")
+      | project TimeGenerated, Source = SignInType, IPAddress, Location, Identity = ServicePrincipalName, AppOrigin,
+          Success = Succeeded, Detail = strcat(ResourceDisplayName, " · ", Credential)
   ),
   (
       _Signins(StartTime, EndTime, "", "")
       | where AppId == ValueApp or AppDisplayName =~ ValueApp
       | project TimeGenerated, Source = "Utilisateurs via l'application", IPAddress, Location, Identity = tolower(UserPrincipalName),
-          Success = Succeeded, Detail = ResourceDisplayName
+          AppOrigin = "", Success = Succeeded, Detail = ResourceDisplayName
   ),
   (
       MicrosoftGraphActivityLogs
       | where TimeGenerated between (StartTime .. EndTime)
       | where AppId == ValueApp or ServicePrincipalId == ValueApp
       | project TimeGenerated, Source = "Microsoft Graph", IPAddress, Location = "", Identity = coalesce(UserId, ServicePrincipalId),
-          Success = ResponseStatusCode < 400, Detail = RequestMethod
+          AppOrigin = "", Success = ResponseStatusCode < 400, Detail = RequestMethod
   )
   | summarize Events = count(), Successes = countif(Success), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
       ActiveDays = dcount(bin(TimeGenerated, 1d)), Identities = make_set(Identity, 10), Locations = make_set(Location, 5),
-      Details = make_set(Detail, 5) by Source, IPAddress
+      Details = make_set(Detail, 5), AppOrigin = take_anyif(AppOrigin, isnotempty(AppOrigin)) by Source, IPAddress
   | extend NewIP = FirstSeen > T0 - 2d
   | sort by NewIP desc, Events desc

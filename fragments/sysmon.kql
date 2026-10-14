@@ -1,0 +1,144 @@
+// Événements Sysmon (journal Microsoft-Windows-Sysmon/Operational) normalisés, quelle que soit la table d'ingestion :
+// Event (agent Azure Monitor, EventData en XML) ou WindowsEvent (transfert d'événements, EventData en JSON).
+// Paramètres : start, end, ids (EventID, vide = tous), term (pré-filtre texte sur les données et le nom de machine, vide = aucun).
+// Colonnes de Sysmon (Image, CommandLine, ParentImage, User, Hashes, TargetFilename, ImageLoaded, TargetObject, Details,
+// SourceIp, DestinationIp, DestinationPort, DestinationHostname, QueryName, QueryResults…) et colonnes dérivées :
+// Contents (flux Zone.Identifier de l'événement 15 : HostUrl et ReferrerUrl du téléchargement).
+// ProcessFile, ParentFile, TargetFile (noms de fichier en minuscules), UserSam, SHA256, SHA1, MD5, RegistryEventType, EventName.
+// Fragment propre à Sentinel : retiré de la variante Defender (les règles l'appellent dans des blocs @sentinel-only).
+// Ne produit rien sans Sysmon installé et une configuration qui journalise les EventID demandés.
+// @sentinel-only:begin
+let _SysmonEventName = (id:int) {
+    case(
+        id == 1, "Processus créé",
+        id == 2, "Date de création d'un fichier modifiée",
+        id == 3, "Connexion réseau",
+        id == 5, "Processus terminé",
+        id == 6, "Pilote chargé",
+        id == 7, "Image (DLL) chargée",
+        id == 8, "Thread distant créé",
+        id == 10, "Accès à un processus",
+        id == 11, "Fichier créé",
+        id == 12, "Clé de registre créée ou supprimée",
+        id == 13, "Valeur de registre modifiée",
+        id == 14, "Clé ou valeur de registre renommée",
+        id == 15, "Flux de fichier créé (ADS, Mark of the Web)",
+        id == 17, "Canal nommé créé",
+        id == 18, "Canal nommé connecté",
+        id == 22, "Requête DNS",
+        id == 23, "Fichier supprimé (archivé)",
+        id == 25, "Altération de processus",
+        id == 26, "Fichier supprimé",
+        id == 29, "Exécutable détecté",
+        strcat("Sysmon ", tostring(id)))
+};
+let _Sysmon = (start:datetime, end:datetime, ids:dynamic, term:string) {
+    union isfuzzy=true
+    (
+        Event
+        | where TimeGenerated between (start .. end)
+        | where Source == "Microsoft-Windows-Sysmon"
+        | where array_length(ids) == 0 or EventID in (ids)
+        | where isempty(term) or EventData has term or Computer has term
+        | extend _x = EventData
+        | extend
+            Image = XMLFIELD(_x, Image),
+            CommandLine = XMLFIELD(_x, CommandLine),
+            CurrentDirectory = XMLFIELD(_x, CurrentDirectory),
+            ProcessGuid = XMLFIELD(_x, ProcessGuid),
+            ProcessId = XMLFIELD(_x, ProcessId),
+            User = XMLFIELD(_x, User),
+            ParentImage = XMLFIELD(_x, ParentImage),
+            ParentCommandLine = XMLFIELD(_x, ParentCommandLine),
+            ParentProcessGuid = XMLFIELD(_x, ParentProcessGuid),
+            Hashes = XMLFIELD(_x, Hashes),
+            Hash = XMLFIELD(_x, Hash),
+            OriginalFileName = XMLFIELD(_x, OriginalFileName),
+            Company = XMLFIELD(_x, Company),
+            IntegrityLevel = XMLFIELD(_x, IntegrityLevel),
+            TargetFilename = XMLFIELD(_x, TargetFilename),
+            CreationUtcTime = XMLFIELD(_x, CreationUtcTime),
+            ImageLoaded = XMLFIELD(_x, ImageLoaded),
+            Signed = XMLFIELD(_x, Signed),
+            Signature = XMLFIELD(_x, Signature),
+            TargetObject = XMLFIELD(_x, TargetObject),
+            Details = XMLFIELD(_x, Details),
+            EventType = XMLFIELD(_x, EventType),
+            Protocol = XMLFIELD(_x, Protocol),
+            Initiated = XMLFIELD(_x, Initiated),
+            SourceIp = XMLFIELD(_x, SourceIp),
+            SourcePort = XMLFIELD(_x, SourcePort),
+            SourceHostname = XMLFIELD(_x, SourceHostname),
+            DestinationIp = XMLFIELD(_x, DestinationIp),
+            DestinationPort = XMLFIELD(_x, DestinationPort),
+            DestinationHostname = XMLFIELD(_x, DestinationHostname),
+            QueryName = XMLFIELD(_x, QueryName),
+            QueryResults = XMLFIELD(_x, QueryResults),
+            QueryStatus = XMLFIELD(_x, QueryStatus),
+            SourceImage = XMLFIELD(_x, SourceImage),
+            TargetImage = XMLFIELD(_x, TargetImage),
+            GrantedAccess = XMLFIELD(_x, GrantedAccess),
+            Archived = XMLFIELD(_x, Archived),
+            Contents = XMLFIELD(_x, Contents)
+        | extend SourceTable = "Event"
+    ),
+    (
+        WindowsEvent
+        | where TimeGenerated between (start .. end)
+        | where Provider == "Microsoft-Windows-Sysmon"
+        | where array_length(ids) == 0 or EventID in (ids)
+        | where isempty(term) or tostring(EventData) has term or RawEventData has term or Computer has term
+        | extend _x = tostring(RawEventData)
+        | extend
+            Image = coalesce(tostring(EventData.Image), XMLFIELD(_x, Image)),
+            CommandLine = coalesce(tostring(EventData.CommandLine), XMLFIELD(_x, CommandLine)),
+            CurrentDirectory = coalesce(tostring(EventData.CurrentDirectory), XMLFIELD(_x, CurrentDirectory)),
+            ProcessGuid = coalesce(tostring(EventData.ProcessGuid), XMLFIELD(_x, ProcessGuid)),
+            ProcessId = coalesce(tostring(EventData.ProcessId), XMLFIELD(_x, ProcessId)),
+            User = coalesce(tostring(EventData.User), XMLFIELD(_x, User)),
+            ParentImage = coalesce(tostring(EventData.ParentImage), XMLFIELD(_x, ParentImage)),
+            ParentCommandLine = coalesce(tostring(EventData.ParentCommandLine), XMLFIELD(_x, ParentCommandLine)),
+            ParentProcessGuid = coalesce(tostring(EventData.ParentProcessGuid), XMLFIELD(_x, ParentProcessGuid)),
+            Hashes = coalesce(tostring(EventData.Hashes), XMLFIELD(_x, Hashes)),
+            Hash = coalesce(tostring(EventData.Hash), XMLFIELD(_x, Hash)),
+            OriginalFileName = coalesce(tostring(EventData.OriginalFileName), XMLFIELD(_x, OriginalFileName)),
+            Company = coalesce(tostring(EventData.Company), XMLFIELD(_x, Company)),
+            IntegrityLevel = coalesce(tostring(EventData.IntegrityLevel), XMLFIELD(_x, IntegrityLevel)),
+            TargetFilename = coalesce(tostring(EventData.TargetFilename), XMLFIELD(_x, TargetFilename)),
+            CreationUtcTime = coalesce(tostring(EventData.CreationUtcTime), XMLFIELD(_x, CreationUtcTime)),
+            ImageLoaded = coalesce(tostring(EventData.ImageLoaded), XMLFIELD(_x, ImageLoaded)),
+            Signed = coalesce(tostring(EventData.Signed), XMLFIELD(_x, Signed)),
+            Signature = coalesce(tostring(EventData.Signature), XMLFIELD(_x, Signature)),
+            TargetObject = coalesce(tostring(EventData.TargetObject), XMLFIELD(_x, TargetObject)),
+            Details = coalesce(tostring(EventData.Details), XMLFIELD(_x, Details)),
+            EventType = coalesce(tostring(EventData.EventType), XMLFIELD(_x, EventType)),
+            Protocol = coalesce(tostring(EventData.Protocol), XMLFIELD(_x, Protocol)),
+            Initiated = coalesce(tostring(EventData.Initiated), XMLFIELD(_x, Initiated)),
+            SourceIp = coalesce(tostring(EventData.SourceIp), XMLFIELD(_x, SourceIp)),
+            SourcePort = coalesce(tostring(EventData.SourcePort), XMLFIELD(_x, SourcePort)),
+            SourceHostname = coalesce(tostring(EventData.SourceHostname), XMLFIELD(_x, SourceHostname)),
+            DestinationIp = coalesce(tostring(EventData.DestinationIp), XMLFIELD(_x, DestinationIp)),
+            DestinationPort = coalesce(tostring(EventData.DestinationPort), XMLFIELD(_x, DestinationPort)),
+            DestinationHostname = coalesce(tostring(EventData.DestinationHostname), XMLFIELD(_x, DestinationHostname)),
+            QueryName = coalesce(tostring(EventData.QueryName), XMLFIELD(_x, QueryName)),
+            QueryResults = coalesce(tostring(EventData.QueryResults), XMLFIELD(_x, QueryResults)),
+            QueryStatus = coalesce(tostring(EventData.QueryStatus), XMLFIELD(_x, QueryStatus)),
+            SourceImage = coalesce(tostring(EventData.SourceImage), XMLFIELD(_x, SourceImage)),
+            TargetImage = coalesce(tostring(EventData.TargetImage), XMLFIELD(_x, TargetImage)),
+            GrantedAccess = coalesce(tostring(EventData.GrantedAccess), XMLFIELD(_x, GrantedAccess)),
+            Archived = coalesce(tostring(EventData.Archived), XMLFIELD(_x, Archived)),
+            Contents = coalesce(tostring(EventData.Contents), XMLFIELD(_x, Contents))
+        | extend SourceTable = "WindowsEvent"
+    )
+    | extend Hashes = coalesce(Hashes, Hash)
+    | extend ProcessFile = tolower(tostring(split(Image, @"\")[-1])), ParentFile = tolower(tostring(split(ParentImage, @"\")[-1])),
+        TargetFile = tolower(tostring(split(TargetFilename, @"\")[-1])), UserSam = tolower(tostring(split(User, @"\")[-1])),
+        SHA256 = tolower(extract(@"SHA256=([0-9A-Fa-f]{64})", 1, Hashes)), SHA1 = tolower(extract(@"SHA1=([0-9A-Fa-f]{40})", 1, Hashes)),
+        MD5 = tolower(extract(@"MD5=([0-9A-Fa-f]{32})", 1, Hashes)), EventName = _SysmonEventName(EventID), RegistryEventType = EventType
+    | project TimeGenerated, SourceTable, Computer, EventID, EventName, Image, ProcessFile, CommandLine, CurrentDirectory, ProcessGuid, ProcessId,
+        User, UserSam, ParentImage, ParentFile, ParentCommandLine, ParentProcessGuid, Hashes, SHA256, SHA1, MD5, OriginalFileName, Company,
+        IntegrityLevel, TargetFilename, TargetFile, CreationUtcTime, ImageLoaded, Signed, Signature, TargetObject, Details, RegistryEventType,
+        Protocol, Initiated, SourceIp, SourcePort, SourceHostname, DestinationIp, DestinationPort, DestinationHostname, QueryName, QueryResults,
+        QueryStatus, SourceImage, TargetImage, GrantedAccess, Archived, Contents
+};
+// @sentinel-only:end

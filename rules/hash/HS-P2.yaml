@@ -4,7 +4,10 @@ indicators: [hash]
 action: pivot
 description: >
   D'où vient le fichier : URL, référent et IP d'origine du téléchargement, processus qui l'a écrit
-  (navigateur, Outlook, archiveur) et, s'il est arrivé par e-mail, expéditeur, destinataire et sujet.
+  (navigateur, Outlook, archiveur) et, s'il est arrivé par e-mail, expéditeur, destinataire et sujet. Dans
+  Sentinel, les téléchargements vus par le proxy (ASimWebSessionLogs, CommonSecurityLog) complètent Defender for
+  Endpoint quand le poste n'est pas couvert, ainsi que le flux Zone.Identifier (Mark of the Web) journalisé par Sysmon 15,
+  qui donne l'URL et le référent du téléchargement.
   Le contexte HOST restreint à une machine.
 reading:
   decisive: URL d'origine sur un domaine récent ou typosquatté, référent publicitaire, ou pièce jointe d'un expéditeur nouveau.
@@ -12,6 +15,7 @@ reading:
   noise: Téléchargements depuis les sites officiels des éditeurs.
 window: { before: 7d, after: 1h }
 context: [HOST]
+uses: [sysmon]
 query: |
   union isfuzzy=true
   (
@@ -36,4 +40,30 @@ query: |
           OriginUrl = "", Referrer = "", OriginIP = SenderIPv4, Via = strcat("E-mail de ", SenderFromAddress),
           Detail = strcat(Subject, " · ", DeliveryAction, " · ", ThreatTypes)
   )
+  // @sentinel-only:begin
+  , (
+      ASimWebSessionLogs
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where FileSHA256 =~ ValueHash or FileSHA1 =~ ValueHash or FileMD5 =~ ValueHash
+      | project TimeGenerated, Source = strcat("ASimWebSessionLogs (", EventProduct, ")"), Where = tolower(coalesce(SrcHostname, SrcIpAddr)),
+          FileName, FolderPath = "", OriginUrl = Url, Referrer = HttpReferrer, OriginIP = DstIpAddr,
+          Via = strcat("Proxy · ", SrcUsername, " · ", HttpUserAgent), Detail = strcat(DvcAction, " ", EventResult)
+  ),
+  (
+      CommonSecurityLog
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where FileHash =~ ValueHash
+      | project TimeGenerated, Source = strcat("CommonSecurityLog (", DeviceVendor, ")"), Where = tolower(coalesce(SourceHostName, SourceIP)),
+          FileName, FolderPath = FilePath, OriginUrl = RequestURL, Referrer = "", OriginIP = DestinationIP,
+          Via = strcat(DeviceProduct, " · ", SourceUserName), Detail = coalesce(DeviceAction, Activity)
+  ),
+  (
+      _Sysmon(StartTime, EndTime, dynamic([15]), ValueHash)
+      | where SHA256 == ValueHash or SHA1 == ValueHash or MD5 == ValueHash
+      | where isempty(HostFilter) or Computer startswith HostFilter
+      | project TimeGenerated, Source = "Sysmon 15 (Zone.Identifier)", Where = tolower(Computer), FileName = TargetFile, FolderPath = TargetFilename,
+          OriginUrl = extract(@"HostUrl=(\S+)", 1, Contents), Referrer = extract(@"ReferrerUrl=(\S+)", 1, Contents), OriginIP = "",
+          Via = strcat(ProcessFile, " · ", UserSam), Detail = strcat("Zone ", extract(@"ZoneId=(\d)", 1, Contents))
+  )
+  // @sentinel-only:end
   | sort by TimeGenerated asc

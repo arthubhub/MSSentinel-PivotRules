@@ -4,21 +4,23 @@ indicators: [ip]
 action: timeline
 description: >
   Courbe minute par minute des demandes de connexion venant de l'IP, une série par machine cible et par
-  résultat : authentifications Windows (SecurityEvent, WindowsEvent), Defender (DeviceLogonEvents) et
-  connexions entrantes acceptées (DeviceNetworkEvents).
+  résultat : authentifications Windows (SecurityEvent, WindowsEvent), Defender (DeviceLogonEvents), Defender for
+  Identity, journaux d'authentification ASIM et connexions entrantes acceptées (DeviceNetworkEvents). La cible est la
+  machine réellement visée (le service demandé pour un 4769) ; les simples validations d'identifiants par un contrôleur de
+  domaine (4768, 4771, 4776) forment une série « DC · validation » à part. Le rôle connu de la cible est indiqué.
 reading:
   decisive: Une même source qui touche de nombreuses machines en quelques minutes.
   context: Échecs sur une machine puis succès sur une autre (identifiants testés).
-  noise: Serveurs de déploiement ou de supervision qui contactent tout le parc à heure fixe.
+  noise: Serveurs de déploiement ou de supervision qui contactent tout le parc à heure fixe ; séries « validation » des DC.
 window: { before: 30m, after: 30m }
 render: timechart
-uses: [win_security]
+uses: [win_security, roles]
 query: |
   union isfuzzy=true
   (
       _WinSecurity(StartTime, EndTime, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776]), Value)
       | where IpAddress == Value
-      | project TimeGenerated, Target = tolower(Computer),
+      | project TimeGenerated, Target = iff(isnotempty(TargetHost), TargetHost, strcat(AuthAuthority, " · validation")),
           Outcome = iff(EventID in (4625, 4771) or Status !in ("", "-", "0x0"), "échec", "succès")
   ),
   (
@@ -28,10 +30,26 @@ query: |
       | project TimeGenerated, Target = tolower(DeviceName), Outcome = iff(ActionType == "LogonSuccess", "succès", "échec")
   ),
   (
+      IdentityLogonEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where IPAddress == Value
+      | project TimeGenerated, Target = iff(isnotempty(TargetDeviceName), tolower(TargetDeviceName), strcat(tolower(DestinationDeviceName), " · validation")),
+          Outcome = iff(ActionType == "LogonSuccess", "succès", "échec")
+  ),
+  (
       DeviceNetworkEvents
       | where TimeGenerated between (StartTime .. EndTime)
       | where RemoteIP == Value and ActionType == "InboundConnectionAccepted"
       | project TimeGenerated, Target = tolower(DeviceName), Outcome = "connexion entrante"
+  ),
+  (
+      ASimAuthenticationEventLogs
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where SrcIpAddr == Value
+      | project TimeGenerated, Target = tolower(coalesce(TargetHostname, DvcHostname)), Outcome = iff(EventResult == "Success", "succès", "échec")
   )
-  | summarize Requests = count() by bin(TimeGenerated, 1m), Serie = strcat(Target, " · ", Outcome)
+  | where isnotempty(Target)
+  | extend MachineKey = _HostKey(Target)
+  | lookup kind=leftouter (_MachineRoles(EndTime)) on MachineKey
+  | summarize Requests = count() by bin(TimeGenerated, 1m), Serie = strcat(_Labeled(Target, MachineRole), " · ", Outcome)
   | render timechart

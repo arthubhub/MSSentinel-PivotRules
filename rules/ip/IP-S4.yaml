@@ -3,16 +3,20 @@ name: Utilisation par jour, par compte
 indicators: [ip]
 action: statistics
 description: >
-  Tableau croisé compte × jour du nombre d'événements associant l'IP à un compte (connexions Entra ID,
-  ouvertures de session Windows et Defender, Microsoft 365, Azure).
+  Tableau croisé compte × jour du nombre d'événements associant l'IP à un compte (connexions Entra ID des utilisateurs et
+  des applications, ouvertures de session Windows, Defender et Linux, Microsoft 365, Azure, Microsoft Graph). Le rôle connu du
+  compte (compte de service, groupe privilégié, compte machine ou système, watchlist) est indiqué entre crochets.
 reading:
   decisive: Des dizaines ou centaines de comptes différents avec 1 à 3 tentatives chacun (password spray).
-  context: Un seul compte avec un très grand nombre de tentatives (force brute).
-  noise: IP de NAT d'entreprise ou de VPN partagée par de nombreux utilisateurs légitimes.
+  context: Un seul compte avec un très grand nombre de tentatives (force brute), ou un compte privilégié parmi les comptes vus.
+  noise: IP de NAT d'entreprise ou de VPN partagée par de nombreux utilisateurs légitimes ; comptes de service à heure fixe.
 window: { before: 7d, after: 1d }
-uses: [ip_events]
+uses: [ip_events, roles]
 query: |
   _IpEvents(StartTime, EndTime, Value)
   | where isnotempty(Account) and Account != "-"
+  | extend AccountKey = _SamOf(Account)
+  | lookup kind=leftouter (_AccountRoles(EndTime)) on AccountKey
+  | extend Account = _Labeled(Account, _JoinRoles(_AccountKind(AccountKey), AccountRole))
   | summarize Events = count() by Account, Day = format_datetime(bin(TimeGenerated, 1d), "yyyy-MM-dd")
   | evaluate pivot(Day, sum(Events), Account)

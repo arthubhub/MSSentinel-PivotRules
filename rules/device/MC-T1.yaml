@@ -6,14 +6,17 @@ description: >
   Déroulé autour de T0 sur la machine : processus, premier contact avec chaque destination publique, fichiers
   exécutables, scripts et archives écrits, ouvertures de session, clés de persistance, événements Defender
   notables (antivirus, ASR, altération, injection, tâches, services), alertes et événements Windows clés
-  (4624, 4625, 4672, 4688, 4697, 4698, 4720, 4732). Limité à 5 000 lignes.
+  (4624, 4625, 4672, 4688, 4697, 4698, 4720, 4732), accès vus par Defender for Identity, processus et
+  authentifications des journaux ASIM, Sysmon (processus, connexions, fichiers, registre, DNS), fichiers modifiés ou
+  supprimés et partages accédés selon l'audit Windows (4660, 4663, 5145), et journaux Linux notables (SSH, sudo,
+  erreurs). Limité à 5 000 lignes.
 reading:
   decisive: Enchaînement processus inhabituel → fichier déposé → persistance → connexion sortante, avec alerte associée.
   context: Ouverture de session distante juste avant l'activité suspecte (mouvement latéral entrant).
   noise: Activité de fond (mises à jour, agents de gestion, antivirus).
 v1: true
 window: { before: 30m, after: 30m }
-uses: [persistence, win_security]
+uses: [persistence, win_security, sysmon]
 query: |
   let Notable = dynamic(["Antivirus", "Asr", "Tamper", "Injection", "ScheduledTask", "ServiceInstalled", "Exploit",
       "SmartScreen", "PowerShellCommand", "Amsi", "Wmi", "Lsass", "Credential"]);
@@ -74,6 +77,59 @@ query: |
       | project TimeGenerated, Source = "AlertEvidence", Host = tolower(DeviceName), Account = "",
           Action = strcat("Alerte ", Severity), Detail = Title
   ),
+  (
+      IdentityLogonEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where TargetDeviceName has ValueShort or DeviceName has ValueShort
+      | where _IsHost(TargetDeviceName) or _IsHost(DeviceName)
+      | project TimeGenerated, Source = "IdentityLogonEvents", Host = ValueShort, Account = tolower(coalesce(AccountUpn, AccountName)),
+          Action = strcat(iff(_IsHost(TargetDeviceName), "Accès entrant ", "Authentification sortante "), Protocol, " ", ActionType),
+          Detail = strcat(DeviceName, " → ", coalesce(TargetDeviceName, DestinationDeviceName), " · ", LogonType)
+  ),
+  // @sentinel-only:begin
+  (
+      ASimProcessEventLogs
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where DvcHostname startswith ValueShort and _IsHost(DvcHostname)
+      | project TimeGenerated, Source = strcat("ASIM ", EventProduct), Host = tolower(DvcHostname), Account = tolower(ActorUsername),
+          Action = strcat("Processus ", tostring(split(replace_string(TargetProcessName, "/", @"\"), @"\")[-1])),
+          Detail = strcat(ParentProcessName, " → ", TargetProcessCommandLine)
+  ),
+  (
+      ASimAuthenticationEventLogs
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where TargetHostname has ValueShort or DvcHostname has ValueShort
+      | where _IsHost(coalesce(TargetHostname, DvcHostname))
+      | project TimeGenerated, Source = strcat("ASIM ", EventProduct), Host = ValueShort, Account = tolower(TargetUsername),
+          Action = strcat(EventType, " ", EventResult), Detail = strcat("depuis ", coalesce(SrcHostname, SrcIpAddr), " · ", LogonProtocol)
+  ),
+  (
+      Syslog
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where Computer startswith ValueShort and _IsHost(Computer)
+      | where ProcessName in~ ("sshd", "sshd-session", "sudo", "su", "useradd", "usermod", "crontab")
+          or SeverityLevel in ("emerg", "alert", "crit", "err")
+      | project TimeGenerated, Source = strcat("Syslog (", ProcessName, ")"), Host = tolower(Computer), Account = "",
+          Action = strcat(Facility, ".", SeverityLevel), Detail = substring(SyslogMessage, 0, 300)
+  ),
+  (
+      _Sysmon(StartTime, EndTime, dynamic([1, 3, 11, 13, 22, 23, 26]), ValueShort)
+      | where _IsHost(Computer)
+      | where EventID != 3 or Initiated == "true"
+      | project TimeGenerated, Source = strcat("Sysmon ", tostring(EventID)), Host = tolower(Computer), Account = UserSam,
+          Action = case(EventID == 1, strcat("Processus ", ProcessFile), strcat(EventName, " · ", ProcessFile)),
+          Detail = case(EventID == 1, strcat(ParentFile, " → ", CommandLine), EventID == 3, strcat(coalesce(DestinationHostname, DestinationIp), ":", DestinationPort),
+              EventID == 13, strcat(TargetObject, " = ", Details), EventID == 22, strcat(QueryName, " → ", QueryResults), TargetFilename)
+  ),
+  (
+      _WinSecurity(StartTime, EndTime, dynamic([4660, 4663, 5145]), ValueShort)
+      | where _IsHost(Computer)
+      | where EventID == 5145 or ObjectAccess has_any ("écriture", "suppression", "permissions")
+      | project TimeGenerated, Source = SourceTable, Host = tolower(Computer), Account = SubjectSam,
+          Action = strcat(tostring(EventID), " · ", EventName, " (", ObjectAccess, ")"),
+          Detail = iff(EventID == 5145, strcat(ShareName, @"\", RelativeTargetName, " depuis ", IpAddress), strcat(ObjectName, " · ", ProcessName))
+  ),
+  // @sentinel-only:end
   (
       _WinSecurity(StartTime, EndTime, dynamic([4624, 4625, 4672, 4688, 4697, 4698, 4720, 4732]), ValueShort)
       | where _IsHost(Computer)

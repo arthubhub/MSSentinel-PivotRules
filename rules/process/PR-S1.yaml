@@ -5,7 +5,9 @@ action: statistics
 description: >
   Exécutions du binaire sur 30 jours, par chemin (profil utilisateur remplacé par *) : machines, comptes,
   jours actifs, hash, éditeurs et parents. Repère un binaire légitime lancé depuis un emplacement anormal
-  (node.exe dans AppData, copie de rundll32). Couvre aussi les 4688 Windows. Le contexte HOST restreint à une machine.
+  (node.exe dans AppData, copie de rundll32). Couvre aussi les 4688 Windows, Sysmon 1 (avec hash et éditeur) et les processus normalisés ASIM (Sysmon,
+  Linux, EDR tiers). Les machines échantillons portent leur rôle connu (DC, serveur déclaré). Le contexte HOST restreint à
+  une machine.
 reading:
   decisive: Chemin modifiable par l'utilisateur (AppData, Temp, ProgramData) vu sur 1 à 3 machines, sans éditeur connu.
   context: Plusieurs hash pour un même nom et un même chemin, nom d'origine (OriginalFileName) différent du nom.
@@ -13,7 +15,7 @@ reading:
 v1: true
 window: { before: 30d, after: 1d }
 context: [HOST]
-uses: [paths, win_security]
+uses: [paths, win_security, roles, sysmon]
 query: |
   union isfuzzy=true
   (
@@ -30,11 +32,31 @@ query: |
       | where isempty(HostFilter) or Computer startswith HostFilter
       | project TimeGenerated, Source = SourceTable, DeviceName = tolower(Computer), AccountName = tolower(SubjectUserName),
           FolderPath = NewProcessName, SHA256 = "", Company = "", OriginalName = "", Parent = tostring(split(ParentProcessName, @"\")[-1])
+  ),
+  (
+      ASimProcessEventLogs
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where TargetProcessName has ValueFile
+      | where tolower(TargetProcessFilename) == ValueFile
+      | where isempty(HostFilter) or DvcHostname startswith HostFilter
+      | project TimeGenerated, Source = strcat("ASIM ", EventProduct), DeviceName = tolower(DvcHostname), AccountName = tolower(ActorUsername),
+          FolderPath = TargetProcessName, SHA256 = tolower(TargetProcessSHA256), Company = TargetProcessFileCompany,
+          OriginalName = TargetProcessFileOriginalName, Parent = ActingProcessFilename
+  ),
+  (
+      _Sysmon(StartTime, EndTime, dynamic([1]), ValueFile)
+      | where ProcessFile == ValueFile
+      | where isempty(HostFilter) or Computer startswith HostFilter
+      | project TimeGenerated, Source = "Sysmon 1", DeviceName = tolower(Computer), AccountName = UserSam, FolderPath = Image, SHA256,
+          Company, OriginalName = OriginalFileName, Parent = ParentFile
   )
+  | extend MachineKey = _HostKey(DeviceName)
+  | lookup kind=leftouter (_MachineRoles(EndTime)) on MachineKey
+  | extend DeviceLabel = _Labeled(DeviceName, MachineRole)
   | extend NormPath = _NormPath(FolderPath)
   | summarize Executions = count(), Machines = dcount(DeviceName), Accounts = dcount(AccountName), ActiveDays = dcount(bin(TimeGenerated, 1d)),
       FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Hashes = make_set_if(SHA256, isnotempty(SHA256), 10),
       Companies = make_set_if(Company, isnotempty(Company), 5), OriginalNames = make_set_if(OriginalName, isnotempty(OriginalName), 5),
-      Parents = make_set(Parent, 10), SampleMachines = make_set(DeviceName, 10), Sources = make_set(Source) by NormPath
+      Parents = make_set(Parent, 10), SampleMachines = make_set(DeviceLabel, 10), Sources = make_set(Source) by NormPath
   | extend UserWritablePath = _IsUserWritable(NormPath)
   | sort by UserWritablePath desc, Machines asc

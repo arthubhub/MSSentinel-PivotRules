@@ -13,7 +13,7 @@ reading:
   noise: Installations et mises à jour de logiciels signés, tâches créées par l'IT.
 v1: true
 window: { before: 1h, after: 24h }
-uses: [persistence, win_security, paths]
+uses: [persistence, win_security, paths, sysmon]
 query: |
   union isfuzzy=true
   (
@@ -65,6 +65,34 @@ query: |
           Item = coalesce(TaskName, ServiceName, TargetUserName),
           Detail = substring(coalesce(TaskContent, ServiceFileName, MemberName), 0, 1000),
           Process = strcat(SubjectDomainName, @"\", SubjectUserName), CommandLine = ""
+  ),
+  (
+      _WinSecurity(StartTime, EndTime, dynamic([4657]), ValueShort)
+      | where _IsHost(Computer)
+      | where _IsPersistenceKey(ObjectName, ObjectValueName)
+      | project TimeGenerated, Mechanism = "4657 · Registre (audit Windows)", Item = strcat(ObjectName, @"\", ObjectValueName), Detail = ObjectAccess,
+          Process = ProcessName, CommandLine = ""
+  ),
+  (
+      _Sysmon(StartTime, EndTime, dynamic([12, 13, 14]), ValueShort)
+      | where _IsHost(Computer)
+      | extend ValueName = tostring(split(TargetObject, @"\")[-1])
+      | where _IsPersistenceKey(TargetObject, ValueName)
+      | project TimeGenerated, Mechanism = strcat("Registre (Sysmon ", tostring(EventID), ")"), Item = TargetObject, Detail = Details,
+          Process = ProcessFile, CommandLine = ""
+  ),
+  (
+      union isfuzzy=true
+      (Event | where TimeGenerated between (StartTime .. EndTime) | where Source == "Service Control Manager" and EventID == 7045
+          | where Computer startswith ValueShort and _IsHost(Computer)
+          | project TimeGenerated, ServiceName = XMLFIELD(EventData, ServiceName), ImagePath = XMLFIELD(EventData, ImagePath),
+              Account = XMLFIELD(EventData, AccountName)),
+      (WindowsEvent | where TimeGenerated between (StartTime .. EndTime) | where Provider == "Service Control Manager" and EventID == 7045
+          | where Computer startswith ValueShort and _IsHost(Computer)
+          | project TimeGenerated, ServiceName = tostring(EventData.ServiceName), ImagePath = tostring(EventData.ImagePath),
+              Account = tostring(EventData.AccountName))
+      | project TimeGenerated, Mechanism = "7045 · Service installé (journal Système)", Item = ServiceName, Detail = ImagePath,
+          Process = Account, CommandLine = ""
   )
   | extend UserWritablePath = _IsUserWritable(Detail)
   | sort by TimeGenerated asc

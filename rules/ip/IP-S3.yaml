@@ -4,15 +4,20 @@ indicators: [ip]
 action: statistics
 description: >
   Tableau croisé machine × jour du nombre d'événements où l'IP apparaît (connexions réseau Defender,
-  journaux Windows, Defender for Identity, pare-feu). Montre les machines contactées pour la première fois.
+  journaux Windows, Defender for Identity, pare-feu, Linux). La machine est la cible réelle de l'événement : un contrôleur
+  de domaine qui n'a fait que valider des identifiants (4768, 4769, 4771, 4776) apparaît à part, suffixé « validation des
+  identifiants ». Le rôle connu de chaque machine (DC, serveur déclaré dans la watchlist) est indiqué entre crochets.
 reading:
   decisive: Machines touchées uniquement le jour de l'alerte, alors que l'IP existait déjà avant.
   context: Nombre de machines qui augmente d'un jour à l'autre (balayage, mouvement latéral).
-  noise: Serveurs de supervision, d'inventaire ou de sauvegarde contactés tous les jours.
+  noise: Serveurs de supervision, d'inventaire ou de sauvegarde contactés tous les jours ; lignes « validation des identifiants » des DC.
 window: { before: 7d, after: 1d }
-uses: [ip_events]
+uses: [ip_events, roles]
 query: |
   _IpEvents(StartTime, EndTime, Value)
-  | where isnotempty(Host)
-  | summarize Events = count() by Machine = tolower(Host), Day = format_datetime(bin(TimeGenerated, 1d), "yyyy-MM-dd")
+  | where isnotempty(Host) or isnotempty(AuthBy)
+  | extend MachineKey = _HostKey(coalesce(Host, AuthBy))
+  | lookup kind=leftouter (_MachineRoles(EndTime)) on MachineKey
+  | extend Machine = _Labeled(iff(isnotempty(Host), Host, strcat(AuthBy, " · validation des identifiants")), MachineRole)
+  | summarize Events = count() by Machine, Day = format_datetime(bin(TimeGenerated, 1d), "yyyy-MM-dd")
   | evaluate pivot(Day, sum(Events), Machine)

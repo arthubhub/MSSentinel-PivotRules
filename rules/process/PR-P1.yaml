@@ -4,7 +4,9 @@ indicators: [process]
 action: pivot
 description: >
   Arbre autour du processus : ses parents et grands-parents (quand il est lancé) et ses enfants (ce qu'il
-  lance), avec lignes de commande, machines et comptes. Sources : DeviceProcessEvents et 4688 Windows.
+  lance), avec lignes de commande, machines et comptes. Sources : DeviceProcessEvents, 4688 Windows, Sysmon 1 et
+  processus normalisés ASIM (Sysmon, Linux, EDR tiers). Le rôle connu des machines (DC, serveur déclaré) et la
+  catégorie des comptes (système, service) sont indiqués entre crochets.
   Par exemple, depuis explorer.exe on voit les exécutables lancés par l'utilisateur ; depuis powershell.exe
   on voit qui l'a lancé et avec quelles options. Si la valeur est un chemin complet, seul ce chemin est retenu.
 reading:
@@ -14,7 +16,7 @@ reading:
 v1: true
 window: { before: 30m, after: 30m }
 context: [HOST]
-uses: [win_security]
+uses: [win_security, roles, sysmon]
 query: |
   union isfuzzy=true
   (
@@ -36,7 +38,32 @@ query: |
       | project TimeGenerated, Source = SourceTable, DeviceName = tolower(Computer), Role, GrandParent = "",
           Parent = tolower(tostring(split(ParentProcessName, @"\")[-1])), Process = tolower(tostring(split(NewProcessName, @"\")[-1])),
           CommandLine, ParentCommandLine = "", Account = tolower(SubjectUserName)
+  ),
+  (
+      ASimProcessEventLogs
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where TargetProcessName has ValueFile or ActingProcessName has ValueFile
+      | extend _t = tolower(TargetProcessFilename), _p = tolower(ActingProcessFilename)
+      | where _t == ValueFile or _p == ValueFile
+      | where isempty(HostFilter) or DvcHostname startswith HostFilter
+      | where isempty(ValuePath) or tolower(TargetProcessName) == ValuePath or tolower(ActingProcessName) == ValuePath
+      | extend Role = iff(_t == ValueFile, "1 · Lancement du processus", "2 · Enfant")
+      | project TimeGenerated, Source = strcat("ASIM ", EventProduct), DeviceName = tolower(DvcHostname), Role,
+          GrandParent = tolower(tostring(split(replace_string(ParentProcessName, "/", @"\\"), @"\\")[-1])), Parent = _p, Process = _t,
+          CommandLine = TargetProcessCommandLine, ParentCommandLine = ActingProcessCommandLine, Account = tolower(ActorUsername)
+  ),
+  (
+      _Sysmon(StartTime, EndTime, dynamic([1]), ValueFile)
+      | where ProcessFile == ValueFile or ParentFile == ValueFile
+      | where isempty(HostFilter) or Computer startswith HostFilter
+      | where isempty(ValuePath) or tolower(Image) == ValuePath or tolower(ParentImage) == ValuePath
+      | extend Role = iff(ProcessFile == ValueFile, "1 · Lancement du processus", "2 · Enfant")
+      | project TimeGenerated, Source = "Sysmon 1", DeviceName = tolower(Computer), Role, GrandParent = "", Parent = ParentFile,
+          Process = ProcessFile, CommandLine, ParentCommandLine, Account = UserSam
   )
+  | extend MachineKey = _HostKey(DeviceName)
+  | lookup kind=leftouter (_MachineRoles(EndTime)) on MachineKey
+  | extend DeviceName = _Labeled(DeviceName, MachineRole), Account = _Labeled(Account, _AccountKind(_SamOf(Account)))
   | summarize Executions = count(), Machines = dcount(DeviceName), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
       CommandLines = make_set(CommandLine, 5), ParentCommandLines = make_set(ParentCommandLine, 3),
       SampleMachines = make_set(DeviceName, 5), Accounts = make_set(Account, 5) by Role, GrandParent, Parent, Process, Source

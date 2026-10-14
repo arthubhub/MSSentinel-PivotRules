@@ -4,12 +4,14 @@ indicators: [email]
 action: timeline
 description: >
   Chaîne complète autour de T0 pour l'utilisateur : e-mails reçus, clics, fichiers téléchargés, premier contact
-  avec chaque destination publique et processus lancés depuis l'explorateur, un navigateur ou Office.
+  avec chaque destination publique et processus lancés depuis l'explorateur, un navigateur ou Office. Host porte le
+  rôle connu de la machine (DC, serveur RDS déclaré…).
 reading:
   decisive: E-mail → clic → téléchargement ou commande collée → processus (powershell, mshta, script) → connexion sortante.
   context: Délai court (moins de 5 minutes) entre le clic et le premier processus inhabituel.
   noise: Navigation ordinaire, ouverture de documents Office depuis Outlook.
 window: { before: 30m, after: 30m }
+uses: [roles]
 query: |
   let Launchers = dynamic(["explorer.exe", "chrome.exe", "msedge.exe", "firefox.exe", "brave.exe", "opera.exe", "outlook.exe",
       "olk.exe", "winword.exe", "excel.exe", "powerpnt.exe", "onenote.exe", "ms-teams.exe", "teams.exe"]);
@@ -53,4 +55,8 @@ query: |
       | project TimeGenerated, Source = "DeviceNetworkEvents", Host = tolower(DeviceName), Account = ValueMail,
           Action = strcat("Premier contact · ", InitiatingProcessFileName), Detail = strcat(Destination, ":", tostring(RemotePort))
   )
+  | extend MachineKey = _HostKey(Host)
+  | lookup kind=leftouter (_MachineRoles(EndTime)) on MachineKey
+  | extend Host = _Labeled(Host, MachineRole)
+  | project-away MachineKey, MachineRole, MachineRoleBasis
   | sort by TimeGenerated asc
