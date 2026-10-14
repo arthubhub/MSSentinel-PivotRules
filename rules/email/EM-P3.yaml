@@ -5,12 +5,14 @@ action: pivot
 description: >
   Connexions réseau Defender (DeviceNetworkEvents) initiées par des processus de l'utilisateur, par défaut 5 minutes
   avant et après T0 (heure du clic par exemple). Le rapprochement se fait sur l'UPN du processus, ou à défaut sur
-  la partie locale de l'adresse (approximation quand le nom de compte Windows diffère).
+  la partie locale de l'adresse (approximation quand le nom de compte Windows diffère). MachineRole donne le rôle
+  connu de la machine (un serveur RDS ou Citrix porte les sessions de nombreux utilisateurs).
 reading:
   decisive: Connexion vers le domaine de l'e-mail ou du faux CAPTCHA, suivie d'une connexion d'un processus non navigateur.
   context: Destinations publiques jamais vues ailleurs dans le parc.
   noise: Trafic de fond du navigateur, de Teams et des agents de mise à jour.
 window: { before: 5m, after: 5m }
+uses: [roles]
 query: |
   DeviceNetworkEvents
   | where TimeGenerated between (StartTime .. EndTime)
@@ -19,4 +21,7 @@ query: |
   | where RemoteIPType != "Loopback"
   | project TimeGenerated, DeviceName, ActionType, Process = InitiatingProcessFileName, CommandLine = InitiatingProcessCommandLine,
       RemoteUrl, RemoteIP, RemotePort, RemoteIPType, Protocol
+  | extend MachineKey = _HostKey(DeviceName)
+  | lookup kind=leftouter (_MachineRoles(EndTime)) on MachineKey
+  | project-away MachineKey, MachineRoleBasis
   | sort by TimeGenerated asc

@@ -1,0 +1,79 @@
+id: AC-P6
+name: Fichiers et partages accédés par le compte
+indicators: [account]
+action: pivot
+description: >
+  Fichiers et partages lus, écrits, supprimés ou dont les permissions ont changé, par le compte, regroupés par machine,
+  dossier et type d'accès :
+  audit Windows de l'accès aux objets (4656, 4663, 4670, et 4660 rattaché au fichier par son handle) sur les machines où
+  une SACL est posée, accès aux partages réseau (5140, 5145) journalisés par les serveurs de fichiers, fichiers créés,
+  modifiés ou supprimés vus par Defender for Endpoint et par Sysmon (11, 15, 23, 26), journaux ASIM de fichiers, et
+  fichiers SharePoint ou OneDrive (OfficeActivity). Les lectures ne sont visibles que dans l'audit Windows et SharePoint :
+  Defender for Endpoint et Sysmon ne journalisent pas les lectures.
+reading:
+  decisive: Lecture ou téléchargement en masse sur un partage ou dans SharePoint peu avant une connexion sortante ou un archivage (exfiltration).
+  context: Accès à des partages administratifs (C$, ADMIN$) ou à des dossiers sensibles hors du périmètre du compte ; permissions modifiées.
+  noise: Profils itinérants, redirection de dossiers, synchronisation OneDrive, antivirus et sauvegarde.
+window: { before: 24h, after: 1h }
+uses: [win_security, sysmon, roles]
+query: |
+  let Win = materialize(_WinSecurity(StartTime, EndTime, dynamic([4656, 4660, 4663, 4670, 5140, 5145]), ValueSam)
+      | where SubjectSam == ValueSam
+      | where EventID in (5140, 5145) or ObjectType in ("File", ""));
+  let Handles = Win | where EventID in (4656, 4663) and isnotempty(HandleId) | summarize HandleObject = take_any(ObjectName) by Computer, HandleId;
+  union isfuzzy=true
+  (
+      Win
+      | join kind=leftouter (Handles) on Computer, HandleId
+      | project TimeGenerated, Source = SourceTable, Machine = tolower(Computer),
+          Kind = iff(EventID in (5140, 5145), "Partage réseau", "Fichier (audit Windows)"),
+          Object = case(EventID == 5145, strcat(@"\\", tolower(Computer), @"\", trim(@"[\\*]+", ShareName), @"\", RelativeTargetName),
+              EventID == 5140, strcat(@"\\", tolower(Computer), @"\", trim(@"[\\*]+", ShareName)),
+              coalesce(ObjectName, HandleObject)),
+          Access = ObjectAccess, Process = tolower(tostring(split(ProcessName, @"\")[-1])), SourceIp = IpAddress
+  ),
+  (
+      DeviceFileEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where InitiatingProcessAccountName =~ ValueSam or RequestAccountName =~ ValueSam
+      | project TimeGenerated, Source = "DeviceFileEvents", Machine = tolower(DeviceName),
+          Kind = iff(RequestProtocol == "Smb", "Partage réseau (Defender)", "Fichier (Defender)"), Object = FolderPath,
+          Access = case(ActionType == "FileDeleted", "suppression", ActionType == "FileRenamed", "renommage", "écriture"),
+          Process = tolower(InitiatingProcessFileName), SourceIp = RequestSourceIP
+  ),
+  (
+      _Sysmon(StartTime, EndTime, dynamic([11, 15, 23, 26]), ValueSam)
+      | where UserSam == ValueSam
+      | project TimeGenerated, Source = strcat("Sysmon ", tostring(EventID)), Machine = tolower(Computer), Kind = "Fichier (Sysmon)",
+          Object = TargetFilename, Access = iff(EventID in (23, 26), "suppression", "écriture"), Process = ProcessFile, SourceIp = ""
+  ),
+  (
+      ASimFileEventLogs
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where ActorUsername has ValueSam
+      | where tolower(ActorUsername) in (ValueSam, ValueUpn) or tolower(ActorUsername) endswith strcat(@"\", ValueSam)
+      | project TimeGenerated, Source = strcat("ASIM ", EventProduct), Machine = tolower(DvcHostname), Kind = "Fichier (ASIM)",
+          Object = TargetFilePath, Access = tolower(EventType), Process = tolower(tostring(split(ActingProcessName, @"\")[-1])), SourceIp = SrcIpAddr
+  ),
+  (
+      OfficeActivity
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where OfficeWorkload in ("SharePoint", "OneDrive")
+      | where UserId =~ ValueUpn
+      | where Operation has_any ("FileAccessed", "FileDownloaded", "FileSyncDownloadedFull", "FileModified", "FileUploaded", "FileDeleted",
+          "FileMoved", "FileCopied", "SharingSet", "AnonymousLinkCreated", "SecureLinkCreated")
+      | project TimeGenerated, Source = "OfficeActivity", Machine = tolower(OfficeWorkload), Kind = strcat(OfficeWorkload, " (Microsoft 365)"),
+          Object = OfficeObjectId,
+          Access = case(Operation has_any ("Accessed", "Downloaded"), "lecture", Operation has "Deleted", "suppression",
+              Operation has_any ("Sharing", "Link"), "partage", "écriture"),
+          Process = tostring(UserAgent), SourceIp = ClientIP
+  )
+  | where isnotempty(Object)
+  | extend Folder = tostring(parse_path(Object).DirectoryPath), File = tostring(parse_path(Object).Filename)
+  | extend MachineKey = _HostKey(Machine)
+  | lookup kind=leftouter (_MachineRoles(EndTime)) on MachineKey
+  | summarize Events = count(), Files = dcount(Object), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
+      SampleFiles = make_set(File, 10), Processes = make_set_if(Process, isnotempty(Process), 5),
+      SourceIps = make_set_if(SourceIp, isnotempty(SourceIp), 5), Sources = make_set(Source)
+      by Machine, MachineRole, Kind, Folder = coalesce(Folder, Object), Access
+  | sort by Files desc, FirstSeen asc

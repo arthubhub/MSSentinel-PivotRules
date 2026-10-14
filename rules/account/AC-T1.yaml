@@ -3,16 +3,19 @@ name: Timeline du compte
 indicators: [account]
 action: timeline
 description: >
-  Déroulé chronologique de l'activité du compte : connexions Entra ID, audit Entra ID, Microsoft 365,
-  Azure, ouvertures de session Defender et clics sur des liens.
+  Déroulé chronologique de l'activité du compte : connexions Entra ID, audit Entra ID, appels Microsoft Graph,
+  Microsoft 365, Azure, ouvertures de session Defender for Endpoint, authentifications Windows (4624, 4625, 4648, 4768,
+  4769, 4771, 4776, 4740) et Defender for Identity, ASIM, SSH Linux et clics sur des liens. Host est la machine
+  réellement concernée ; pour une simple validation d'identifiants, Host est vide et le DC figure dans Detail.
 reading:
   decisive: Connexion inhabituelle → ajout d'une méthode MFA → règle de boîte → consentement, en moins d'une heure.
   context: Lecture de secrets ou opérations Azure dans la foulée d'une première connexion depuis une IP.
   noise: Activité de bureautique ordinaire (consultation de fichiers, réunions Teams).
 v1: true
 window: { before: 2h, after: 2h }
-uses: [signins]
+uses: [signins, win_security]
 query: |
+  let UserIds = _Signins(StartTime - 1d, EndTime, "", ValueUpn) | where isnotempty(UserId) | distinct UserId;
   union isfuzzy=true
   (
       _Signins(StartTime, EndTime, "", ValueUpn)
@@ -54,6 +57,45 @@ query: |
       | where AccountName =~ ValueSam
       | project TimeGenerated, Source = "DeviceLogonEvents", Host = tolower(DeviceName), Account = tolower(AccountName),
           Action = strcat(ActionType, " ", LogonType), Detail = strcat(RemoteIP, " ", RemoteDeviceName)
+  ),
+  (
+      _WinSecurity(StartTime, EndTime, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776, 4740]), ValueSam)
+      | where TargetSam == ValueSam
+      | project TimeGenerated, Source = SourceTable, Host = TargetHost, Account = ValueSam,
+          Action = strcat(tostring(EventID), " · ", EventName, iff(isnotempty(LogonTypeName), strcat(" ", LogonTypeName), "")),
+          Detail = strcat("depuis ", coalesce(WorkstationName, IpAddress), iff(isnotempty(AuthAuthority), strcat(" · validé par ", AuthAuthority), ""),
+              iff(EventID == 4769, strcat(" · service ", ServiceName), ""), iff(Status !in ("", "-", "0x0"), strcat(" · statut ", Status), ""))
+  ),
+  (
+      IdentityLogonEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where AccountUpn =~ ValueUpn or AccountName =~ ValueSam
+      | project TimeGenerated, Source = "IdentityLogonEvents", Host = tolower(TargetDeviceName), Account = ValueSam,
+          Action = strcat(ActionType, " ", Protocol, " ", LogonType),
+          Detail = strcat("depuis ", coalesce(DeviceName, IPAddress), " · validé par ", DestinationDeviceName, " · ", FailureReason)
+  ),
+  (
+      MicrosoftGraphActivityLogs
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where UserId in (UserIds)
+      | project TimeGenerated, Source = "MicrosoftGraphActivityLogs", Host = "", Account = ValueUpn,
+          Action = strcat("Graph ", RequestMethod, " ", tostring(ResponseStatusCode)),
+          Detail = strcat(replace_regex(tostring(parse_url(RequestUri).Path), @"[0-9a-fA-F-]{36}", "{id}"), " · ", IPAddress)
+  ),
+  (
+      ASimAuthenticationEventLogs
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where TargetUsername has ValueSam
+      | where tolower(TargetUsername) in (ValueSam, ValueUpn) or tolower(TargetUsername) endswith strcat(@"\", ValueSam)
+      | project TimeGenerated, Source = strcat("ASIM ", EventProduct), Host = tolower(coalesce(TargetHostname, DvcHostname)), Account = ValueSam,
+          Action = strcat(EventType, " ", EventResult), Detail = strcat("depuis ", coalesce(SrcHostname, SrcIpAddr), " · ", LogonProtocol)
+  ),
+  (
+      Syslog
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where ProcessName in~ ("sshd", "sshd-session", "sudo", "su") and SyslogMessage has ValueSam
+      | project TimeGenerated, Source = strcat("Syslog (", ProcessName, ")"), Host = tolower(Computer), Account = ValueSam,
+          Action = ProcessName, Detail = substring(SyslogMessage, 0, 300)
   ),
   (
       UrlClickEvents

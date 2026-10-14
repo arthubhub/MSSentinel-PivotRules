@@ -1,0 +1,64 @@
+id: AC-P5
+name: Profil et rôles du compte
+indicators: [account]
+action: pivot
+description: >
+  Dit qui est le compte avant de pivoter dessus : fiche IdentityInfo (nom, service, poste, état, type), rôles connus
+  (rôle Entra ID attribué, groupe AD privilégié, compte de service, compte sensible ou leurre selon Defender for
+  Identity, watchlist EasyPivotRoles), catégorie déduite du nom (compte machine, système, krbtgt, synchronisation Entra
+  Connect, administrateur intégré) et comportement sur la fenêtre : ouvertures de session de type service ou batch, nombre
+  de machines et d'IP, part des connexions non interactives. Un compte qui se comporte comme un compte de service sans
+  être déclaré comme tel est signalé.
+reading:
+  decisive: Compte privilégié ou sensible impliqué dans l'alerte, ou compte de service utilisé en session interactive.
+  context: Compte désactivé ou supprimé qui s'authentifie encore ; compte sans fiche IdentityInfo (local, externe, récent).
+  noise: Comptes de service et de synchronisation, très présents dans tous les journaux d'authentification.
+v1: true
+window: { before: 7d, after: 1d }
+uses: [signins, win_security, roles]
+query: |
+  let Profile = union isfuzzy=true
+      (datatable(Sam:string)[] | extend Upn = "", DisplayName = "", Department = "", JobTitle = "", Enabled = "", UserType = "", Risk = "",
+          LastSeenInDirectory = datetime(null)),
+      (
+          IdentityInfo
+          | where TimeGenerated between ((T0 - 14d) .. EndTime)
+          | extend Sam = tolower(coalesce(tostring(column_ifexists("SAMAccountName", "")), AccountName)),
+              Upn = tolower(coalesce(tostring(column_ifexists("AccountUPN", "")), tostring(column_ifexists("AccountUpn", ""))))
+          | where Sam == ValueSam or Upn == ValueUpn
+          | summarize arg_max(TimeGenerated, *) by Sam
+          | project Sam, Upn, DisplayName = AccountDisplayName, Department = tostring(column_ifexists("Department", "")),
+              JobTitle = tostring(column_ifexists("JobTitle", "")), Enabled = tostring(column_ifexists("IsAccountEnabled", "")),
+              UserType = tostring(column_ifexists("UserType", "")), Risk = tostring(column_ifexists("RiskLevel", "")),
+              LastSeenInDirectory = TimeGenerated
+      )
+      | take 1;
+  let Roles = _AccountRoles(EndTime) | where AccountKey in (ValueSam, ValueUpn)
+      | summarize KnownRoles = strcat_array(make_set(AccountRole), ", "), RoleBasis = make_set(AccountRoleBasis, 10);
+  let Logons = union isfuzzy=true
+      (datatable(Machine:string, LogonType:string, Source:string)[]),
+      (DeviceLogonEvents | where TimeGenerated between (StartTime .. EndTime) | where AccountName =~ ValueSam
+          | project Machine = tolower(DeviceName), LogonType, Source = "DeviceLogonEvents"),
+      (_WinSecurity(StartTime, EndTime, dynamic([4624]), ValueSam) | where TargetSam == ValueSam
+          | project Machine = TargetHost, LogonType = LogonTypeName, Source = SourceTable)
+      | summarize Machines = dcount(Machine), ServiceLogons = countif(LogonType in ("Service", "Batch")),
+          InteractiveLogons = countif(LogonType in ("Interactive", "RemoteInteractive", "CachedInteractive", "Unlock")), Logons = count();
+  let Cloud = _Signins(StartTime, EndTime, "", ValueUpn)
+      | summarize SignIns = count(), NonInteractive = countif(SignInType == "NonInteractive"), CloudIPs = dcount(IPAddress);
+  print Account = Value, Sam = ValueSam
+  | extend NameCategory = _AccountKind(ValueSam)
+  | extend KnownRoles = toscalar(Roles | project KnownRoles), RoleBasis = toscalar(Roles | project RoleBasis)
+  | extend P = toscalar(Profile | project pack_all())
+  | extend L = toscalar(Logons | project pack_all()), C = toscalar(Cloud | project pack_all())
+  | extend BehavesLikeService = toint(L.ServiceLogons) > 0 and toint(L.InteractiveLogons) == 0
+  | extend Assessment = case(
+      isnotempty(KnownRoles), strcat("Rôle connu : ", KnownRoles),
+      isnotempty(NameCategory), strcat("Catégorie : ", NameCategory),
+      BehavesLikeService, "Se comporte comme un compte de service (sessions de service ou batch, aucune session interactive) sans être déclaré comme tel",
+      isempty(tostring(P.Sam)), "Absent d'IdentityInfo : compte local, externe, récent, ou UEBA non activé",
+      "Compte utilisateur sans rôle particulier connu")
+  | project Account, Sam, Assessment, KnownRoles, NameCategory, DisplayName = tostring(P.DisplayName), Upn = tostring(P.Upn),
+      Department = tostring(P.Department), JobTitle = tostring(P.JobTitle), Enabled = tostring(P.Enabled), UserType = tostring(P.UserType),
+      Risk = tostring(P.Risk), Machines = toint(L.Machines), Logons = toint(L.Logons), ServiceLogons = toint(L.ServiceLogons),
+      InteractiveLogons = toint(L.InteractiveLogons), SignIns = toint(C.SignIns), NonInteractiveSignIns = toint(C.NonInteractive),
+      CloudIPs = toint(C.CloudIPs), RoleBasis

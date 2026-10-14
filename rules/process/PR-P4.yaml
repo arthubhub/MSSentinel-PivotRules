@@ -4,14 +4,16 @@ indicators: [process]
 action: pivot
 description: >
   Modifications de persistance faites par le processus : clés de registre sensibles (DeviceRegistryEvents),
-  tâches planifiées et services (DeviceEvents), et commandes schtasks, reg, sc qu'il a lancées (DeviceProcessEvents).
+  tâches planifiées et services (DeviceEvents), et commandes schtasks, reg, sc qu'il a lancées (DeviceProcessEvents) ;
+  dans Sentinel, registre vu par Sysmon (12, 13, 14) et par l'audit Windows (4657, avec SACL).
+  MachineRole donne le rôle connu de la machine (DC, serveur déclaré).
 reading:
   decisive: Script ou binaire inconnu qui crée une tâche planifiée ou une clé Run pointant vers un fichier qu'il vient de déposer.
   context: Modification d'Image File Execution Options ou de Winlogon.
   noise: Installateurs signés qui créent leurs tâches de mise à jour.
 window: { before: 30m, after: 30m }
 context: [HOST]
-uses: [persistence]
+uses: [persistence, roles, sysmon, win_security]
 query: |
   union isfuzzy=true
   (
@@ -47,4 +49,25 @@ query: |
       | project TimeGenerated, DeviceName = tolower(DeviceName), Kind = "Commande", Persistence = ProcessCommandLine has_any ("/create", "add", "create", "config"),
           Action = FileName, Item = FileName, Detail = ProcessCommandLine, CommandLine = InitiatingProcessCommandLine
   )
+  // @sentinel-only:begin
+  , (
+      _Sysmon(StartTime, EndTime, dynamic([12, 13, 14]), ValueFile)
+      | where ProcessFile == ValueFile
+      | where isempty(ValuePath) or tolower(Image) == ValuePath
+      | where isempty(HostFilter) or Computer startswith HostFilter
+      | extend Key = tostring(parse_path(TargetObject).DirectoryPath), ValueName = tostring(split(TargetObject, @"\")[-1])
+      | project TimeGenerated, DeviceName = tolower(Computer), Kind = "Registre (Sysmon)", Persistence = _IsPersistenceKey(TargetObject, ValueName),
+          Action = coalesce(RegistryEventType, EventName), Item = TargetObject, Detail = Details, CommandLine = ""
+  ),
+  (
+      _WinSecurity(StartTime, EndTime, dynamic([4657]), ValueFile)
+      | where tolower(ProcessName) endswith strcat(@"\", ValueFile)
+      | where isempty(HostFilter) or Computer startswith HostFilter
+      | project TimeGenerated, DeviceName = tolower(Computer), Kind = "Registre (audit Windows)", Persistence = _IsPersistenceKey(ObjectName, ObjectValueName),
+          Action = "4657 · Valeur de registre modifiée", Item = strcat(ObjectName, @"\", ObjectValueName), Detail = ObjectAccess, CommandLine = ""
+  )
+  // @sentinel-only:end
+  | extend MachineKey = _HostKey(DeviceName)
+  | lookup kind=leftouter (_MachineRoles(EndTime)) on MachineKey
+  | project-away MachineKey, MachineRoleBasis
   | sort by Persistence desc, TimeGenerated asc

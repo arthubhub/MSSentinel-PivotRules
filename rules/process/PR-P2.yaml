@@ -3,8 +3,8 @@ name: Connexions réseau du processus
 indicators: [process]
 action: pivot
 description: >
-  Destinations contactées par le processus (DeviceNetworkEvents) : URL ou IP, port, type d'adresse, nombre de
-  connexions, premier et dernier contact, machines et lignes de commande.
+  Destinations contactées par le processus (DeviceNetworkEvents, et Sysmon 3 dans Sentinel) : URL ou IP, port, type d'adresse, nombre de
+  connexions, premier et dernier contact, machines (avec leur rôle connu : DC, serveur déclaré) et lignes de commande.
 reading:
   decisive: Moteur de script ou LOLBin (powershell, mshta, rundll32, node) qui contacte une destination publique récente.
   context: Destination IP sans nom de domaine (C2 résolu hors DNS, par exemple via une blockchain).
@@ -12,14 +12,34 @@ reading:
 v1: true
 window: { before: 30m, after: 30m }
 context: [HOST]
+uses: [roles, sysmon]
 query: |
-  DeviceNetworkEvents
-  | where TimeGenerated between (StartTime .. EndTime)
-  | where InitiatingProcessFileName =~ ValueFile
-  | where isempty(HostFilter) or DeviceName startswith HostFilter
-  | where isempty(ValuePath) or InitiatingProcessFolderPath =~ ValuePath
-  | where RemoteIPType != "Loopback"
+  union isfuzzy=true
+  (
+      DeviceNetworkEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where InitiatingProcessFileName =~ ValueFile
+      | where isempty(HostFilter) or DeviceName startswith HostFilter
+      | where isempty(ValuePath) or InitiatingProcessFolderPath =~ ValuePath
+      | where RemoteIPType != "Loopback"
+      | project TimeGenerated, DeviceName, RemoteUrl, RemoteIP, RemotePort, RemoteIPType, ActionType, CommandLine = InitiatingProcessCommandLine
+  )
+  // @sentinel-only:begin
+  , (
+      _Sysmon(StartTime, EndTime, dynamic([3]), ValueFile)
+      | where ProcessFile == ValueFile
+      | where isempty(ValuePath) or tolower(Image) == ValuePath
+      | where isempty(HostFilter) or Computer startswith HostFilter
+      | where DestinationIp !startswith "127." and DestinationIp != "::1"
+      | project TimeGenerated, DeviceName = Computer, RemoteUrl = DestinationHostname, RemoteIP = DestinationIp, RemotePort = toint(DestinationPort),
+          RemoteIPType = iff(ipv4_is_private(DestinationIp) or DestinationIp startswith "fe80:" or DestinationIp startswith "fd", "Private", "Public"),
+          ActionType = "Sysmon 3", CommandLine = ""
+  )
+  // @sentinel-only:end
+  | extend MachineKey = _HostKey(DeviceName)
+  | lookup kind=leftouter (_MachineRoles(EndTime)) on MachineKey
   | summarize Connections = count(), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
-      Machines = make_set(tolower(DeviceName), 10), Actions = make_set(ActionType), CommandLines = make_set(InitiatingProcessCommandLine, 5)
+      Machines = make_set(_Labeled(tolower(DeviceName), MachineRole), 10), Actions = make_set(ActionType),
+      CommandLines = make_set_if(CommandLine, isnotempty(CommandLine), 5)
       by Destination = coalesce(RemoteUrl, RemoteIP), RemoteIP, RemotePort, RemoteIPType
   | sort by RemoteIPType == "Public" desc, FirstSeen asc

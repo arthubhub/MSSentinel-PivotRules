@@ -3,8 +3,9 @@ name: Activité de l'IP par jour
 indicators: [ip]
 action: statistics
 description: >
-  Nombre d'événements contenant l'IP par jour et par table (Entra ID, Windows, Defender, Microsoft 365,
-  Azure, pare-feu, messagerie). Montre si l'IP est nouvelle, dormante ou habituelle.
+  Nombre d'événements contenant l'IP par jour et par table (Entra ID utilisateurs et applications, Microsoft Graph,
+  Windows, Defender, Microsoft 365, Azure, pare-feu et proxy, messagerie, Linux). Montre si l'IP est nouvelle, dormante ou
+  habituelle. Une table absente n'apparaît pas : voir IP-S0 pour savoir lesquelles sont alimentées.
 reading:
   decisive: Première apparition dans les dernières 24 heures après plusieurs jours d'absence.
   context: Changement brutal de volume ou apparition dans une nouvelle table (par exemple Azure après Entra ID).

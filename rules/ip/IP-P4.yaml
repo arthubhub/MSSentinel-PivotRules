@@ -5,22 +5,54 @@ action: pivot
 description: >
   Processus, machines et comptes à l'origine des connexions vers l'IP (ou depuis l'IP quand elle est locale),
   avec ports, URL et premier et dernier contact. Inclut l'écart médian entre connexions pour repérer un balisage.
+  Defender for Endpoint, complété dans Sentinel par Sysmon 3 et par les sessions réseau ASIM qui portent un nom
+  d'application (pare-feu applicatifs). Le rôle de la machine (DC, serveur déclaré) et la catégorie du compte (système, service) sont indiqués.
 reading:
   decisive: Binaire signé légitime (rundll32, msiexec, node.exe, mshta) ou processus hors dossier d'installation qui parle à une IP publique.
   context: Écart médian régulier entre connexions (balise C2) ou destination contactée depuis une seule machine.
   noise: Navigateurs, agents de mise à jour et outils de sécurité qui contactent des IP de CDN.
 window: { before: 1h, after: 1h }
+uses: [roles, sysmon]
 query: |
-  DeviceNetworkEvents
-  | where TimeGenerated between (StartTime .. EndTime)
-  | where RemoteIP == Value or LocalIP == Value
-  | extend Direction = iff(RemoteIP == Value, "Vers l'IP", "IP locale de la machine")
-  | sort by DeviceName asc, InitiatingProcessFileName asc, TimeGenerated asc
-  | extend GapSeconds = iff(DeviceName == prev(DeviceName) and InitiatingProcessFileName == prev(InitiatingProcessFileName),
+  union isfuzzy=true
+  (
+      DeviceNetworkEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where RemoteIP == Value or LocalIP == Value
+      | project TimeGenerated, Source = "DeviceNetworkEvents", DeviceName = tolower(DeviceName),
+          Direction = iff(RemoteIP == Value, "Vers l'IP", "IP locale de la machine"), Process = InitiatingProcessFileName,
+          ProcessPath = InitiatingProcessFolderPath, Account = tolower(InitiatingProcessAccountName), ProcessSHA256 = InitiatingProcessSHA256,
+          RemotePort, RemoteUrl, ActionType, CommandLine = InitiatingProcessCommandLine
+  )
+  // @sentinel-only:begin
+  , (
+      ASimNetworkSessionLogs
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where (DstIpAddr == Value or SrcIpAddr == Value) and isnotempty(SrcAppName)
+      | project TimeGenerated, Source = strcat("ASimNetworkSessionLogs (", EventProduct, ")"), DeviceName = tolower(SrcHostname),
+          Direction = iff(DstIpAddr == Value, "Vers l'IP", "IP locale de la machine"), Process = tostring(split(replace_string(SrcAppName, "/", @"\"), @"\")[-1]),
+          ProcessPath = SrcAppName, Account = tolower(SrcUsername), ProcessSHA256 = "", RemotePort = DstPortNumber, RemoteUrl = DstFQDN,
+          ActionType = DvcAction, CommandLine = ""
+  ),
+  (
+      _Sysmon(StartTime, EndTime, dynamic([3]), Value)
+      | where DestinationIp == Value or SourceIp == Value
+      | project TimeGenerated, Source = "Sysmon 3", DeviceName = tolower(Computer),
+          Direction = iff(DestinationIp == Value, "Vers l'IP", "IP locale de la machine"), Process = ProcessFile, ProcessPath = Image,
+          Account = UserSam, ProcessSHA256 = "", RemotePort = toint(DestinationPort), RemoteUrl = DestinationHostname,
+          ActionType = iff(Initiated == "true", "Connexion sortante", "Connexion entrante"), CommandLine = ""
+  )
+  // @sentinel-only:end
+  | sort by DeviceName asc, Process asc, TimeGenerated asc
+  | extend GapSeconds = iff(DeviceName == prev(DeviceName) and Process == prev(Process),
       datetime_diff("second", TimeGenerated, prev(TimeGenerated)), long(null))
   | summarize Connections = count(), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
       MedianGapSeconds = percentile(GapSeconds, 50), Ports = make_set(RemotePort, 20), Urls = make_set(RemoteUrl, 10),
-      Actions = make_set(ActionType), CommandLine = take_any(InitiatingProcessCommandLine)
-      by DeviceName, Direction, Process = InitiatingProcessFileName, ProcessPath = InitiatingProcessFolderPath,
-         Account = InitiatingProcessAccountName, ProcessSHA256 = InitiatingProcessSHA256
+      Actions = make_set(ActionType), CommandLine = take_any(CommandLine), Sources = make_set(Source)
+      by DeviceName, Direction, Process, ProcessPath, Account, ProcessSHA256
+  | extend MachineKey = _HostKey(DeviceName)
+  | lookup kind=leftouter (_MachineRoles(EndTime)) on MachineKey
+  | extend AccountKind = _AccountKind(_SamOf(Account))
+  | project FirstSeen, LastSeen, DeviceName, MachineRole, Direction, Process, ProcessPath, Account, AccountKind, Connections,
+      MedianGapSeconds, Ports, Urls, Actions, CommandLine, ProcessSHA256, Sources
   | sort by FirstSeen asc

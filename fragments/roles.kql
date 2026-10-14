@@ -1,0 +1,167 @@
+// Rôles des entités (machines, IP, comptes) : distingue « où l'événement est journalisé » de « où l'entité est utilisée »
+// et signale les entités qui faussent un pivot (contrôleur de domaine, NAT, proxy, compte de service…).
+// Trois sources, combinées :
+// 1. détection automatique des contrôleurs de domaine (DC) : émetteurs de 4768 (seul un KDC en produit), cibles LDAP vues par
+//    Defender for Identity, machines qui acceptent des connexions Kerberos (port 88) selon Defender for Endpoint ;
+// 2. watchlist Sentinel « EasyPivotRoles » (colonnes Entity, Type, Role, Note), modèle dans watchlists/EasyPivotRoles.csv ;
+// 3. comptes : IdentityInfo (rôles Entra ID, groupes AD privilégiés, compte de service, étiquettes Defender for Identity)
+//    et noms réservés (compte machine, compte système, krbtgt, synchronisation Entra Connect).
+// Chaque fonction prend l'instant de référence `at` et regarde la journée qui précède (14 jours pour IdentityInfo).
+// Les blocs « @sentinel-only » sont retirés de la variante Defender XDR (tables absentes de Defender).
+//
+// _HostKey(h) : nom court en minuscules (FQDN, NetBIOS, compte machine « PC01$ » → « pc01 ») ; vide pour une adresse IP.
+let _HostKey = (h:string) {
+    iff(isnotnull(parse_ipv4(h)) or h contains ":", "", tolower(tostring(split(trim_end(@"\$", trim(@"[\s\\]+", h)), ".")[0])))
+};
+// _SamOf(a) : nom SAM d'un compte, depuis « DOMAINE\nom », « nom@domaine » ou « nom ».
+let _SamOf = (a:string) { tolower(tostring(split(tostring(split(a, "@")[0]), @"\")[-1])) };
+// _Labeled(nom, rôle) : « dc01 [DC] », pour annoter les listes (make_set) sans ajouter de colonne.
+let _Labeled = (name:string, role:string) { iff(isempty(role), name, strcat(name, " [", role, "]")) };
+// _JoinRoles(a, b) : concatène deux libellés de rôle en ignorant les vides.
+let _JoinRoles = (a:string, b:string) { strcat_array(set_difference(pack_array(a, b), dynamic([""])), ", ") };
+// _AccountKind(nom SAM) : catégorie déduite du nom seul.
+let _AccountKind = (sam:string) {
+    case(
+        sam endswith "$", "Compte machine",
+        sam in ("system", "local system", "local service", "network service", "anonymous logon", "iusr", "-")
+            or sam startswith "dwm-" or sam startswith "umfd-", "Compte système",
+        sam == "krbtgt", "Compte KDC (krbtgt)",
+        sam startswith "msol_" or sam startswith "sync_" or sam startswith "aad_" or sam startswith "adtoaadsyncserviceaccount",
+            "Synchronisation Entra Connect",
+        sam in ("administrator", "administrateur"), "Administrateur intégré",
+        "")
+};
+// _DcEvidence(at) : machines (et IP) qui se comportent comme des contrôleurs de domaine.
+let _DcEvidence = (at:datetime) {
+    union isfuzzy=true
+    (
+        datatable(Machine:string, Ip:string, Basis:string)[]
+    ),
+    // @sentinel-only:begin
+    (
+        SecurityEvent
+        | where TimeGenerated between ((at - 1d) .. at)
+        | where EventID == 4768
+        | summarize by Computer
+        | project Machine = Computer, Ip = "", Basis = "Émet des 4768 (KDC)"
+    ),
+    (
+        WindowsEvent
+        | where TimeGenerated between ((at - 1d) .. at)
+        | where Provider == "Microsoft-Windows-Security-Auditing" and EventID == 4768
+        | summarize by Computer
+        | project Machine = Computer, Ip = "", Basis = "Émet des 4768 (KDC)"
+    ),
+    // @sentinel-only:end
+    (
+        IdentityQueryEvents
+        | where TimeGenerated between ((at - 1d) .. at)
+        | where Protocol =~ "Ldap" and isnotempty(DestinationDeviceName)
+        | summarize by DestinationDeviceName, DestinationIPAddress
+        | project Machine = DestinationDeviceName, Ip = DestinationIPAddress, Basis = "Cible LDAP (Defender for Identity)"
+    ),
+    (
+        DeviceNetworkEvents
+        | where TimeGenerated between ((at - 1d) .. at)
+        | where LocalPort == 88 and ActionType in ("InboundConnectionAccepted", "ListeningConnectionCreated")
+        | summarize by DeviceName, LocalIP
+        | project Machine = DeviceName, Ip = LocalIP, Basis = "Accepte Kerberos sur le port 88 (Defender for Endpoint)"
+    )
+};
+// _MachineRoles(at) : MachineKey (nom court), MachineRole (« DC, Serveur de fichiers »), MachineRoleBasis (preuves).
+let _MachineRoles = (at:datetime) {
+    union isfuzzy=true
+    (
+        datatable(MachineKey:string, Role:string, Basis:string)[]
+    ),
+    (
+        _DcEvidence(at)
+        | project MachineKey = _HostKey(Machine), Role = "DC", Basis
+    ),
+    (
+        Watchlist
+        | where WatchlistAlias =~ "EasyPivotRoles" and _DTItemType == "watchlist-item"
+        | summarize arg_max(_DTTimestamp, _DTItemStatus, WatchlistItem) by _DTItemId
+        | where _DTItemStatus != "Deleted"
+        | where tolower(tostring(WatchlistItem.Type)) in ("machine", "host", "device", "serveur", "poste")
+        | project MachineKey = _HostKey(tostring(WatchlistItem.Entity)), Role = tostring(WatchlistItem.Role),
+            Basis = strcat("Watchlist EasyPivotRoles ", tostring(WatchlistItem.Note))
+    )
+    | where isnotempty(MachineKey) and isnotempty(Role)
+    | summarize MachineRoles = make_set(Role), MachineRoleBasis = make_set(Basis, 5) by MachineKey
+    | project MachineKey, MachineRole = strcat_array(MachineRoles, ", "), MachineRoleBasis
+};
+// _IpRoles(at) : Ip (adresse exacte ou plage CIDR), IpRole, IpRoleBasis.
+let _IpRoles = (at:datetime) {
+    union isfuzzy=true
+    (
+        datatable(Ip:string, Role:string, Basis:string)[]
+    ),
+    (
+        _DcEvidence(at)
+        | where isnotempty(Ip)
+        | project Ip, Role = "DC", Basis
+    ),
+    (
+        Watchlist
+        | where WatchlistAlias =~ "EasyPivotRoles" and _DTItemType == "watchlist-item"
+        | summarize arg_max(_DTTimestamp, _DTItemStatus, WatchlistItem) by _DTItemId
+        | where _DTItemStatus != "Deleted"
+        | where tolower(tostring(WatchlistItem.Type)) in ("ip", "plage", "cidr", "subnet", "réseau")
+        | project Ip = trim(@"\s", tostring(WatchlistItem.Entity)), Role = tostring(WatchlistItem.Role),
+            Basis = strcat("Watchlist EasyPivotRoles ", tostring(WatchlistItem.Note))
+    )
+    | where isnotempty(Ip) and isnotempty(Role)
+    | summarize IpRoles = make_set(Role), IpRoleBasis = make_set(Basis, 5) by Ip
+    | project Ip, IpRole = strcat_array(IpRoles, ", "), IpRoleBasis
+};
+// _IpRoleOf(ip, at) : rôles connus d'une adresse, y compris par appartenance à une plage CIDR de la watchlist.
+let _IpRoleOf = (ip:string, at:datetime) {
+    toscalar(_IpRoles(at)
+        | where Ip == ip or (Ip has "/" and ipv4_is_in_range(ip, Ip))
+        | summarize Roles = strcat_array(make_set(IpRole), ", "))
+};
+// _AccountRoles(at) : AccountKey (nom SAM ou UPN, en minuscules), AccountRole, AccountRoleBasis.
+let _AccountRoles = (at:datetime) {
+    union isfuzzy=true
+    (
+        datatable(AccountKey:string, Role:string, Basis:string)[]
+    ),
+    (
+        IdentityInfo
+        | where TimeGenerated between ((at - 14d) .. at)
+        | extend Sam = tolower(coalesce(tostring(column_ifexists("SAMAccountName", "")), AccountName)),
+            Upn = tolower(coalesce(tostring(column_ifexists("AccountUPN", "")), tostring(column_ifexists("AccountUpn", "")))),
+            EntraRoles = tostring(column_ifexists("AssignedRoles", dynamic([]))),
+            Groups = tostring(column_ifexists("GroupMembership", dynamic([]))),
+            IsSvc = tobool(column_ifexists("IsServiceAccount", false)),
+            IdTags = tostring(column_ifexists("Tags", ""))
+        | where isnotempty(Sam)
+        | summarize arg_max(TimeGenerated, Upn, EntraRoles, Groups, IsSvc, IdTags) by Sam
+        | extend Roles = pack_array(
+            iff(EntraRoles in ("", "[]", "null"), "", "Rôle Entra ID attribué"),
+            iff(Groups has_any ("Domain Admins", "Enterprise Admins", "Schema Admins", "Account Operators", "Backup Operators",
+                    "Server Operators", "Admins du domaine", "Administrateurs de l'entreprise", "Administrateurs du schéma",
+                    "Opérateurs de compte", "Opérateurs de sauvegarde", "Opérateurs de serveur"), "Groupe AD privilégié", ""),
+            iff(IsSvc, "Compte de service", ""),
+            iff(IdTags has_any ("Sensitive", "Sensible"), "Compte sensible", ""),
+            iff(IdTags has "Honeytoken", "Compte leurre", ""))
+        | mv-expand Role = Roles to typeof(string)
+        | where isnotempty(Role)
+        | mv-expand AccountKey = pack_array(Sam, Upn) to typeof(string)
+        | project AccountKey, Role, Basis = "IdentityInfo"
+    ),
+    (
+        Watchlist
+        | where WatchlistAlias =~ "EasyPivotRoles" and _DTItemType == "watchlist-item"
+        | summarize arg_max(_DTTimestamp, _DTItemStatus, WatchlistItem) by _DTItemId
+        | where _DTItemStatus != "Deleted"
+        | where tolower(tostring(WatchlistItem.Type)) in ("compte", "account", "user", "utilisateur")
+        | extend Raw = tolower(trim(@"\s", tostring(WatchlistItem.Entity)))
+        | mv-expand AccountKey = pack_array(Raw, _SamOf(Raw)) to typeof(string)
+        | project AccountKey, Role = tostring(WatchlistItem.Role), Basis = strcat("Watchlist EasyPivotRoles ", tostring(WatchlistItem.Note))
+    )
+    | where isnotempty(AccountKey) and isnotempty(Role)
+    | summarize AccountRoles = make_set(Role), AccountRoleBasis = make_set(Basis, 5) by AccountKey
+    | project AccountKey, AccountRole = strcat_array(AccountRoles, ", "), AccountRoleBasis
+};

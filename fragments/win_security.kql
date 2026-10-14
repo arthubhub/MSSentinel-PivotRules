@@ -2,7 +2,18 @@
 // Pour les SecurityEvent, on reparse les champs depuis le EventData XML si il y a des bugs, avec une regex (ajouté au moment du build)
 // Paramètres : start, end (fenêtre), ids (liste d'EventID, vide = tous), term (pré-filtre texte, vide = aucun ;
 // recherché dans le XML brut et dans les colonnes de compte, de machine, d'IP et de processus).
+// Colonnes ajoutées pour ne pas confondre la machine qui journalise avec la machine utilisée :
+// - TargetHost : machine réellement visée. 4769 : la machine du service demandé (ServiceName « FS01$ ») ; 4648 : TargetServerName ;
+//   4768, 4771, 4776 : vide (simple validation d'identifiants, la cible n'est pas connue) ; sinon : Computer.
+// - AuthAuthority : machine qui a validé les identifiants (DC, ou la machine elle-même pour un compte local en NTLM) pour
+//   4768, 4769, 4771 et 4776 ; vide sinon.
+// - SourceHost : poste d'origine déclaré (WorkstationName), à défaut l'IP source.
+// - ObjectAccess : droits demandés sur un fichier, une clé ou un partage (lecture, écriture, suppression, permissions,
+//   exécution) pour 4656, 4657, 4660, 4663, 4670, 5140 et 5145 (audit « Système de fichiers », « Registre », « Partage de
+//   fichiers détaillé » : rien n'est produit sans stratégie d'audit et, pour les fichiers et le registre, sans SACL).
+// Fragment propre à Sentinel : retiré de la variante Defender (les règles l'appellent dans des blocs @sentinel-only).
 // @requires: win_names
+// @sentinel-only:begin
 let _WinSecurity = (start:datetime, end:datetime, ids:dynamic, term:string) {
     union isfuzzy=true
     (
@@ -48,6 +59,11 @@ let _WinSecurity = (start:datetime, end:datetime, ids:dynamic, term:string) {
             RelativeTargetName = coalesce(RelativeTargetName, XMLFIELD(_x, RelativeTargetName)),
             ObjectName = coalesce(ObjectName, XMLFIELD(_x, ObjectName)),
             AccessMask = coalesce(AccessMask, XMLFIELD(_x, AccessMask)),
+            AccessList = XMLFIELD(_x, AccessList),
+            ObjectType = coalesce(ObjectType, XMLFIELD(_x, ObjectType)),
+            HandleId = coalesce(HandleId, XMLFIELD(_x, HandleId)),
+            ObjectValueName = coalesce(ObjectValueName, XMLFIELD(_x, ObjectValueName)),
+            ShareLocalPath = coalesce(ShareLocalPath, XMLFIELD(_x, ShareLocalPath)),
             PrivilegeList = coalesce(PrivilegeList, XMLFIELD(_x, PrivilegeList))
         | extend SourceTable = "SecurityEvent"
     ),
@@ -93,6 +109,11 @@ let _WinSecurity = (start:datetime, end:datetime, ids:dynamic, term:string) {
             RelativeTargetName = coalesce(tostring(EventData.RelativeTargetName), XMLFIELD(_x, RelativeTargetName)),
             ObjectName = coalesce(tostring(EventData.ObjectName), XMLFIELD(_x, ObjectName)),
             AccessMask = coalesce(tostring(EventData.AccessMask), XMLFIELD(_x, AccessMask)),
+            AccessList = coalesce(tostring(EventData.AccessList), XMLFIELD(_x, AccessList)),
+            ObjectType = coalesce(tostring(EventData.ObjectType), XMLFIELD(_x, ObjectType)),
+            HandleId = coalesce(tostring(EventData.HandleId), XMLFIELD(_x, HandleId)),
+            ObjectValueName = coalesce(tostring(EventData.ObjectValueName), XMLFIELD(_x, ObjectValueName)),
+            ShareLocalPath = coalesce(tostring(EventData.ShareLocalPath), XMLFIELD(_x, ShareLocalPath)),
             PrivilegeList = coalesce(tostring(EventData.PrivilegeList), XMLFIELD(_x, PrivilegeList))
         | extend SourceTable = "WindowsEvent"
     )
@@ -100,5 +121,21 @@ let _WinSecurity = (start:datetime, end:datetime, ids:dynamic, term:string) {
     | extend WorkstationName = iff(WorkstationName == "-", "", trim_start(@"\\\\", WorkstationName))
     | extend TargetSam = tolower(tostring(split(TargetUserName, "@")[0])), SubjectSam = tolower(SubjectUserName)
     | extend EventName = _WinEventName(EventID), LogonTypeName = _LogonTypeName(LogonType)
-    | project TimeGenerated, SourceTable, Computer, EventID, EventName, SubjectUserSid, SubjectUserName, SubjectDomainName, SubjectLogonId, TargetUserSid, TargetUserName, TargetDomainName, TargetLogonId, LogonType, LogonProcessName, AuthenticationPackageName, WorkstationName, IpAddress, IpPort, ProcessName, ElevatedToken, Status, SubStatus, ServiceName, TicketEncryptionType, TicketOptions, TargetServerName, NewProcessName, ParentProcessName, CommandLine, TaskName, TaskContent, MemberName, MemberSid, ServiceFileName, ShareName, RelativeTargetName, ObjectName, AccessMask, PrivilegeList, LogonTypeName, TargetSam, SubjectSam
+    | extend _svcAccount = tolower(tostring(split(ServiceName, "@")[0]))
+    | extend TargetHost = tolower(case(
+            EventID == 4769 and _svcAccount endswith "$", trim_end(@"\$", _svcAccount),
+            EventID in (4768, 4769, 4771, 4776), "",
+            EventID == 4648 and isnotempty(TargetServerName) and TargetServerName !in~ ("-", "localhost", "127.0.0.1", "::1"), TargetServerName,
+            Computer)),
+        AuthAuthority = iff(EventID in (4768, 4769, 4771, 4776), tolower(Computer), ""),
+        SourceHost = tolower(coalesce(WorkstationName, IpAddress))
+    // Droits demandés sur un objet (4656, 4663, 5145 : codes %%44xx de AccessList ; 4660 : suppression ; 4670 : permissions)
+    | extend ObjectAccess = iff(EventID in (4656, 4658, 4660, 4663, 4670, 5140, 5145, 4657), strcat_array(set_difference(pack_array(
+            iff(AccessList has_any ("%%4416", "%%4419", "%%4423", "ReadData") or EventID == 5140, "lecture", ""),
+            iff(AccessList has_any ("%%4417", "%%4418", "%%4420", "%%4424", "WriteData", "AppendData") or EventID == 4657, "écriture", ""),
+            iff(AccessList has_any ("%%1537", "DELETE") or EventID == 4660, "suppression", ""),
+            iff(AccessList has_any ("%%1539", "%%1540", "WRITE_DAC", "WRITE_OWNER") or EventID == 4670, "permissions", ""),
+            iff(AccessList has_any ("%%4421", "Execute"), "exécution", "")), dynamic([""])), ", "), "")
+    | project TimeGenerated, SourceTable, Computer, TargetHost, AuthAuthority, SourceHost, EventID, EventName, SubjectUserSid, SubjectUserName, SubjectDomainName, SubjectLogonId, TargetUserSid, TargetUserName, TargetDomainName, TargetLogonId, LogonType, LogonProcessName, AuthenticationPackageName, WorkstationName, IpAddress, IpPort, ProcessName, ElevatedToken, Status, SubStatus, ServiceName, TicketEncryptionType, TicketOptions, TargetServerName, NewProcessName, ParentProcessName, CommandLine, TaskName, TaskContent, MemberName, MemberSid, ServiceFileName, ShareName, RelativeTargetName, ObjectName, AccessMask, AccessList, ObjectType, HandleId, ObjectValueName, ShareLocalPath, ObjectAccess, PrivilegeList, LogonTypeName, TargetSam, SubjectSam
 };
+// @sentinel-only:end

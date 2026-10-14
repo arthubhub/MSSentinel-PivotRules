@@ -3,7 +3,8 @@ name: Services cloud accédés depuis l'IP
 indicators: [ip]
 action: pivot
 description: >
-  Services et opérations cloud vus depuis l'IP : connexions Entra ID, Microsoft Graph, Microsoft 365
+  Services et opérations cloud vus depuis l'IP : connexions Entra ID des utilisateurs et des applications (service
+  principals, identités managées), opérations d'annuaire Entra ID (AuditLogs), Microsoft Graph, Microsoft 365
   (OfficeActivity, CloudAppEvents), Azure Resource Manager, Key Vault et stockage Blob.
 reading:
   decisive: Lecture de secrets Key Vault, attribution de rôle Azure ou listing de stockage depuis une IP jamais vue.
@@ -11,13 +12,25 @@ reading:
   noise: Accès légitimes depuis le proxy de sortie de l'entreprise.
 v1: true
 window: { before: 24h, after: 1h }
-uses: [signins]
+uses: [signins, spn_signins]
 query: |
   union isfuzzy=true
   (
       _Signins(StartTime, EndTime, Value, "")
       | project TimeGenerated, Service = "Entra ID", Operation = strcat("Connexion à ", AppDisplayName), Target = ResourceDisplayName,
           Account = tolower(UserPrincipalName), Result = iff(Succeeded, "Succès", strcat("Échec ", ResultType))
+  ),
+  (
+      _SpnSignins(StartTime, EndTime, "", Value)
+      | project TimeGenerated, Service = strcat("Entra ID (", SignInType, ")"), Operation = strcat("Connexion à ", ResourceDisplayName),
+          Target = ResourceDisplayName, Account = tolower(ServicePrincipalName), Result = iff(Succeeded, "Succès", strcat("Échec ", ResultType))
+  ),
+  (
+      AuditLogs
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where tostring(InitiatedBy.user.ipAddress) == Value or tostring(InitiatedBy.app.ipAddress) == Value
+      | project TimeGenerated, Service = "Annuaire Entra ID", Operation = OperationName, Target = tostring(TargetResources[0].displayName),
+          Account = tolower(coalesce(tostring(InitiatedBy.user.userPrincipalName), tostring(InitiatedBy.app.displayName))), Result
   ),
   (
       MicrosoftGraphActivityLogs

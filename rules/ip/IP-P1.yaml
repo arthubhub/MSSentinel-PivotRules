@@ -4,17 +4,20 @@ indicators: [ip]
 action: pivot
 description: >
   Retrouve le nom de la ou des machines derrière une IP : adresse attribuée à une carte réseau
-  (DeviceNetworkInfo), IP locale de connexions (DeviceNetworkEvents), IP publique de sortie (DeviceInfo),
-  poste source vu par les contrôleurs de domaine et serveurs (4624, 4625, 4648, 4768, 4769, 4771, 4776 dans
-  SecurityEvent et WindowsEvent), poste distant vu par Defender (DeviceLogonEvents) et Defender for Identity.
+  (DeviceNetworkInfo), IP de l'agent Azure Monitor (Heartbeat) ou d'une machine Linux (Syslog), IP locale de connexions
+  (DeviceNetworkEvents), IP publique de sortie (DeviceInfo), poste source vu par les contrôleurs de domaine et serveurs
+  (4624, 4625, 4648, 4768, 4769, 4771, 4776 dans SecurityEvent et WindowsEvent), poste distant vu par Defender
+  (DeviceLogonEvents), Defender for Identity, et noms de machine portés par les journaux normalisés ASIM (authentification,
+  sessions réseau). Indique le rôle connu de chaque machine et celui de l'IP elle-même (DC, NAT, proxy, VPN…).
 reading:
-  decisive: Une IP attribuée par DeviceNetworkInfo sur la période donne le nom de la machine avec certitude.
+  decisive: Une IP attribuée par DeviceNetworkInfo ou Heartbeat sur la période donne le nom de la machine avec certitude.
   context: Un poste source vu seulement dans les événements 4624 ou 4776 (champ WorkstationName, déclaratif).
-  noise: IP de NAT, de VPN ou de serveur de rebond qui ramène plusieurs dizaines de machines.
+  noise: IP de NAT, de VPN ou de serveur de rebond qui ramène plusieurs dizaines de machines (colonne IpRole renseignée).
 v1: true
 window: { before: 24h, after: 1h }
-uses: [win_security]
+uses: [win_security, roles]
 query: |
+  let IpRole = _IpRoleOf(Value, EndTime);
   union isfuzzy=true
   (
       DeviceNetworkInfo
@@ -24,6 +27,20 @@ query: |
       | where tostring(Ip.IPAddress) == Value
       | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
           by Machine = tolower(DeviceName), Evidence = strcat("IP attribuée à ", NetworkAdapterName, " (", MacAddress, ")"), Source = "DeviceNetworkInfo"
+  ),
+  (
+      Heartbeat
+      | where TimeGenerated between ((StartTime - 1d) .. EndTime)
+      | where ComputerIP == Value or ComputerPrivateIPs has Value
+      | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
+          by Machine = tolower(Computer), Evidence = iff(ComputerIP == Value, "IP de l'agent Azure Monitor", "IP privée de l'agent Azure Monitor"), Source = "Heartbeat"
+  ),
+  (
+      Syslog
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where HostIP == Value
+      | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
+          by Machine = tolower(Computer), Evidence = "IP de la machine Linux (Syslog)", Source = "Syslog"
   ),
   (
       DeviceNetworkEvents
@@ -58,15 +75,33 @@ query: |
       | where IPAddress == Value and isnotempty(DeviceName)
       | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
           by Machine = tolower(DeviceName), Evidence = strcat("Source ", Protocol, " vers ", Application), Source = "IdentityLogonEvents"
+  ),
+  (
+      ASimAuthenticationEventLogs
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where SrcIpAddr == Value and isnotempty(SrcHostname)
+      | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
+          by Machine = tolower(SrcHostname), Evidence = strcat("Poste source (", EventProduct, ")"), Source = "ASimAuthenticationEventLogs"
+  ),
+  (
+      ASimNetworkSessionLogs
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where (SrcIpAddr == Value and isnotempty(SrcHostname)) or (DstIpAddr == Value and isnotempty(DstHostname))
+      | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
+          by Machine = tolower(iff(SrcIpAddr == Value, SrcHostname, DstHostname)), Evidence = strcat("Nom de machine du flux (", EventProduct, ")"), Source = "ASimNetworkSessionLogs"
   )
   | summarize FirstSeen = min(FirstSeen), LastSeen = max(LastSeen), Events = sum(Events),
       Evidence = make_set(Evidence, 10), Sources = make_set(Source) by Machine
+  | extend MachineKey = _HostKey(Machine)
+  | lookup kind=leftouter (_MachineRoles(EndTime)) on MachineKey
   | extend ConfidenceRank = case(
-      set_has_element(Sources, "DeviceNetworkInfo") or set_has_element(Sources, "DeviceNetworkEvents"), 1,
+      set_has_element(Sources, "DeviceNetworkInfo") or set_has_element(Sources, "Heartbeat") or set_has_element(Sources, "DeviceNetworkEvents")
+          or set_has_element(Sources, "Syslog"), 1,
       array_length(Sources) > 1, 2,
       3)
   | extend Confidence = case(ConfidenceRank == 1, "Élevée : IP portée par la machine",
       ConfidenceRank == 2, "Moyenne : plusieurs sources concordantes",
       "Faible : nom déclaré par une seule source")
+  | extend IpRole
   | sort by ConfidenceRank asc, LastSeen desc
-  | project-away ConfidenceRank
+  | project Machine, MachineRole, Confidence, IpRole, FirstSeen, LastSeen, Events, Evidence, Sources

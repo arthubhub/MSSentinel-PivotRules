@@ -1,0 +1,63 @@
+id: MC-P5
+name: Rôle et identité de la machine
+indicators: [device]
+action: pivot
+description: >
+  Dit ce qu'est la machine avant de pivoter dessus : rôle connu (contrôleur de domaine détecté par ses 4768, ses
+  requêtes LDAP vues par Defender for Identity ou son écoute Kerberos, rôle déclaré dans la watchlist EasyPivotRoles),
+  inventaire Defender for Endpoint (système, type, groupe, exposition, criticité, jonction, utilisateurs connectés, IP
+  publique), adresses IP, agent Azure Monitor (Heartbeat) et tables qui la voient sur la fenêtre. Un contrôleur de
+  domaine ou un serveur d'infrastructure apparaît dans les journaux de presque tous les comptes : les pivots MC-P1 et
+  AC-P2 le signalent, cette règle explique pourquoi.
+reading:
+  decisive: Machine critique (DC, serveur sensible, exposée à Internet) impliquée dans l'alerte.
+  context: Machine sans inventaire Defender (non intégrée) ou sans agent, donc visible seulement par d'autres sources.
+  noise: Serveurs d'infrastructure (DC, fichiers, supervision) qui ressortent dans tous les pivots.
+v1: true
+window: { before: 7d, after: 1d }
+uses: [roles]
+query: |
+  let Roles = _MachineRoles(EndTime) | where MachineKey == ValueShort;
+  let Inventory = DeviceInfo
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where DeviceName startswith ValueShort and _IsHost(DeviceName)
+      | summarize arg_max(TimeGenerated, OSPlatform, OSVersion, DeviceType, MachineGroup, ExposureLevel, AssetValue, JoinType,
+          IsInternetFacing, OnboardingStatus, SensorHealthState, PublicIP, LoggedOnUsers, DeviceId, DeviceName)
+      | project-rename LastInventory = TimeGenerated;
+  let Ips = union isfuzzy=true
+      (datatable(Ip:string)[]),
+      (DeviceNetworkInfo | where TimeGenerated between (StartTime .. EndTime) | where DeviceName startswith ValueShort and _IsHost(DeviceName)
+          | mv-expand A = IPAddresses | project Ip = tostring(A.IPAddress)),
+      (Heartbeat | where TimeGenerated between (StartTime .. EndTime) | where Computer startswith ValueShort and _IsHost(Computer)
+          | project Ip = ComputerIP)
+      | where isnotempty(Ip) and Ip !startswith "127." and Ip != "::1" and Ip !startswith "fe80:"
+      | summarize Ips = make_set(Ip, 20);
+  let Agent = Heartbeat
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where Computer startswith ValueShort and _IsHost(Computer)
+      | summarize LastHeartbeat = max(TimeGenerated), AgentOS = take_any(strcat(OSType, " ", OSName, " ", OSMajorVersion)),
+          AgentCategory = take_any(Category);
+  let Seen = union isfuzzy=true withsource=Table DeviceProcessEvents, DeviceNetworkEvents, DeviceLogonEvents
+      // @sentinel-only:begin
+      , SecurityEvent, WindowsEvent, Syslog
+      // @sentinel-only:end
+      | where TimeGenerated between ((EndTime - 1d) .. EndTime)
+      | extend H = coalesce(tostring(column_ifexists("DeviceName", "")), tostring(column_ifexists("Computer", "")))
+      | where H startswith ValueShort and _IsHost(H)
+      | summarize by Table
+      | summarize Tables = make_set(Table);
+  print Machine = ValueHost
+  | extend KnownRole = toscalar(Roles | project MachineRole), RoleBasis = toscalar(Roles | project MachineRoleBasis)
+  | extend I = toscalar(Inventory | project pack_all()), A = toscalar(Agent | project pack_all())
+  | extend Ips = toscalar(Ips), SeenIn = toscalar(Seen)
+  | extend Assessment = case(
+      isnotempty(KnownRole), strcat("Rôle connu : ", KnownRole),
+      tostring(I.DeviceType) == "Server", "Serveur sans rôle connu : le déclarer dans la watchlist EasyPivotRoles si c'est un serveur d'infrastructure",
+      isempty(tostring(I.DeviceId)) and isnull(A.LastHeartbeat), "Ni inventaire Defender ni agent Azure Monitor : machine vue seulement par d'autres sources",
+      "Poste ou machine sans rôle particulier connu")
+  | project Machine, Assessment, KnownRole, RoleBasis, DeviceName = tostring(I.DeviceName), OS = strcat(tostring(I.OSPlatform), " ", tostring(I.OSVersion)),
+      DeviceType = tostring(I.DeviceType), MachineGroup = tostring(I.MachineGroup), ExposureLevel = tostring(I.ExposureLevel),
+      AssetValue = tostring(I.AssetValue), IsInternetFacing = tostring(I.IsInternetFacing), JoinType = tostring(I.JoinType),
+      OnboardingStatus = tostring(I.OnboardingStatus), SensorHealthState = tostring(I.SensorHealthState), PublicIP = tostring(I.PublicIP),
+      LoggedOnUsers = I.LoggedOnUsers, LastInventory = todatetime(I.LastInventory), Ips, LastHeartbeat = todatetime(A.LastHeartbeat),
+      AgentOS = tostring(A.AgentOS), SeenIn

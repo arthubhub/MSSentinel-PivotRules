@@ -7,14 +7,16 @@ description: >
   (identifiants explicites), 4768 et 4769 (Kerberos), 4771, 4776 (NTLM), puis, pour chaque session ouverte,
   les 4672 (privilèges), 4688 (processus lancés dans la session) et 4634 ou 4647 (fermeture), rattachés par
   l'identifiant de session sur la même machine. Couvre SecurityEvent et WindowsEvent, y compris quand les
-  colonnes ne sont remplies que dans le XML brut.
+  colonnes ne sont remplies que dans le XML brut. LoggedOn est la machine qui a journalisé l'événement, Target la
+  machine réellement visée (service demandé pour un 4769, serveur cible pour un 4648) et ValidatedBy le contrôleur de
+  domaine qui a validé les identifiants ; le rôle connu de LoggedOn est indiqué (LoggedOnRole).
 reading:
   decisive: Série de 4625 puis 4624 de type 3 ou 10, suivie d'un 4672 et de 4688 dans la même session.
   context: Ticket 4769 demandé avec un chiffrement RC4 (0x17) vers un compte de service (Kerberoasting).
   noise: Ouvertures de type 3 répétées par des serveurs de fichiers, d'impression ou de supervision.
 v1: true
 window: { before: 30m, after: 30m }
-uses: [win_security]
+uses: [win_security, roles]
 query: |
   let Auth = _WinSecurity(StartTime, EndTime, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776]), Value)
       | where IpAddress == Value;
@@ -28,7 +30,10 @@ query: |
       | join kind=inner (Sessions) on $left.Computer == $right.SessionComputer, $left.LinkId == $right.SessionLogonId;
   union Auth, Linked
   | extend AccountName = iff(EventID in (4672, 4688), strcat(SubjectDomainName, @"\", SubjectUserName), strcat(TargetDomainName, @"\", TargetUserName))
-  | project TimeGenerated, Source = SourceTable, Host = tolower(Computer), Account = tolower(AccountName),
+  | extend MachineKey = _HostKey(Computer)
+  | lookup kind=leftouter (_MachineRoles(EndTime)) on MachineKey
+  | project TimeGenerated, Source = SourceTable, LoggedOn = tolower(Computer), LoggedOnRole = MachineRole, Target = TargetHost,
+      ValidatedBy = AuthAuthority, Account = tolower(AccountName),
       Action = strcat(tostring(EventID), " · ", EventName),
       Detail = case(
           EventID in (4624, 4625), strcat(LogonTypeName, " · ", AuthenticationPackageName, " · poste ", WorkstationName, iff(EventID == 4625, strcat(" · ", Status, "/", SubStatus), "")),

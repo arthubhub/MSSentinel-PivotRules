@@ -3,34 +3,81 @@ name: Comptes connectés à la machine
 indicators: [device]
 action: pivot
 description: >
-  Comptes qui ont ouvert ou tenté d'ouvrir une session sur la machine : Defender for Endpoint et Windows
-  (4624, 4625 via SecurityEvent et WindowsEvent), avec type d'ouverture, IP et poste source, et droits
-  d'administrateur local. Les comptes machine et les comptes système sont exclus.
+  Comptes qui ont accédé ou tenté d'accéder à la machine, classés par nature de l'accès (colonne Perspective) :
+  « Session sur la machine » (Defender for Endpoint, 4624 et 4625 de la machine, ASIM, SSH Linux), « Identifiants
+  explicites vers la machine » (4648 journalisé sur le poste d'origine), « Ticket de service Kerberos » (4769 journalisé
+  par le contrôleur de domaine pour un service de la machine : seule trace quand la machine n'envoie pas ses journaux) et
+  « Accès vu par Defender for Identity ». Si la machine est un contrôleur de domaine, ses ouvertures réseau (GPO, SYSVOL,
+  LDAP, faites par tous les comptes du domaine) sont classées à part en dernier. Donne type d'ouverture, IP et poste
+  source, droits d'administrateur local et rôle connu du compte. Les comptes machine et les comptes système sont exclus.
 reading:
-  decisive: Compte inconnu de la machine en RemoteInteractive (RDP) ou réseau, depuis un poste utilisateur.
-  context: Compte administrateur local utilisé pour la première fois.
-  noise: Comptes de service, d'inventaire et de sauvegarde en ouverture de type réseau ou service.
+  decisive: Compte inconnu de la machine en RemoteInteractive (RDP) ou réseau, depuis un poste utilisateur ; compte privilégié inattendu.
+  context: Compte administrateur local utilisé pour la première fois ; tickets 4769 sans session correspondante (journaux de la machine absents).
+  noise: Comptes de service, d'inventaire et de sauvegarde en ouverture de type réseau ou service ; accès réseau à un DC.
 window: { before: 24h, after: 1h }
-uses: [win_security]
+uses: [win_security, roles]
 query: |
+  let IsDc = toscalar(_MachineRoles(EndTime) | where MachineKey == ValueShort | summarize countif(MachineRole has "DC")) > 0;
   union isfuzzy=true
   (
       DeviceLogonEvents
       | where TimeGenerated between (StartTime .. EndTime)
       | where DeviceName startswith ValueShort
       | where _IsHost(DeviceName)
-      | project TimeGenerated, Account = tolower(strcat(AccountDomain, @"\", AccountName)), Source = "DeviceLogonEvents", LogonType,
-          Success = ActionType == "LogonSuccess", SourceIp = RemoteIP, SourceHost = tolower(RemoteDeviceName), IsLocalAdmin
+      | project TimeGenerated, Account = tolower(strcat(AccountDomain, @"\", AccountName)), Perspective = "Session sur la machine",
+          Source = "DeviceLogonEvents", LogonType, Success = ActionType == "LogonSuccess", SourceIp = RemoteIP,
+          SourceHost = tolower(RemoteDeviceName), IsLocalAdmin
   ),
   (
-      _WinSecurity(StartTime, EndTime, dynamic([4624, 4625]), ValueShort)
-      | where _IsHost(Computer)
-      | project TimeGenerated, Account = tolower(strcat(TargetDomainName, @"\", TargetUserName)), Source = SourceTable,
-          LogonType = LogonTypeName, Success = EventID == 4624, SourceIp = IpAddress, SourceHost = tolower(WorkstationName), IsLocalAdmin = bool(null)
+      _WinSecurity(StartTime, EndTime, dynamic([4624, 4625, 4648, 4769]), ValueShort)
+      | where _IsHost(TargetHost)
+      | project TimeGenerated,
+          Account = iff(isempty(TargetDomainName) or TargetDomainName == "-", TargetSam, strcat(tolower(tostring(split(TargetDomainName, ".")[0])), @"\", TargetSam)),
+          Perspective = case(EventID == 4648, "Identifiants explicites vers la machine", EventID == 4769, "Ticket de service Kerberos (vu par le DC)",
+              "Session sur la machine"),
+          Source = SourceTable, LogonType = case(EventID == 4648, "Identifiants explicites (4648)", EventID == 4769, strcat("Kerberos · ", ServiceName), LogonTypeName),
+          Success = EventID != 4625 and Status in ("", "-", "0x0"), SourceIp = IpAddress,
+          SourceHost = iff(EventID == 4648, tolower(Computer), tolower(WorkstationName)), IsLocalAdmin = bool(null)
+  ),
+  (
+      IdentityLogonEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where TargetDeviceName startswith ValueShort and _IsHost(TargetDeviceName)
+      | project TimeGenerated, Account = tolower(coalesce(AccountUpn, AccountName)), Perspective = "Accès vu par Defender for Identity",
+          Source = "IdentityLogonEvents", LogonType = strcat(Protocol, " ", LogonType), Success = ActionType == "LogonSuccess",
+          SourceIp = IPAddress, SourceHost = tolower(DeviceName), IsLocalAdmin = bool(null)
+  ),
+  (
+      ASimAuthenticationEventLogs
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where TargetHostname has ValueShort or DvcHostname has ValueShort
+      | where _IsHost(coalesce(TargetHostname, DvcHostname))
+      | project TimeGenerated, Account = tolower(TargetUsername), Perspective = "Session sur la machine", Source = strcat("ASIM ", EventProduct),
+          LogonType = strcat(LogonProtocol, " ", LogonMethod), Success = EventResult == "Success", SourceIp = SrcIpAddr,
+          SourceHost = tolower(SrcHostname), IsLocalAdmin = bool(null)
+  ),
+  (
+      Syslog
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where Computer startswith ValueShort and _IsHost(Computer)
+      | where ProcessName in~ ("sshd", "sshd-session")
+      | extend User = extract(@"(?:Accepted|Failed) \S+ for (?:invalid user )?(\S+) from", 1, SyslogMessage)
+      | where isnotempty(User)
+      | project TimeGenerated, Account = tolower(User), Perspective = "Session sur la machine", Source = "Syslog (sshd)", LogonType = "SSH",
+          Success = SyslogMessage startswith "Accepted", SourceIp = extract(@" from (\S+)", 1, SyslogMessage), SourceHost = "", IsLocalAdmin = bool(null)
   )
   | where not(Account endswith "$")
   | where not(Account has_any (@"nt authority\", @"window manager\", @"font driver host\", @"nt service\"))
+  | extend Perspective = iff(IsDc and Perspective == "Session sur la machine" and LogonType has "Network",
+      "Accès réseau au contrôleur de domaine (GPO, SYSVOL, LDAP)", Perspective)
+  | extend Rank = case(Perspective startswith "Session", 1, Perspective startswith "Identifiants", 2, Perspective startswith "Ticket", 3,
+      Perspective startswith "Accès vu", 4, 5)
   | summarize Logons = count(), Failures = countif(not(Success)), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
-      LogonTypes = make_set(LogonType), SourceIps = make_set(SourceIp, 10), SourceHosts = make_set(SourceHost, 10),
-      Sources = make_set(Source), LocalAdmin = max(toint(IsLocalAdmin)) by Account
-  | sort by FirstSeen asc
+      LogonTypes = make_set(LogonType, 10), SourceIps = make_set_if(SourceIp, isnotempty(SourceIp), 10),
+      SourceHosts = make_set_if(SourceHost, isnotempty(SourceHost), 10), Sources = make_set(Source),
+      LocalAdmin = max(toint(IsLocalAdmin)) by Account, Perspective, Rank
+  | extend AccountKey = _SamOf(Account)
+  | lookup kind=leftouter (_AccountRoles(EndTime)) on AccountKey
+  | extend AccountRole = _JoinRoles(_AccountKind(AccountKey), AccountRole)
+  | sort by Rank asc, FirstSeen asc
+  | project Account, AccountRole, Perspective, Logons, Failures, FirstSeen, LastSeen, LogonTypes, SourceIps, SourceHosts, LocalAdmin, Sources

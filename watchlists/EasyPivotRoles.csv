@@ -1,0 +1,11 @@
+Entity,Type,Role,Note
+dc01.contoso.local,Machine,DC,Exemple fictif - les DC sont aussi détectés automatiquement
+fs01,Machine,Serveur de fichiers,Exemple fictif
+rds01,Machine,Serveur RDS,Exemple fictif - sessions de nombreux utilisateurs
+bastion01,Machine,Bastion,Exemple fictif
+203.0.113.10,IP,NAT de sortie,Exemple fictif (plage de documentation RFC 5737)
+198.51.100.0/24,IP,VPN,Exemple fictif - les plages CIDR IPv4 sont acceptées
+10.0.50.20,IP,Scanner de vulnérabilités,Exemple fictif
+svc_backup,Compte,Compte de service,Exemple fictif
+CONTOSO\adm_jdoe,Compte,Compte d'administration,Exemple fictif
+breakglass@contoso.com,Compte,Compte de secours,Exemple fictif

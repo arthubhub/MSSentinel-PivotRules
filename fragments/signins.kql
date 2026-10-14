@@ -1,36 +1,64 @@
-// Connexions Entra ID interactives et non interactives, normalisées.
-// Dans AADNonInteractiveUserSignInLogs, DeviceDetail, Status et LocationDetails sont des chaînes JSON :
-// elles sont analysées pour obtenir les mêmes colonnes que SigninLogs.
-// Paramètres : start, end, ip (vide = toutes), upn (vide = tous). Résultat : 0 = succès.
+// Connexions Entra ID des utilisateurs, normalisées, quelle que soit la table qui les porte :
+// - Sentinel : SigninLogs (interactives) et AADNonInteractiveUserSignInLogs (non interactives). Dans cette dernière,
+//   DeviceDetail, Status et LocationDetails sont des chaînes JSON : elles sont analysées pour obtenir les mêmes colonnes.
+// - Defender XDR : EntraIdSignInEvents (interactives et non interactives, colonne Timestamp, ErrorCode 0 = succès).
+//   Elle n'est lue que pour le type de connexion que la table Sentinel ne fournit pas sur la période : pas de doublon
+//   dans le portail unifié, et les connexions restent visibles sans le connecteur Entra ID de Sentinel.
+// Paramètres : start, end, ip (vide = toutes), upn (vide = tous). Résultat : 0 = succès. SourceTable indique la table d'origine.
 let _Signins = (start:datetime, end:datetime, ip:string, upn:string) {
+    let _HasInteractive = toscalar(union isfuzzy=true
+        (SigninLogs | where TimeGenerated between ((start - 1d) .. end) | take 1 | project Present = 1),
+        (print Present = 0)
+        | summarize max(Present)) == 1;
+    let _HasNonInteractive = toscalar(union isfuzzy=true
+        (AADNonInteractiveUserSignInLogs | where TimeGenerated between ((start - 1d) .. end) | take 1 | project Present = 1),
+        (print Present = 0)
+        | summarize max(Present)) == 1;
     union isfuzzy=true
     (
         SigninLogs
         | where TimeGenerated between (start .. end)
         | where isempty(ip) or IPAddress == ip
         | where isempty(upn) or UserPrincipalName =~ upn
-        | extend _dev = DeviceDetail, _loc = LocationDetails, _st = Status, SignInType = "Interactive"
+        | extend _dev = DeviceDetail, _loc = LocationDetails, _st = Status
+        | project TimeGenerated, SourceTable = "SigninLogs", SignInType = "Interactive", UserPrincipalName, UserId, AppDisplayName, AppId,
+            ResourceDisplayName, ResultType, ResultDescription, FailureReason = tostring(_st.failureReason), IPAddress, Location,
+            City = tostring(_loc.city), AutonomousSystemNumber, ClientAppUsed, UserAgent, DeviceName = tostring(_dev.displayName),
+            DeviceId = tostring(_dev.deviceId), OperatingSystem = tostring(_dev.operatingSystem), Browser = tostring(_dev.browser),
+            IsManaged = tostring(_dev.isManaged), IsCompliant = tostring(_dev.isCompliant), TrustType = tostring(_dev.trustType),
+            ConditionalAccessStatus, AuthenticationRequirement, RiskLevelDuringSignIn, SessionId, CorrelationId
     ),
     (
         AADNonInteractiveUserSignInLogs
         | where TimeGenerated between (start .. end)
         | where isempty(ip) or IPAddress == ip
         | where isempty(upn) or UserPrincipalName =~ upn
-        | extend _dev = parse_json(DeviceDetail), _loc = parse_json(LocationDetails), _st = parse_json(Status), SignInType = "NonInteractive"
+        | extend _dev = parse_json(DeviceDetail), _loc = parse_json(LocationDetails), _st = parse_json(Status)
+        | project TimeGenerated, SourceTable = "AADNonInteractiveUserSignInLogs", SignInType = "NonInteractive", UserPrincipalName, UserId,
+            AppDisplayName, AppId, ResourceDisplayName, ResultType, ResultDescription, FailureReason = tostring(_st.failureReason),
+            IPAddress, Location, City = tostring(_loc.city), AutonomousSystemNumber, ClientAppUsed, UserAgent,
+            DeviceName = tostring(_dev.displayName), DeviceId = tostring(_dev.deviceId), OperatingSystem = tostring(_dev.operatingSystem),
+            Browser = tostring(_dev.browser), IsManaged = tostring(_dev.isManaged), IsCompliant = tostring(_dev.isCompliant),
+            TrustType = tostring(_dev.trustType), ConditionalAccessStatus, AuthenticationRequirement, RiskLevelDuringSignIn, SessionId, CorrelationId
+    ),
+    (
+        EntraIdSignInEvents
+        | where Timestamp between (start .. end)
+        | extend SignInType = iff(LogonType contains "noninteractive", "NonInteractive", "Interactive")
+        | where (SignInType == "Interactive" and not(_HasInteractive)) or (SignInType == "NonInteractive" and not(_HasNonInteractive))
+        | where isempty(ip) or IPAddress == ip
+        | where isempty(upn) or AccountUpn =~ upn
+        | project TimeGenerated = Timestamp, SourceTable = "EntraIdSignInEvents", SignInType, UserPrincipalName = AccountUpn,
+            UserId = AccountObjectId, AppDisplayName = Application, AppId = ApplicationId, ResourceDisplayName,
+            ResultType = tostring(ErrorCode), ResultDescription = "", FailureReason = "", IPAddress, Location = Country, City,
+            AutonomousSystemNumber = "", ClientAppUsed, UserAgent, DeviceName, DeviceId = EntraIdDeviceId, OperatingSystem = OSPlatform,
+            Browser, IsManaged = tostring(IsManaged == 1), IsCompliant = tostring(IsCompliant == 1), TrustType = DeviceTrustType,
+            ConditionalAccessStatus = case(ConditionalAccessStatus == 0, "success", ConditionalAccessStatus == 1, "failure",
+                ConditionalAccessStatus == 2, "notApplied", tostring(ConditionalAccessStatus)),
+            AuthenticationRequirement,
+            RiskLevelDuringSignIn = case(RiskLevelDuringSignIn == 100, "high", RiskLevelDuringSignIn == 50, "medium",
+                RiskLevelDuringSignIn == 10, "low", RiskLevelDuringSignIn == 0, "none", tostring(RiskLevelDuringSignIn)),
+            SessionId, CorrelationId
     )
-    | extend
-        DeviceName = tostring(_dev.displayName),
-        DeviceId = tostring(_dev.deviceId),
-        OperatingSystem = tostring(_dev.operatingSystem),
-        Browser = tostring(_dev.browser),
-        IsManaged = tostring(_dev.isManaged),
-        IsCompliant = tostring(_dev.isCompliant),
-        TrustType = tostring(_dev.trustType),
-        City = tostring(_loc.city),
-        FailureReason = tostring(_st.failureReason),
-        Succeeded = ResultType == "0"
-    | project TimeGenerated, SignInType, UserPrincipalName, UserId, AppDisplayName, AppId, ResourceDisplayName,
-        ResultType, ResultDescription, FailureReason, Succeeded, IPAddress, Location, City, AutonomousSystemNumber,
-        ClientAppUsed, UserAgent, DeviceName, DeviceId, OperatingSystem, Browser, IsManaged, IsCompliant, TrustType,
-        ConditionalAccessStatus, AuthenticationRequirement, RiskLevelDuringSignIn, SessionId, CorrelationId
+    | extend Succeeded = ResultType == "0"
 };

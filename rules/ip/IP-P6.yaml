@@ -1,0 +1,47 @@
+id: IP-P6
+name: Nature et rôle de l'IP
+indicators: [ip]
+action: pivot
+description: >
+  Dit ce qu'est l'IP avant de pivoter dessus : privée ou publique, rôle connu (contrôleur de domaine détecté, NAT, proxy,
+  VPN, scanner… déclarés dans la watchlist EasyPivotRoles, plages CIDR comprises), machines qui la portent
+  (DeviceNetworkInfo, Heartbeat, DeviceInfo), et volume d'identités et de machines vues avec elle sur la fenêtre. Une IP
+  vue avec beaucoup de comptes est signalée comme partagée : les pivots IP-P2, IP-S4 et IP-T3 y seront bruités.
+reading:
+  decisive: IP publique sans rôle connu, vue avec quelques comptes seulement, dont un succès inhabituel.
+  context: IP partagée (NAT, proxy, VPN), à restreindre au compte ou à la machine plutôt qu'à l'IP.
+  noise: IP d'un contrôleur de domaine ou d'un serveur d'infrastructure, présente dans presque tous les journaux.
+v1: true
+window: { before: 24h, after: 1h }
+uses: [ip_events, roles]
+query: |
+  let Kind = case(
+      Value matches regex @"^(127\.|::1$)", "Bouclage",
+      ipv4_is_private(Value), "Privée (RFC 1918)",
+      Value matches regex @"^(169\.254\.|fe80:)", "Lien local",
+      Value matches regex @"^(100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.)", "Partagée opérateur (CGNAT)",
+      Value matches regex @"^(fc|fd)", "Privée (IPv6 ULA)",
+      "Publique");
+  let Owners = union isfuzzy=true
+      (datatable(Machine:string, Basis:string)[]),
+      (DeviceNetworkInfo | where TimeGenerated between ((StartTime - 1d) .. EndTime) | where IPAddresses has Value
+          | summarize by Machine = tolower(DeviceName) | extend Basis = "Carte réseau (DeviceNetworkInfo)"),
+      (Heartbeat | where TimeGenerated between ((StartTime - 1d) .. EndTime) | where ComputerIP == Value or ComputerPrivateIPs has Value
+          | summarize by Machine = tolower(Computer) | extend Basis = "Agent Azure Monitor (Heartbeat)"),
+      (DeviceInfo | where TimeGenerated between ((StartTime - 1d) .. EndTime) | where PublicIP == Value
+          | summarize by Machine = tolower(DeviceName) | extend Basis = "IP publique de sortie (DeviceInfo)");
+  let Seen = _IpEvents(StartTime, EndTime, Value)
+      | summarize Events = count(), Accounts = dcountif(Account, isnotempty(Account) and Account != "-"),
+          Machines = dcountif(Host, isnotempty(Host)), Sources = make_set(Source, 30),
+          FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated);
+  Seen
+  | extend Ip = Value, Kind, KnownRole = _IpRoleOf(Value, EndTime),
+      OwnerMachines = toscalar(Owners | summarize make_set(strcat(Machine, " (", Basis, ")"), 20)),
+      OwnerCount = toscalar(Owners | summarize dcount(Machine))
+  | extend Assessment = case(
+      isnotempty(KnownRole), strcat("Rôle connu : ", KnownRole, ". Les pivots sur cette IP ramènent son trafic d'infrastructure."),
+      OwnerCount > 3, "Portée par plusieurs machines (NAT, VPN, IP réattribuée) : pivoter sur la machine plutôt que sur l'IP.",
+      Accounts > 20, "Vue avec de nombreux comptes : IP partagée probable (NAT, proxy, VPN, Citrix).",
+      Events == 0, "Aucun événement sur la fenêtre : élargir la fenêtre ou vérifier la couverture (IP-S0).",
+      "Pas de rôle connu ni de signe de partage.")
+  | project Ip, Kind, KnownRole, Assessment, OwnerMachines, Accounts, Machines, Events, FirstSeen, LastSeen, Sources

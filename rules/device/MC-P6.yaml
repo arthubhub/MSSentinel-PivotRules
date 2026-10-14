@@ -1,0 +1,67 @@
+id: MC-P6
+name: Fichiers et partages accédés sur la machine
+indicators: [device]
+action: pivot
+description: >
+  Qui a accédé à quels fichiers et partages de la machine, regroupé par compte, dossier et type d'accès : accès aux
+  partages réseau (5140, 5145) et accès aux fichiers audités par SACL (4656, 4663, 4670, et 4660 rattaché au fichier par son
+  handle) journalisés par la machine, fichiers écrits à distance par SMB (Defender for Endpoint, RequestAccountName),
+  fichiers créés ou supprimés vus par Sysmon (11, 23, 26) et journaux ASIM de fichiers. Utile sur un serveur de fichiers :
+  les lectures n'apparaissent que dans l'audit Windows.
+reading:
+  decisive: Un compte qui lit en masse un partage qu'il n'utilise pas d'habitude, ou des accès aux partages administratifs (C$, ADMIN$).
+  context: Fichiers déposés à distance par SMB puis exécutés (mouvement latéral) ; permissions modifiées.
+  noise: Sauvegarde, antivirus, indexation, redirection de dossiers et profils itinérants.
+window: { before: 24h, after: 1h }
+uses: [win_security, sysmon, roles]
+query: |
+  let Win = materialize(_WinSecurity(StartTime, EndTime, dynamic([4656, 4660, 4663, 4670, 5140, 5145]), ValueShort)
+      | where _IsHost(Computer)
+      | where EventID in (5140, 5145) or ObjectType in ("File", ""));
+  let Handles = Win | where EventID in (4656, 4663) and isnotempty(HandleId) | summarize HandleObject = take_any(ObjectName) by Computer, HandleId;
+  union isfuzzy=true
+  (
+      Win
+      | join kind=leftouter (Handles) on Computer, HandleId
+      | project TimeGenerated, Source = SourceTable, Account = tolower(strcat(SubjectDomainName, @"\", SubjectUserName)),
+          Kind = iff(EventID in (5140, 5145), "Partage réseau", "Fichier (audit Windows)"),
+          Object = case(EventID == 5145, strcat(trim(@"[\\*]+", ShareName), @"\", RelativeTargetName), EventID == 5140, trim(@"[\\*]+", ShareName),
+              coalesce(ObjectName, HandleObject)),
+          Access = ObjectAccess, Process = tolower(tostring(split(ProcessName, @"\")[-1])), SourceIp = IpAddress
+  ),
+  (
+      DeviceFileEvents
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where DeviceName startswith ValueShort and _IsHost(DeviceName)
+      | where isnotempty(RequestAccountName) and RequestProtocol == "Smb"
+      | project TimeGenerated, Source = "DeviceFileEvents", Account = tolower(strcat(RequestAccountDomain, @"\", RequestAccountName)),
+          Kind = "Écriture à distance (SMB, Defender)", Object = FolderPath,
+          Access = case(ActionType == "FileDeleted", "suppression", ActionType == "FileRenamed", "renommage", "écriture"),
+          Process = tolower(InitiatingProcessFileName), SourceIp = RequestSourceIP
+  ),
+  (
+      _Sysmon(StartTime, EndTime, dynamic([11, 23, 26]), ValueShort)
+      | where Computer startswith ValueShort and _IsHost(Computer)
+      | where UserSam !in ("system", "local service", "network service")
+      | project TimeGenerated, Source = strcat("Sysmon ", tostring(EventID)), Account = tolower(User), Kind = "Fichier (Sysmon)",
+          Object = TargetFilename, Access = iff(EventID == 11, "écriture", "suppression"), Process = ProcessFile, SourceIp = ""
+  ),
+  (
+      ASimFileEventLogs
+      | where TimeGenerated between (StartTime .. EndTime)
+      | where DvcHostname startswith ValueShort and _IsHost(DvcHostname)
+      | project TimeGenerated, Source = strcat("ASIM ", EventProduct), Account = tolower(ActorUsername), Kind = "Fichier (ASIM)",
+          Object = TargetFilePath, Access = tolower(EventType), Process = tolower(tostring(split(ActingProcessName, @"\")[-1])), SourceIp = SrcIpAddr
+  )
+  | where isnotempty(Object)
+  | where not(Account endswith "$") and not(Account has_any (@"nt authority\", @"window manager\", @"font driver host\"))
+  | extend Folder = tostring(parse_path(Object).DirectoryPath), File = tostring(parse_path(Object).Filename)
+  | extend AccountKey = _SamOf(Account)
+  | summarize Events = count(), Files = dcount(Object), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
+      SampleFiles = make_set(File, 10), Processes = make_set_if(Process, isnotempty(Process), 5),
+      SourceIps = make_set_if(SourceIp, isnotempty(SourceIp), 5), Sources = make_set(Source)
+      by Account, AccountKey, Kind, Folder = coalesce(Folder, Object), Access
+  | lookup kind=leftouter (_AccountRoles(EndTime)) on AccountKey
+  | extend AccountRole = _JoinRoles(_AccountKind(AccountKey), AccountRole)
+  | project Account, AccountRole, Kind, Folder, Access, Files, Events, FirstSeen, LastSeen, SampleFiles, Processes, SourceIps, Sources
+  | sort by Files desc, FirstSeen asc

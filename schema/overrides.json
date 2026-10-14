@@ -1,5 +1,5 @@
 {
- "_comment": "Compléments au schéma généré : AzureDiagnostics (schéma du dépôt Azure-Sentinel), colonne Timestamp des tables Defender XDR (présente dans Defender et dans les tables diffusées vers Sentinel).",
+ "_comment": "Compléments au schéma généré : AzureDiagnostics (schéma du dépôt Azure-Sentinel), colonne Timestamp des tables Defender XDR (présente dans Defender et dans les tables diffusées vers Sentinel), et tables propres à Defender XDR absentes de la référence Azure Monitor (EntraIdSignInEvents, EntraIdSpnSignInEvents : schémas repris de Azure-Sentinel/.script/tests/KqlvalidationsTests/CustomTables ; colonne Timestamp seulement).",
  "xdrTables": [
   "DeviceNetworkEvents",
   "DeviceNetworkInfo",
@@ -21,7 +21,15 @@
   "AlertEvidence",
   "AlertInfo",
   "MessageEvents",
-  "MessageUrlInfo"
+  "MessageUrlInfo",
+  "EntraIdSignInEvents",
+  "EntraIdSpnSignInEvents",
+  "IdentityQueryEvents",
+  "IdentityDirectoryEvents"
+ ],
+ "_defenderOptional": "Tables hors Defender XDR tolérées dans la variante Defender d'une règle : elles ne sont lues que dans une branche de union isfuzzy=true, sans colonne de temps, et disparaissent simplement quand elles n'existent pas (Defender sans Sentinel).",
+ "defenderOptional": [
+  "Watchlist"
  ],
  "add": {
   "AzureDiagnostics": {
@@ -285,6 +293,88 @@
    "Timestamp": "datetime"
   },
   "MessageUrlInfo": {
+   "Timestamp": "datetime"
+  },
+  "EntraIdSignInEvents": {
+   "Timestamp": "datetime",
+   "Application": "string",
+   "ApplicationId": "string",
+   "LogonType": "string",
+   "EndpointCall": "string",
+   "ErrorCode": "int",
+   "CorrelationId": "string",
+   "SessionId": "string",
+   "AccountDisplayName": "string",
+   "AccountObjectId": "string",
+   "AccountUpn": "string",
+   "IsExternalUser": "int",
+   "IsGuestUser": "bool",
+   "AlternateSignInName": "string",
+   "LastPasswordChangeTimestamp": "datetime",
+   "ResourceDisplayName": "string",
+   "ResourceId": "string",
+   "ResourceTenantId": "string",
+   "DeviceName": "string",
+   "OSPlatform": "string",
+   "DeviceTrustType": "string",
+   "IsManaged": "int",
+   "IsCompliant": "int",
+   "AuthenticationProcessingDetails": "string",
+   "AuthenticationRequirement": "string",
+   "TokenIssuerType": "string",
+   "RiskLevelAggregated": "int",
+   "RiskLevelDuringSignIn": "int",
+   "RiskEventTypes": "string",
+   "RiskState": "int",
+   "UserAgent": "string",
+   "ClientAppUsed": "string",
+   "Browser": "string",
+   "ConditionalAccessPolicies": "string",
+   "ConditionalAccessStatus": "int",
+   "IPAddress": "string",
+   "Country": "string",
+   "State": "string",
+   "City": "string",
+   "Latitude": "string",
+   "Longitude": "string",
+   "NetworkLocationDetails": "string",
+   "RequestId": "string",
+   "ReportId": "string",
+   "EntraIdDeviceId": "string",
+   "GatewayJA4": "string",
+   "UniqueTokenId": "string",
+   "IsSignInThroughGlobalSecureAccess": "bool"
+  },
+  "EntraIdSpnSignInEvents": {
+   "Timestamp": "datetime",
+   "Application": "string",
+   "ApplicationId": "string",
+   "IsManagedIdentity": "bool",
+   "ErrorCode": "int",
+   "CorrelationId": "string",
+   "ServicePrincipalName": "string",
+   "ServicePrincipalId": "string",
+   "ResourceDisplayName": "string",
+   "ResourceId": "string",
+   "ResourceTenantId": "string",
+   "IPAddress": "string",
+   "Country": "string",
+   "State": "string",
+   "City": "string",
+   "Latitude": "string",
+   "Longitude": "string",
+   "RequestId": "string",
+   "ReportId": "string",
+   "IsConfidentialClient": "bool",
+   "GatewayJA4": "string",
+   "SessionId": "string",
+   "UserAgent": "string",
+   "UniqueTokenId": "string"
+  },
+  "IdentityQueryEvents": {
+   "Timestamp": "datetime"
+  },
+  "IdentityDirectoryEvents": {
    "Timestamp": "datetime"
   }
  }

@@ -2,7 +2,10 @@
 // Tests de bout en bout sur dist/pivot-rules.json :
 // 1. chaque requête, une fois remplie avec une valeur d'exemple (y compris des guillemets), reste du KQL valide ;
 // 2. la valeur d'exemple de chaque indicateur est reconnue par ses motifs ;
-// 3. aucun paramètre {{…}} ne subsiste après remplissage.
+// 3. aucun paramètre {{…}} ne subsiste après remplissage ;
+// 4. une variante Defender ne lit que des tables Defender XDR (ou tolérées, comme Watchlist) et jamais TimeGenerated ;
+// 5. chaque table lue appartient à une famille de sources, et chaque indicateur a sa règle de couverture (XX-S0)
+//    et sa règle de découverte (XX-S9).
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import { fillQuery, matchesIndicator } from './fill-query.mjs';
@@ -40,6 +43,30 @@ for (const rule of bundle.rules) {
       for (const d of kql.validate(q)) if (d.severity === 'Error') fail(`${rule.id} (${variant}, ${ind}) l.${d.line} ${d.message}`);
     }
   }
+}
+const tableNames = Object.keys(kql.tables).sort((a, b) => b.length - a.length);
+const allowedDefender = new Set([...kql.xdrTables, ...kql.defenderOptional]);
+const tablesIn = (q) => {
+  // Sans les chaînes (un nom de table cité dans un texte n'est pas une lecture) ni les commentaires
+  const code = q.replace(/@"[^"]*"|@'[^']*'|"(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*'/g, '""').replace(/(^|[^:])\/\/.*$/gm, '$1');
+  return tableNames.filter((t) => new RegExp(`(^|[^\\w.])${t}(?![\\w])`, 'm').test(code));
+};
+const familyTables = new Set(Object.values(bundle.sources || {}).flatMap((f) => f.tables));
+for (const rule of bundle.rules) {
+  if (rule.queryDefender) {
+    for (const t of tablesIn(rule.queryDefender)) if (!allowedDefender.has(t)) fail(`${rule.id} (queryDefender) lit ${t}, absente de Defender XDR`);
+    if (/\bTimeGenerated\b/.test(rule.queryDefender)) fail(`${rule.id} (queryDefender) contient TimeGenerated`);
+    if (!rule.platforms.includes('defender')) fail(`${rule.id} : queryDefender sans la plateforme defender`);
+  }
+  for (const t of rule.tables) if (!familyTables.has(t)) fail(`${rule.id} : table ${t} sans famille de sources`);
+  if (!/-S9$/.test(rule.id) && (!rule.sources || !rule.sources.length)) fail(`${rule.id} : champ sources vide`);
+}
+for (const pfx of new Set(bundle.rules.map((r) => r.id.slice(0, 2)))) {
+  if (!bundle.rules.some((r) => r.id === `${pfx}-S9`)) fail(`indicateur ${pfx} sans règle de découverte ${pfx}-S9`);
+  const cov = bundle.rules.find((r) => r.id === `${pfx}-S0`);
+  if (!cov) { fail(`indicateur ${pfx} sans règle de couverture ${pfx}-S0`); continue; }
+  const read = new Set(bundle.rules.filter((r) => r.id.startsWith(pfx) && r !== cov).flatMap((r) => r.tables));
+  for (const t of read) if (!cov.tables.includes(t)) fail(`${pfx}-S0 ne contrôle pas la table ${t}`);
 }
 console.log(failures ? `${failures} échec(s)` : `OK : ${bundle.rules.length} règles remplies et validées.`);
 process.exit(failures ? 1 : 0);
