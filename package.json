@@ -1,6 +1,6 @@
 {
   "name": "sentinel-pivot-rules",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Règles de pivot KQL (Statistics, Pivot, Timeline) pour Microsoft Sentinel et Defender XDR, compilées de YAML vers JSON pour l’userscript.",
   "scripts": {
     "build": "node scripts/build.mjs",
