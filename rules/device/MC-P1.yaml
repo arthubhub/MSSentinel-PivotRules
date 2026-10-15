@@ -17,11 +17,11 @@ reading:
 window: { before: 24h, after: 1h }
 uses: [win_security, roles]
 query: |
-  let IsDc = toscalar(_MachineRoles(EndTimestampstamp) | where MachineKey == ValueShort | summarize countif(MachineRole has "DC")) > 0;
+  let IsDc = toscalar(_MachineRoles(EndTimestamp) | where MachineKey == ValueShort | summarize countif(MachineRole has "DC")) > 0;
   union isfuzzy=true
   (
       DeviceLogonEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where DeviceName startswith ValueShort
       | where _IsHost(DeviceName)
       | project TimeGenerated, Account = tolower(strcat(AccountDomain, @"\", AccountName)), Perspective = "Session sur la machine",
@@ -29,7 +29,7 @@ query: |
           SourceHost = tolower(RemoteDeviceName), IsLocalAdmin
   ),
   (
-      _WinSecurity(StartTimestampstamp, EndTimestampstamp, dynamic([4624, 4625, 4648, 4769]), ValueShort)
+      _WinSecurity(StartTimestamp, EndTimestamp, dynamic([4624, 4625, 4648, 4769]), ValueShort)
       | where _IsHost(TargetHost)
       | project TimeGenerated,
           Account = iff(isempty(TargetDomainName) or TargetDomainName == "-", TargetSam, strcat(tolower(tostring(split(TargetDomainName, ".")[0])), @"\", TargetSam)),
@@ -41,7 +41,7 @@ query: |
   ),
   (
       IdentityLogonEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where TargetDeviceName startswith ValueShort and _IsHost(TargetDeviceName)
       | project TimeGenerated, Account = tolower(coalesce(AccountUpn, AccountName)), Perspective = "Accès vu par Defender for Identity",
           Source = "IdentityLogonEvents", LogonType = strcat(Protocol, " ", LogonType), Success = ActionType == "LogonSuccess",
@@ -49,7 +49,7 @@ query: |
   ),
   (
       ASimAuthenticationEventLogs
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where TargetHostname has ValueShort or DvcHostname has ValueShort
       | where _IsHost(coalesce(TargetHostname, DvcHostname))
       | project TimeGenerated, Account = tolower(TargetUsername), Perspective = "Session sur la machine", Source = strcat("ASIM ", EventProduct),
@@ -58,7 +58,7 @@ query: |
   ),
   (
       Syslog
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where Computer startswith ValueShort and _IsHost(Computer)
       | where ProcessName in~ ("sshd", "sshd-session")
       | extend User = extract(@"(?:Accepted|Failed) \S+ for (?:invalid user )?(\S+) from", 1, SyslogMessage)
@@ -77,7 +77,7 @@ query: |
       SourceHosts = make_set_if(SourceHost, isnotempty(SourceHost), 10), Sources = make_set(Source),
       LocalAdmin = max(toint(IsLocalAdmin)) by Account, Perspective, Rank
   | extend AccountKey = _SamOf(Account)
-  | lookup kind=leftouter (_AccountRoles(EndTimestampstamp)) on AccountKey
+  | lookup kind=leftouter (_AccountRoles(EndTimestamp)) on AccountKey
   | extend AccountRole = _JoinRoles(_AccountKind(AccountKey), AccountRole)
   | sort by Rank asc, FirstSeen asc
   | project Account, AccountRole, Perspective, Logons, Failures, FirstSeen, LastSeen, LogonTypes, SourceIps, SourceHosts, LocalAdmin, Sources

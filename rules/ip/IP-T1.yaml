@@ -18,20 +18,20 @@ v1: true
 window: { before: 30m, after: 30m }
 uses: [win_security, roles]
 query: |
-  let Auth = _WinSecurity(StartTimestampstamp, EndTimestampstamp, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776]), Value)
+  let Auth = _WinSecurity(StartTimestamp, EndTimestamp, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776]), Value)
       | where IpAddress == Value;
   let Sessions = Auth
       | where EventID == 4624 and isnotempty(TargetLogonId)
       | distinct SessionComputer = Computer, SessionLogonId = TargetLogonId;
   let SessionHosts = Sessions | distinct SessionComputer;
-  let Linked = _WinSecurity(StartTimestampstamp, EndTimestampstamp, dynamic([4672, 4688, 4634, 4647]), "")
+  let Linked = _WinSecurity(StartTimestamp, EndTimestamp, dynamic([4672, 4688, 4634, 4647]), "")
       | where Computer in (SessionHosts)
       | extend LinkId = iff(EventID in (4672, 4688), SubjectLogonId, TargetLogonId)
       | join kind=inner (Sessions) on $left.Computer == $right.SessionComputer, $left.LinkId == $right.SessionLogonId;
   union Auth, Linked
   | extend AccountName = iff(EventID in (4672, 4688), strcat(SubjectDomainName, @"\", SubjectUserName), strcat(TargetDomainName, @"\", TargetUserName))
   | extend MachineKey = _HostKey(Computer)
-  | lookup kind=leftouter (_MachineRoles(EndTimestampstamp)) on MachineKey
+  | lookup kind=leftouter (_MachineRoles(EndTimestamp)) on MachineKey
   | project TimeGenerated, Source = SourceTable, LoggedOn = tolower(Computer), LoggedOnRole = MachineRole, Target = TargetHost,
       ValidatedBy = AuthAuthority, Account = tolower(AccountName),
       Action = strcat(tostring(EventID), " · ", EventName),

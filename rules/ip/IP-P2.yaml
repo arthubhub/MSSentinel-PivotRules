@@ -18,17 +18,17 @@ uses: [signins, spn_signins, win_security, roles]
 query: |
   union isfuzzy=true
   (
-      _Signins(StartTimestampstamp, EndTimestampstamp, Value, "")
+      _Signins(StartTimestamp, EndTimestamp, Value, "")
       | project TimeGenerated, Account = tolower(UserPrincipalName), Source = strcat("Entra ID ", SignInType),
           Success = Succeeded, Target = "", AuthBy = "", App = AppDisplayName, Detail = iff(Succeeded, Location, strcat(ResultType, " ", FailureReason))
   ),
   (
-      _SpnSignins(StartTimestampstamp, EndTimestampstamp, "", Value)
+      _SpnSignins(StartTimestamp, EndTimestamp, "", Value)
       | project TimeGenerated, Account = tolower(ServicePrincipalName), Source = strcat("Entra ID ", SignInType),
           Success = Succeeded, Target = "", AuthBy = "", App = ResourceDisplayName, Detail = strcat(Credential, " ", ResultType)
   ),
   (
-      _WinSecurity(StartTimestampstamp, EndTimestampstamp, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776]), Value)
+      _WinSecurity(StartTimestamp, EndTimestamp, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776]), Value)
       | where IpAddress == Value
       | project TimeGenerated, Account = iff(isempty(TargetDomainName) or TargetDomainName == "-", TargetSam, tolower(strcat(TargetDomainName, @"\", TargetSam))),
           Source = SourceTable, Success = EventID !in (4625, 4771) and Status in ("", "-", "0x0"),
@@ -36,14 +36,14 @@ query: |
   ),
   (
       DeviceLogonEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where RemoteIP == Value
       | project TimeGenerated, Account = tolower(strcat(AccountDomain, @"\", AccountName)), Source = "DeviceLogonEvents",
           Success = ActionType == "LogonSuccess", Target = tolower(DeviceName), AuthBy = "", App = "", Detail = strcat(LogonType, " ", FailureReason)
   ),
   (
       IdentityLogonEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where IPAddress == Value
       | project TimeGenerated, Account = tolower(coalesce(AccountUpn, AccountName)), Source = "IdentityLogonEvents",
           Success = ActionType == "LogonSuccess", Target = tolower(TargetDeviceName), AuthBy = tolower(DestinationDeviceName),
@@ -51,14 +51,14 @@ query: |
   ),
   (
       ASimAuthenticationEventLogs
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where SrcIpAddr == Value
       | project TimeGenerated, Account = tolower(TargetUsername), Source = strcat("ASIM ", EventProduct), Success = EventResult == "Success",
           Target = tolower(coalesce(TargetHostname, DvcHostname)), AuthBy = "", App = TargetAppName, Detail = strcat(LogonProtocol, " ", EventResultDetails)
   ),
   (
       Syslog
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where SyslogMessage has Value and ProcessName in~ ("sshd", "sshd-session")
       | extend User = extract(@"(?:Accepted|Failed) \S+ for (?:invalid user )?(\S+) from", 1, SyslogMessage)
       | where isnotempty(User)
@@ -67,8 +67,8 @@ query: |
   )
   | where isnotempty(Account) and Account !endswith "$"
   | extend MachineKey = _HostKey(Target), AccountKey = _SamOf(Account)
-  | lookup kind=leftouter (_MachineRoles(EndTimestampstamp)) on MachineKey
-  | lookup kind=leftouter (_AccountRoles(EndTimestampstamp)) on AccountKey
+  | lookup kind=leftouter (_MachineRoles(EndTimestamp)) on MachineKey
+  | lookup kind=leftouter (_AccountRoles(EndTimestamp)) on AccountKey
   | summarize Attempts = count(), Successes = countif(Success), Failures = countif(not(Success)),
       FirstSeen = min(TimeGenerated), FirstSuccess = minif(TimeGenerated, Success), LastSeen = max(TimeGenerated),
       Targets = make_set_if(_Labeled(Target, MachineRole), isnotempty(Target), 20), ValidatedBy = make_set_if(AuthBy, isnotempty(AuthBy), 5),

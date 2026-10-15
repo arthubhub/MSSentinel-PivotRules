@@ -16,25 +16,25 @@ uses: [signins, spn_signins]
 query: |
   union isfuzzy=true
   (
-      _Signins(StartTimestampstamp, EndTimestampstamp, Value, "")
+      _Signins(StartTimestamp, EndTimestamp, Value, "")
       | project TimeGenerated, Service = "Entra ID", Operation = strcat("Connexion à ", AppDisplayName), Target = ResourceDisplayName,
           Account = tolower(UserPrincipalName), Result = iff(Succeeded, "Succès", strcat("Échec ", ResultType))
   ),
   (
-      _SpnSignins(StartTimestampstamp, EndTimestampstamp, "", Value)
+      _SpnSignins(StartTimestamp, EndTimestamp, "", Value)
       | project TimeGenerated, Service = strcat("Entra ID (", SignInType, ")"), Operation = strcat("Connexion à ", ResourceDisplayName),
           Target = ResourceDisplayName, Account = tolower(ServicePrincipalName), Result = iff(Succeeded, "Succès", strcat("Échec ", ResultType))
   ),
   (
       AuditLogs
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where tostring(InitiatedBy.user.ipAddress) == Value or tostring(InitiatedBy.app.ipAddress) == Value
       | project TimeGenerated, Service = "Annuaire Entra ID", Operation = OperationName, Target = tostring(TargetResources[0].displayName),
           Account = tolower(coalesce(tostring(InitiatedBy.user.userPrincipalName), tostring(InitiatedBy.app.displayName))), Result
   ),
   (
       MicrosoftGraphActivityLogs
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where IPAddress == Value
       | project TimeGenerated, Service = "Microsoft Graph",
           Operation = strcat(RequestMethod, " ", replace_regex(tostring(parse_url(RequestUri).Path), @"[0-9a-fA-F-]{36}", "{id}")),
@@ -42,28 +42,28 @@ query: |
   ),
   (
       CloudAppEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where IPAddress == Value
       | project TimeGenerated, Service = Application, Operation = ActionType, Target = ObjectName,
           Account = tolower(coalesce(tostring(RawEventData.UserId), AccountDisplayName)), Result = ""
   ),
   (
       OfficeActivity
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where ClientIP has Value
       | project TimeGenerated, Service = OfficeWorkload, Operation, Target = coalesce(OfficeObjectId, SourceFileName),
           Account = tolower(UserId), Result = ResultStatus
   ),
   (
       AzureActivity
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where CallerIpAddress == Value
       | project TimeGenerated, Service = "Azure Resource Manager", Operation = OperationNameValue, Target = _ResourceId,
           Account = tolower(Caller), Result = ActivityStatusValue
   ),
   (
       AZKVAuditLogs
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where CallerIpAddress == Value
       | extend Id = parse_json(tostring(Identity))
       | project TimeGenerated, Service = "Key Vault", Operation = OperationName, Target = _ResourceId,
@@ -71,7 +71,7 @@ query: |
   ),
   (
       AzureDiagnostics
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where ResourceProvider == "MICROSOFT.KEYVAULT" and CallerIPAddress == Value
       | project TimeGenerated, Service = "Key Vault", Operation = OperationName, Target = Resource,
           Account = tolower(coalesce(column_ifexists("identity_claim_http_schemas_xmlsoap_org_ws_2005_05_identity_claims_upn_s", ""), column_ifexists("identity_claim_appid_g", ""))),
@@ -79,7 +79,7 @@ query: |
   ),
   (
       StorageBlobLogs
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where CallerIpAddress startswith strcat(Value, ":") or CallerIpAddress == Value
       | project TimeGenerated, Service = strcat("Stockage Blob ", AccountName), Operation = OperationName, Target = ObjectKey,
           Account = tolower(coalesce(RequesterUpn, RequesterObjectId, AuthenticationType)), Result = StatusText

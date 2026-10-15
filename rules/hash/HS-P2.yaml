@@ -20,7 +20,7 @@ query: |
   union isfuzzy=true
   (
       DeviceFileEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where SHA256 == ValueHash or SHA1 == ValueHash or MD5 == ValueHash
       | where isempty(HostFilter) or DeviceName startswith HostFilter
       | project TimeGenerated, Source = "DeviceFileEvents", Where = tolower(DeviceName), FileName, FolderPath,
@@ -29,11 +29,11 @@ query: |
   ),
   (
       EmailAttachmentInfo
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where SHA256 == ValueHash
       | join kind=leftouter (
           EmailEvents
-          | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+          | where TimeGenerated between (StartTimestamp .. EndTimestamp)
           | project NetworkMessageId, RecipientEmailAddress, Subject, DeliveryAction, SenderIPv4
           ) on NetworkMessageId, RecipientEmailAddress
       | project TimeGenerated, Source = "EmailAttachmentInfo", Where = tolower(RecipientEmailAddress), FileName, FolderPath = "",
@@ -43,7 +43,7 @@ query: |
   // @sentinel-only:begin
   , (
       ASimWebSessionLogs
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where FileSHA256 =~ ValueHash or FileSHA1 =~ ValueHash or FileMD5 =~ ValueHash
       | project TimeGenerated, Source = strcat("ASimWebSessionLogs (", EventProduct, ")"), Where = tolower(coalesce(SrcHostname, SrcIpAddr)),
           FileName, FolderPath = "", OriginUrl = Url, Referrer = HttpReferrer, OriginIP = DstIpAddr,
@@ -51,14 +51,14 @@ query: |
   ),
   (
       CommonSecurityLog
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where FileHash =~ ValueHash
       | project TimeGenerated, Source = strcat("CommonSecurityLog (", DeviceVendor, ")"), Where = tolower(coalesce(SourceHostName, SourceIP)),
           FileName, FolderPath = FilePath, OriginUrl = RequestURL, Referrer = "", OriginIP = DestinationIP,
           Via = strcat(DeviceProduct, " · ", SourceUserName), Detail = coalesce(DeviceAction, Activity)
   ),
   (
-      _Sysmon(StartTimestampstamp, EndTimestampstamp, dynamic([15]), ValueHash)
+      _Sysmon(StartTimestamp, EndTimestamp, dynamic([15]), ValueHash)
       | where SHA256 == ValueHash or SHA1 == ValueHash or MD5 == ValueHash
       | where isempty(HostFilter) or Computer startswith HostFilter
       | project TimeGenerated, Source = "Sysmon 15 (Zone.Identifier)", Where = tolower(Computer), FileName = TargetFile, FolderPath = TargetFilename,

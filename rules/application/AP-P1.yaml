@@ -18,13 +18,13 @@ query: |
       "Add owner to application", "Add owner to service principal", "Update application", "Add application"]);
   // CloudAppEvents ne sert que si AuditLogs manque sur la période : les mêmes opérations y figurent sinon en double
   let HasAudit = toscalar(union isfuzzy=true
-      (AuditLogs | where TimeGenerated between ((StartTimestampstamp - 1d) .. EndTimestampstamp) | take 1 | project Present = 1),
+      (AuditLogs | where TimeGenerated between ((StartTimestamp - 1d) .. EndTimestamp) | take 1 | project Present = 1),
       (print Present = 0)
       | summarize max(Present)) == 1;
   union isfuzzy=true
   (
       AuditLogs
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where OperationName in (Ops) or OperationName has "Certificates and secrets management"
       | where TargetResources has ValueApp or AdditionalDetails has ValueApp
       | extend Changes = tostring(TargetResources[0].modifiedProperties)
@@ -39,7 +39,7 @@ query: |
   ),
   (
       CloudAppEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where not(HasAudit)
       | where ActionType has_any (Ops) or ActionType has "Certificates and secrets management"
       | where RawEventData has ValueApp

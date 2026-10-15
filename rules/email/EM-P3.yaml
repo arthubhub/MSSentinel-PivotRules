@@ -15,13 +15,13 @@ window: { before: 5m, after: 5m }
 uses: [roles]
 query: |
   DeviceNetworkEvents
-  | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+  | where TimeGenerated between (StartTimestamp .. EndTimestamp)
   | where InitiatingProcessAccountUpn =~ ValueMail
       or (isempty(InitiatingProcessAccountUpn) and InitiatingProcessAccountName =~ ValueMailLocal)
   | where RemoteIPType != "Loopback"
   | project TimeGenerated, DeviceName, ActionType, Process = InitiatingProcessFileName, CommandLine = InitiatingProcessCommandLine,
       RemoteUrl, RemoteIP, RemotePort, RemoteIPType, Protocol
   | extend MachineKey = _HostKey(DeviceName)
-  | lookup kind=leftouter (_MachineRoles(EndTimestampstamp)) on MachineKey
+  | lookup kind=leftouter (_MachineRoles(EndTimestamp)) on MachineKey
   | project-away MachineKey, MachineRoleBasis
   | sort by TimeGenerated asc

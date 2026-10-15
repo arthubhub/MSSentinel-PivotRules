@@ -18,28 +18,28 @@ query: |
   let H = materialize(union isfuzzy=true
   (
       union isfuzzy=true withsource=Source DeviceFileEvents, DeviceProcessEvents, DeviceImageLoadEvents, DeviceEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where SHA256 == ValueHash or SHA1 == ValueHash or MD5 == ValueHash
       | where isempty(HostFilter) or DeviceName startswith HostFilter
       | project TimeGenerated, Source, DeviceName = tolower(DeviceName), FileName, FolderPath
   ),
   (
       EmailAttachmentInfo
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where SHA256 == ValueHash
       | project TimeGenerated, Source = "EmailAttachmentInfo", DeviceName = tolower(RecipientEmailAddress), FileName, FolderPath = ""
   )
   // @sentinel-only:begin
   , (
       ASimFileEventLogs
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where TargetFileSHA256 =~ ValueHash or TargetFileSHA1 =~ ValueHash or TargetFileMD5 =~ ValueHash
       | where isempty(HostFilter) or DvcHostname startswith HostFilter
       | project TimeGenerated, Source = "ASimFileEventLogs", DeviceName = tolower(DvcHostname), FileName = TargetFileName, FolderPath = TargetFilePath
   ),
   (
       ASimProcessEventLogs
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where TargetProcessSHA256 =~ ValueHash or TargetProcessSHA1 =~ ValueHash or TargetProcessMD5 =~ ValueHash
       | where isempty(HostFilter) or DvcHostname startswith HostFilter
       | project TimeGenerated, Source = "ASimProcessEventLogs", DeviceName = tolower(DvcHostname), FileName = TargetProcessFilename,
@@ -47,18 +47,18 @@ query: |
   ),
   (
       ASimWebSessionLogs
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where FileSHA256 =~ ValueHash or FileSHA1 =~ ValueHash or FileMD5 =~ ValueHash
       | project TimeGenerated, Source = "ASimWebSessionLogs", DeviceName = tolower(coalesce(SrcHostname, SrcIpAddr)), FileName, FolderPath = Url
   ),
   (
       CommonSecurityLog
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where FileHash =~ ValueHash
       | project TimeGenerated, Source = "CommonSecurityLog", DeviceName = tolower(coalesce(SourceHostName, SourceIP)), FileName, FolderPath = FilePath
   ),
   (
-      _Sysmon(StartTimestampstamp, EndTimestampstamp, dynamic([1, 7, 15, 23, 26, 29]), ValueHash)
+      _Sysmon(StartTimestamp, EndTimestamp, dynamic([1, 7, 15, 23, 26, 29]), ValueHash)
       | where SHA256 == ValueHash or SHA1 == ValueHash or MD5 == ValueHash
       | where isempty(HostFilter) or Computer startswith HostFilter
       | extend Path = case(EventID == 1, Image, EventID == 7, ImageLoaded, TargetFilename)

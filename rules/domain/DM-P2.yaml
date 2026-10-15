@@ -13,13 +13,13 @@ window: { before: 7d, after: 1d }
 uses: [web_functions]
 query: |
   EmailUrlInfo
-  | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+  | where TimeGenerated between (StartTimestamp .. EndTimestamp)
   | where UrlDomain has ValueDomain
   | where _InDomain(tolower(UrlDomain), ValueDomain)
   | summarize Urls = make_set(Url, 5) by NetworkMessageId
   | join kind=inner (
       EmailEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | project NetworkMessageId, TimeGenerated, SenderFromAddress, RecipientEmailAddress, Subject, DeliveryAction,
           LatestDeliveryLocation, ThreatTypes, EmailDirection
       ) on NetworkMessageId

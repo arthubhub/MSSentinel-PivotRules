@@ -13,7 +13,7 @@ reading:
 window: { before: 1h, after: 1h }
 query: |
   let Downloads = DeviceFileEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where DeviceName startswith ValueShort
       | where _IsHost(DeviceName)
       | where ActionType in ("FileCreated", "FileRenamed", "FileModified") and isnotempty(SHA256)
@@ -21,7 +21,7 @@ query: |
       | project DownloadTime = TimeGenerated, DeviceId, SHA256, DownloadedFile = FileName, FolderPath, FileOriginUrl,
           FileOriginReferrerUrl, Writer = InitiatingProcessFileName;
   DeviceProcessEvents
-  | where TimeGenerated between (StartTimestampstamp .. (EndTimestampstamp + 10m))
+  | where TimeGenerated between (StartTimestamp .. (EndTimestamp + 10m))
   | where DeviceName startswith ValueShort
   | where _IsHost(DeviceName)
   | project ExecTime = TimeGenerated, DeviceId, DeviceName, SHA256, ExecutedFile = FileName, ProcessCommandLine,

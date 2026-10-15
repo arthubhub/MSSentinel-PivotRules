@@ -14,6 +14,6 @@ window: { before: 7d, after: 1d }
 render: timechart
 uses: [ip_events]
 query: |
-  _IpEvents(StartTimestampstamp, EndTimestampstamp, Value)
+  _IpEvents(StartTimestamp, EndTimestamp, Value)
   | summarize Events = count() by bin(TimeGenerated, 1d), Source
   | render timechart

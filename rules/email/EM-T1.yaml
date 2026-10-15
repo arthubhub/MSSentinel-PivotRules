@@ -19,20 +19,20 @@ query: |
   union isfuzzy=true
   (
       EmailEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where RecipientEmailAddress =~ ValueMail
       | project TimeGenerated, Source = "EmailEvents", Host = "", Account = ValueMail, Action = "E-mail reçu",
           Detail = strcat(SenderFromAddress, " · ", Subject, " · ", DeliveryAction, " ", ThreatTypes)
   ),
   (
       UrlClickEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where AccountUpn =~ ValueMail
       | project TimeGenerated, Source = "UrlClickEvents", Host = "", Account = ValueMail, Action = strcat("Clic ", ActionType), Detail = Url
   ),
   (
       DeviceFileEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where IsUser(InitiatingProcessAccountUpn, InitiatingProcessAccountName)
       | where isnotempty(FileOriginUrl) or FolderPath has @"\Downloads\"
       | project TimeGenerated, Source = "DeviceFileEvents", Host = tolower(DeviceName), Account = ValueMail,
@@ -40,7 +40,7 @@ query: |
   ),
   (
       DeviceProcessEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where IsUser(AccountUpn, AccountName)
       | where InitiatingProcessFileName in~ (Launchers)
       | project TimeGenerated, Source = "DeviceProcessEvents", Host = tolower(DeviceName), Account = ValueMail,
@@ -48,7 +48,7 @@ query: |
   ),
   (
       DeviceNetworkEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where IsUser(InitiatingProcessAccountUpn, InitiatingProcessAccountName)
       | where RemoteIPType == "Public"
       | summarize TimeGenerated = min(TimeGenerated) by DeviceName, InitiatingProcessFileName, Destination = coalesce(RemoteUrl, RemoteIP), RemotePort
@@ -56,7 +56,7 @@ query: |
           Action = strcat("Premier contact · ", InitiatingProcessFileName), Detail = strcat(Destination, ":", tostring(RemotePort))
   )
   | extend MachineKey = _HostKey(Host)
-  | lookup kind=leftouter (_MachineRoles(EndTimestampstamp)) on MachineKey
+  | lookup kind=leftouter (_MachineRoles(EndTimestamp)) on MachineKey
   | extend Host = _Labeled(Host, MachineRole)
   | project-away MachineKey, MachineRole, MachineRoleBasis
   | sort by TimeGenerated asc

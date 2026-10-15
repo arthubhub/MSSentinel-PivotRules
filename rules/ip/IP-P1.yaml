@@ -17,11 +17,11 @@ v1: true
 window: { before: 24h, after: 1h }
 uses: [win_security, roles]
 query: |
-  let IpRole = _IpRoleOf(Value, EndTimestampstamp);
+  let IpRole = _IpRoleOf(Value, EndTimestamp);
   union isfuzzy=true
   (
       DeviceNetworkInfo
-      | where TimeGenerated between ((StartTimestampstamp - 1d) .. EndTimestampstamp)
+      | where TimeGenerated between ((StartTimestamp - 1d) .. EndTimestamp)
       | where IPAddresses has Value
       | mv-expand Ip = IPAddresses
       | where tostring(Ip.IPAddress) == Value
@@ -30,62 +30,62 @@ query: |
   ),
   (
       Heartbeat
-      | where TimeGenerated between ((StartTimestampstamp - 1d) .. EndTimestampstamp)
+      | where TimeGenerated between ((StartTimestamp - 1d) .. EndTimestamp)
       | where ComputerIP == Value or ComputerPrivateIPs has Value
       | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
           by Machine = tolower(Computer), Evidence = iff(ComputerIP == Value, "IP de l'agent Azure Monitor", "IP privée de l'agent Azure Monitor"), Source = "Heartbeat"
   ),
   (
       Syslog
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where HostIP == Value
       | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
           by Machine = tolower(Computer), Evidence = "IP de la machine Linux (Syslog)", Source = "Syslog"
   ),
   (
       DeviceNetworkEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where LocalIP == Value
       | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
           by Machine = tolower(DeviceName), Evidence = "IP locale de connexions réseau", Source = "DeviceNetworkEvents"
   ),
   (
       DeviceInfo
-      | where TimeGenerated between ((StartTimestampstamp - 1d) .. EndTimestampstamp)
+      | where TimeGenerated between ((StartTimestamp - 1d) .. EndTimestamp)
       | where PublicIP == Value
       | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
           by Machine = tolower(DeviceName), Evidence = "IP publique de sortie", Source = "DeviceInfo"
   ),
   (
-      _WinSecurity(StartTimestampstamp, EndTimestampstamp, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776]), Value)
+      _WinSecurity(StartTimestamp, EndTimestamp, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776]), Value)
       | where IpAddress == Value and isnotempty(WorkstationName)
       | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
           by Machine = tolower(WorkstationName), Evidence = strcat("Poste source déclaré, vu par ", tolower(Computer)), Source = SourceTable
   ),
   (
       DeviceLogonEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where RemoteIP == Value and isnotempty(RemoteDeviceName)
       | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
           by Machine = tolower(RemoteDeviceName), Evidence = strcat("Poste distant vu par ", tolower(DeviceName)), Source = "DeviceLogonEvents"
   ),
   (
       IdentityLogonEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where IPAddress == Value and isnotempty(DeviceName)
       | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
           by Machine = tolower(DeviceName), Evidence = strcat("Source ", Protocol, " vers ", Application), Source = "IdentityLogonEvents"
   ),
   (
       ASimAuthenticationEventLogs
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where SrcIpAddr == Value and isnotempty(SrcHostname)
       | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
           by Machine = tolower(SrcHostname), Evidence = strcat("Poste source (", EventProduct, ")"), Source = "ASimAuthenticationEventLogs"
   ),
   (
       ASimNetworkSessionLogs
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where (SrcIpAddr == Value and isnotempty(SrcHostname)) or (DstIpAddr == Value and isnotempty(DstHostname))
       | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
           by Machine = tolower(iff(SrcIpAddr == Value, SrcHostname, DstHostname)), Evidence = strcat("Nom de machine du flux (", EventProduct, ")"), Source = "ASimNetworkSessionLogs"
@@ -93,7 +93,7 @@ query: |
   | summarize FirstSeen = min(FirstSeen), LastSeen = max(LastSeen), Events = sum(Events),
       Evidence = make_set(Evidence, 10), Sources = make_set(Source) by Machine
   | extend MachineKey = _HostKey(Machine)
-  | lookup kind=leftouter (_MachineRoles(EndTimestampstamp)) on MachineKey
+  | lookup kind=leftouter (_MachineRoles(EndTimestamp)) on MachineKey
   | extend ConfidenceRank = case(
       set_has_element(Sources, "DeviceNetworkInfo") or set_has_element(Sources, "Heartbeat") or set_has_element(Sources, "DeviceNetworkEvents")
           or set_has_element(Sources, "Syslog"), 1,

@@ -13,7 +13,7 @@ window: { before: 7d, after: 1d }
 render: timechart
 query: |
   EmailEvents
-  | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+  | where TimeGenerated between (StartTimestamp .. EndTimestamp)
   | where RecipientEmailAddress =~ ValueMail or SenderFromAddress =~ ValueMail or SenderMailFromAddress =~ ValueMail
   | extend Role = iff(RecipientEmailAddress =~ ValueMail, "Reçu", "Envoyé"),
       Verdict = iff(isempty(ThreatTypes), DeliveryAction, strcat(DeliveryAction, " · ", ThreatTypes))

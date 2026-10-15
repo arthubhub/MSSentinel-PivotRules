@@ -12,16 +12,16 @@ reading:
 window: { before: 4h, after: 1h }
 query: |
   let Msgs = EmailEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where RecipientEmailAddress =~ ValueMail or SenderFromAddress =~ ValueMail or SenderMailFromAddress =~ ValueMail
       | summarize MailTime = min(TimeGenerated), Subject = take_any(Subject), Sender = take_any(SenderFromAddress) by NetworkMessageId;
   let Clicks = UrlClickEvents
-      | where TimeGenerated between (StartTimestampstamp .. now())
+      | where TimeGenerated between (StartTimestamp .. now())
       | summarize Clicks = count(), Clickers = make_set(AccountUpn, 10) by NetworkMessageId, Url;
   union isfuzzy=true
   (
       EmailUrlInfo
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | join kind=inner (Msgs) on NetworkMessageId
       | join kind=leftouter (Clicks) on NetworkMessageId, Url
       | project MailTime, Sender, Subject, Kind = "URL", Item = Url, Info = strcat(UrlDomain, " · ", UrlLocation),
@@ -29,7 +29,7 @@ query: |
   ),
   (
       EmailAttachmentInfo
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | join kind=inner (Msgs) on NetworkMessageId
       | project MailTime, Sender, Subject, Kind = "Pièce jointe", Item = FileName, Info = strcat(FileType, " · ", tostring(FileSize), " octets"),
           SHA256, Threat = strcat(ThreatTypes, " ", ThreatNames), Clicks = long(null), Clickers = dynamic(null), NetworkMessageId

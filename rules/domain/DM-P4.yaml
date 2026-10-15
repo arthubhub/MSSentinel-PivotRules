@@ -18,7 +18,7 @@ query: |
   union isfuzzy=true
   (
       DnsEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where SubType == "LookupQuery"
       | where Name has ValueDomain
       | where _InDomain(tolower(trim_end(@"\.", Name)), ValueDomain)
@@ -26,7 +26,7 @@ query: |
   ),
   (
       ASimDnsActivityLogs
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where DnsQuery has ValueDomain
       | where _InDomain(tolower(trim_end(@"\.", DnsQuery)), ValueDomain)
       | project TimeGenerated, Source = "ASimDnsActivityLogs", Query = tolower(trim_end(@"\.", DnsQuery)), Answer = DnsResponseName,
@@ -34,7 +34,7 @@ query: |
   ),
   (
       DeviceEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where ActionType == "DnsQueryResponse"
       | where AdditionalFields has ValueDomain
       | extend AF = parse_json(tostring(AdditionalFields))
@@ -44,13 +44,13 @@ query: |
   ),
   (
       DeviceNetworkEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where RemoteUrl has ValueDomain
       | where _InDomain(_Host(RemoteUrl), ValueDomain)
       | project TimeGenerated, Source = "DeviceNetworkEvents", Query = _Host(RemoteUrl), Answer = RemoteIP, Client = tolower(DeviceName)
   ),
   (
-      _Sysmon(StartTimestampstamp, EndTimestampstamp, dynamic([22]), ValueDomain)
+      _Sysmon(StartTimestamp, EndTimestamp, dynamic([22]), ValueDomain)
       | extend Query = tolower(trim_end(@"\.", QueryName))
       | where _InDomain(Query, ValueDomain)
       | project TimeGenerated, Source = "Sysmon 22", Query, Answer = QueryResults, Client = tolower(Computer)

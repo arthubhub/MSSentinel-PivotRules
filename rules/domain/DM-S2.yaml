@@ -13,7 +13,7 @@ v1: true
 window: { before: 30d, after: 1d }
 uses: [domain_hits]
 query: |
-  let Hits = materialize(_DomainHits(StartTimestampstamp, EndTimestampstamp, ValueDomain) | extend Fqdn = _Host(Url));
+  let Hits = materialize(_DomainHits(StartTimestamp, EndTimestamp, ValueDomain) | extend Fqdn = _Host(Url));
   union
   (
       Hits

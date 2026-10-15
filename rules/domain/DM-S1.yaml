@@ -15,6 +15,6 @@ window: { before: 14d, after: 1d }
 render: timechart
 uses: [domain_hits]
 query: |
-  _DomainHits(StartTimestampstamp, EndTimestampstamp, ValueDomain)
+  _DomainHits(StartTimestamp, EndTimestamp, ValueDomain)
   | summarize Events = count() by bin(TimeGenerated, 1d), Source
   | render timechart
