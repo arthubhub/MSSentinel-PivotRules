@@ -528,7 +528,7 @@ function discoveryQuery(term, known, depth = 5) {
     '        | extend Raw = Cell[Column]',
     '        | where tostring(Raw) has Term',
     '        | project Column, Raw)',
-    '    | project Table, Column, Path = Column, Text = substring(tostring(Raw), 0, 300),',
+    '    | project Table, Column, Path = Column, Text = substring(tostring(Raw), 0, 3000),',
     '        V = iff(gettype(Raw) in ("dictionary", "array"), Raw, parse_json(tostring(Raw)))',
     ...Array.from({ length: depth }, () => level).flat(),
     '    | extend Exact = tolower(tostring(V)) == tolower(Term) or tostring(V) == Value',
