@@ -18,7 +18,7 @@ query: |
   union isfuzzy=true
   (
       DeviceProcessEvents
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where FileName =~ ValueFile or InitiatingProcessFileName =~ ValueFile
       | where isempty(HostFilter) or DeviceName startswith HostFilter
       | project TimeGenerated, Source = "DeviceProcessEvents", Host = tolower(DeviceName), Account = tolower(AccountName),
@@ -27,7 +27,7 @@ query: |
   ),
   (
       DeviceNetworkEvents
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where InitiatingProcessFileName =~ ValueFile
       | where isempty(ValuePath) or InitiatingProcessFolderPath =~ ValuePath
       | where isempty(HostFilter) or DeviceName startswith HostFilter
@@ -38,7 +38,7 @@ query: |
   ),
   (
       DeviceFileEvents
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where InitiatingProcessFileName =~ ValueFile
       | where isempty(ValuePath) or InitiatingProcessFolderPath =~ ValuePath
       | where isempty(HostFilter) or DeviceName startswith HostFilter
@@ -47,7 +47,7 @@ query: |
   ),
   (
       DeviceRegistryEvents
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where InitiatingProcessFileName =~ ValueFile
       | where isempty(ValuePath) or InitiatingProcessFolderPath =~ ValuePath
       | where isempty(HostFilter) or DeviceName startswith HostFilter
@@ -58,7 +58,7 @@ query: |
   // @sentinel-only:begin
   , (
       ASimProcessEventLogs
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where TargetProcessName has ValueFile or ActingProcessName has ValueFile
       | where tolower(TargetProcessFilename) == ValueFile or tolower(ActingProcessFilename) == ValueFile
       | where isempty(HostFilter) or DvcHostname startswith HostFilter
@@ -67,7 +67,7 @@ query: |
           Detail = TargetProcessCommandLine
   ),
   (
-      _Sysmon(StartTime, EndTime, dynamic([1, 3, 11, 13, 22, 23, 26]), ValueFile)
+      _Sysmon(StartTimestampstamp, EndTimestampstamp, dynamic([1, 3, 11, 13, 22, 23, 26]), ValueFile)
       | where ProcessFile == ValueFile or (EventID == 1 and ParentFile == ValueFile)
       | where isempty(ValuePath) or tolower(Image) == ValuePath or tolower(ParentImage) == ValuePath
       | where isempty(HostFilter) or Computer startswith HostFilter
@@ -79,7 +79,7 @@ query: |
   )
   // @sentinel-only:end
   | extend MachineKey = _HostKey(Host)
-  | lookup kind=leftouter (_MachineRoles(EndTime)) on MachineKey
+  | lookup kind=leftouter (_MachineRoles(EndTimestampstamp)) on MachineKey
   | extend Host = _Labeled(Host, MachineRole)
   | project-away MachineKey, MachineRole, MachineRoleBasis
   | sort by TimeGenerated asc

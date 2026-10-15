@@ -17,7 +17,7 @@ query: |
   union isfuzzy=true
   (
       DeviceNetworkEvents
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where RemoteIP == Value or LocalIP == Value
       | project TimeGenerated, Source = "DeviceNetworkEvents", DeviceName = tolower(DeviceName),
           Direction = iff(RemoteIP == Value, "Vers l'IP", "IP locale de la machine"), Process = InitiatingProcessFileName,
@@ -27,7 +27,7 @@ query: |
   // @sentinel-only:begin
   , (
       ASimNetworkSessionLogs
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where (DstIpAddr == Value or SrcIpAddr == Value) and isnotempty(SrcAppName)
       | project TimeGenerated, Source = strcat("ASimNetworkSessionLogs (", EventProduct, ")"), DeviceName = tolower(SrcHostname),
           Direction = iff(DstIpAddr == Value, "Vers l'IP", "IP locale de la machine"), Process = tostring(split(replace_string(SrcAppName, "/", @"\"), @"\")[-1]),
@@ -35,7 +35,7 @@ query: |
           ActionType = DvcAction, CommandLine = ""
   ),
   (
-      _Sysmon(StartTime, EndTime, dynamic([3]), Value)
+      _Sysmon(StartTimestampstamp, EndTimestampstamp, dynamic([3]), Value)
       | where DestinationIp == Value or SourceIp == Value
       | project TimeGenerated, Source = "Sysmon 3", DeviceName = tolower(Computer),
           Direction = iff(DestinationIp == Value, "Vers l'IP", "IP locale de la machine"), Process = ProcessFile, ProcessPath = Image,
@@ -51,7 +51,7 @@ query: |
       Actions = make_set(ActionType), CommandLine = take_any(CommandLine), Sources = make_set(Source)
       by DeviceName, Direction, Process, ProcessPath, Account, ProcessSHA256
   | extend MachineKey = _HostKey(DeviceName)
-  | lookup kind=leftouter (_MachineRoles(EndTime)) on MachineKey
+  | lookup kind=leftouter (_MachineRoles(EndTimestampstamp)) on MachineKey
   | extend AccountKind = _AccountKind(_SamOf(Account))
   | project FirstSeen, LastSeen, DeviceName, MachineRole, Direction, Process, ProcessPath, Account, AccountKind, Connections,
       MedianGapSeconds, Ports, Urls, Actions, CommandLine, ProcessSHA256, Sources

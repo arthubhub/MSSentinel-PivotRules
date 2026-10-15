@@ -25,12 +25,12 @@ v1: true
 window: { before: 24h, after: 1h }
 uses: [win_security, roles]
 query: |
-  let Win = materialize(_WinSecurity(StartTime, EndTime, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776]), ValueSam)
+  let Win = materialize(_WinSecurity(StartTimestampstamp, EndTimestampstamp, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776]), ValueSam)
       | where TargetSam == ValueSam);
   union isfuzzy=true
   (
       DeviceLogonEvents
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where AccountName =~ ValueSam
       | project TimeGenerated, Machine = tolower(DeviceName), Perspective = "Session sur la machine", Source = "DeviceLogonEvents",
           LogonType, Success = ActionType == "LogonSuccess", SourceIp = RemoteIP, SourceHost = tolower(RemoteDeviceName), AuthBy = "",
@@ -61,7 +61,7 @@ query: |
   ),
   (
       IdentityLogonEvents
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where AccountUpn =~ ValueUpn or AccountName =~ ValueSam
       | extend Pair = pack_array(
           bag_pack("Machine", tolower(TargetDeviceName), "Perspective", "Session sur la machine"),
@@ -74,7 +74,7 @@ query: |
   ),
   (
       ASimAuthenticationEventLogs
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where TargetUsername has ValueSam
       | where tolower(TargetUsername) in (ValueSam, ValueUpn) or tolower(TargetUsername) endswith strcat(@"\", ValueSam)
       | project TimeGenerated, Machine = tolower(coalesce(TargetHostname, DvcHostname)), Perspective = "Session sur la machine",
@@ -83,7 +83,7 @@ query: |
   ),
   (
       Syslog
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where ProcessName in~ ("sshd", "sshd-session") and SyslogMessage has ValueSam
       | extend User = extract(@"(?:Accepted|Failed) \S+ for (?:invalid user )?(\S+) from", 1, SyslogMessage)
       | where tolower(User) == ValueSam
@@ -93,7 +93,7 @@ query: |
   )
   | where isnotempty(Machine) and Machine != "-"
   | extend MachineKey = _HostKey(Machine)
-  | lookup kind=leftouter (_MachineRoles(EndTime)) on MachineKey
+  | lookup kind=leftouter (_MachineRoles(EndTimestampstamp)) on MachineKey
   | extend Perspective = iff(MachineRole has "DC" and Perspective == "Session sur la machine" and LogonType has "Network",
       "Accès réseau au contrôleur de domaine (GPO, SYSVOL, LDAP)", Perspective)
   | extend Rank = case(Perspective startswith "Session", 1, Perspective startswith "Identifiants", 2, Perspective startswith "Ticket", 3,

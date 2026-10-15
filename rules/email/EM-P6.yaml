@@ -12,7 +12,7 @@ reading:
 window: { before: 7d, after: 1d }
 query: |
   EmailEvents
-  | where TimeGenerated between (StartTime .. EndTime)
+  | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
   | where RecipientEmailAddress =~ ValueMail
   | summarize Mails = count(), Forwarded = countif(isnotempty(ForwardingInformation)), FirstSeen = min(TimeGenerated),
       LastSeen = max(TimeGenerated), Subjects = make_set(Subject, 20), Directions = make_set(EmailDirection),

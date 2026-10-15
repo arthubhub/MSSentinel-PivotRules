@@ -13,10 +13,10 @@ reading:
 window: { before: 7d, after: 1d }
 uses: [ip_events, roles]
 query: |
-  _IpEvents(StartTime, EndTime, Value)
+  _IpEvents(StartTimestampstamp, EndTimestampstamp, Value)
   | where isnotempty(Account) and Account != "-"
   | extend AccountKey = _SamOf(Account)
-  | lookup kind=leftouter (_AccountRoles(EndTime)) on AccountKey
+  | lookup kind=leftouter (_AccountRoles(EndTimestampstamp)) on AccountKey
   | extend Account = _Labeled(Account, _JoinRoles(_AccountKind(AccountKey), AccountRole))
   | summarize Events = count() by Account, Day = format_datetime(bin(TimeGenerated, 1d), "yyyy-MM-dd")
   | evaluate pivot(Day, sum(Events), Account)

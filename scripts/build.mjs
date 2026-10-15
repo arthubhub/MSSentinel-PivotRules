@@ -184,8 +184,8 @@ function header(rule) {
     `let T0 = coalesce(todatetime(@"{{T0}}"), now());`,
     `let Before = coalesce(tolong(@"{{BEFORE_MIN}}"), ${toMinutes(rule.window.before)}) * 1m; // défaut : ${rule.window.before}`,
     `let After = coalesce(tolong(@"{{AFTER_MIN}}"), ${toMinutes(rule.window.after)}) * 1m; // défaut : ${rule.window.after}`,
-    'let StartTime = T0 - Before;',
-    'let EndTime = T0 + After;',
+    'let StartTimestamp = T0 - Before;',
+    'let EndTimestamp = T0 + After;',
   ];
   if ((rule.context || []).includes('HOST')) {
     lines.push('let HostFilter = tolower(tostring(split(trim(@"\\s", iff(@"{{HOST}}" startswith "{{", "", @"{{HOST}}")), ".")[0]));');
@@ -354,9 +354,9 @@ function coverageQuery(members, usage) {
     return `    ${kqlStr(m.key)}, ${kqlStr(m.table)}, ${kqlArr(m.families.map((f) => SOURCES[f].label))}, ${hints}, ` +
       `${kqlStr(m.hint || '')}, ${!!optional}, ${kqlArr([...m.readers].sort())}, ${kqlArr([...(usage[m.table]?.columns || [])].sort())}`;
   });
-  const volume = members.map((m) => `    (${m.table} | where ${timeCol(m.table)} between (StartTime .. EndTime)` +
+  const volume = members.map((m) => `    (${m.table} | where ${timeCol(m.table)} between (StartTimestamp .. EndTimestamp)` +
     `${m.filter ? ` | where ${m.filter}` : ''} | summarize Events = count(), LastEvent = max(${timeCol(m.table)}) | extend Member = ${kqlStr(m.key)})`);
-  const tableVolume = tables.map((t) => `    (${t} | where ${timeCol(t)} between (StartTime .. EndTime) | summarize TableEvents = count() | extend Table = ${kqlStr(t)})`);
+  const tableVolume = tables.map((t) => `    (${t} | where ${timeCol(t)} between (StartTimestamp .. EndTimestamp) | summarize TableEvents = count() | extend Table = ${kqlStr(t)})`);
   const schema = tables.map((t) => `    (${t} | getschema | summarize PresentColumns = make_set(ColumnName) | extend Table = ${kqlStr(t)})`);
   return [
     'let Expected = datatable(Member:string, Table:string, Families:dynamic, Hints:dynamic, MemberHint:string, Optional:bool, Rules:dynamic, Columns:dynamic) [',
@@ -502,7 +502,7 @@ function discoveryQuery(term, known, depth = 5) {
     '// 1. Un seul passage sur toutes les tables',
     'let Hits = materialize(',
     '    union isfuzzy=true withsource=Table *',
-    '    | where TimeGenerated between (StartTime .. EndTime)',
+    '    | where TimeGenerated between (StartTimestamp .. EndTimestamp)',
     '    | where * has Term',
     '    | extend Row = pack_all(true));',
     '// 2. Statistiques par table, sur toutes les lignes trouvées',

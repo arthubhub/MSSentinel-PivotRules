@@ -14,10 +14,10 @@ reading:
 window: { before: 7d, after: 1d }
 uses: [ip_events, roles]
 query: |
-  _IpEvents(StartTime, EndTime, Value)
+  _IpEvents(StartTimestampstamp, EndTimestampstamp, Value)
   | where isnotempty(Host) or isnotempty(AuthBy)
   | extend MachineKey = _HostKey(coalesce(Host, AuthBy))
-  | lookup kind=leftouter (_MachineRoles(EndTime)) on MachineKey
+  | lookup kind=leftouter (_MachineRoles(EndTimestampstamp)) on MachineKey
   | extend Machine = _Labeled(iff(isnotempty(Host), Host, strcat(AuthBy, " · validation des identifiants")), MachineRole)
   | summarize Events = count() by Machine, Day = format_datetime(bin(TimeGenerated, 1d), "yyyy-MM-dd")
   | evaluate pivot(Day, sum(Events), Machine)

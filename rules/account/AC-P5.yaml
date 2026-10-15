@@ -22,7 +22,7 @@ query: |
           LastSeenInDirectory = datetime(null)),
       (
           IdentityInfo
-          | where TimeGenerated between ((T0 - 14d) .. EndTime)
+          | where TimeGenerated between ((T0 - 14d) .. EndTimestampstamp)
           | extend Sam = tolower(coalesce(tostring(column_ifexists("SAMAccountName", "")), AccountName)),
               Upn = tolower(coalesce(tostring(column_ifexists("AccountUPN", "")), tostring(column_ifexists("AccountUpn", ""))))
           | where Sam == ValueSam or Upn == ValueUpn
@@ -33,17 +33,17 @@ query: |
               LastSeenInDirectory = TimeGenerated
       )
       | take 1;
-  let Roles = _AccountRoles(EndTime) | where AccountKey in (ValueSam, ValueUpn)
+  let Roles = _AccountRoles(EndTimestampstamp) | where AccountKey in (ValueSam, ValueUpn)
       | summarize KnownRoles = strcat_array(make_set(AccountRole), ", "), RoleBasis = make_set(AccountRoleBasis, 10);
   let Logons = union isfuzzy=true
       (datatable(Machine:string, LogonType:string, Source:string)[]),
-      (DeviceLogonEvents | where TimeGenerated between (StartTime .. EndTime) | where AccountName =~ ValueSam
+      (DeviceLogonEvents | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp) | where AccountName =~ ValueSam
           | project Machine = tolower(DeviceName), LogonType, Source = "DeviceLogonEvents"),
-      (_WinSecurity(StartTime, EndTime, dynamic([4624]), ValueSam) | where TargetSam == ValueSam
+      (_WinSecurity(StartTimestampstamp, EndTimestampstamp, dynamic([4624]), ValueSam) | where TargetSam == ValueSam
           | project Machine = TargetHost, LogonType = LogonTypeName, Source = SourceTable)
       | summarize Machines = dcount(Machine), ServiceLogons = countif(LogonType in ("Service", "Batch")),
           InteractiveLogons = countif(LogonType in ("Interactive", "RemoteInteractive", "CachedInteractive", "Unlock")), Logons = count();
-  let Cloud = _Signins(StartTime, EndTime, "", ValueUpn)
+  let Cloud = _Signins(StartTimestampstamp, EndTimestampstamp, "", ValueUpn)
       | summarize SignIns = count(), NonInteractive = countif(SignInType == "NonInteractive"), CloudIPs = dcount(IPAddress);
   print Account = Value, Sam = ValueSam
   | extend NameCategory = _AccountKind(ValueSam)

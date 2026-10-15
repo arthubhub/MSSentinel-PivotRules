@@ -18,7 +18,7 @@ query: |
   union isfuzzy=true
   (
       DeviceRegistryEvents
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where InitiatingProcessFileName =~ ValueFile
       | where isempty(ValuePath) or InitiatingProcessFolderPath =~ ValuePath
       | where isempty(HostFilter) or DeviceName startswith HostFilter
@@ -29,7 +29,7 @@ query: |
   ),
   (
       DeviceEvents
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where InitiatingProcessFileName =~ ValueFile
       | where isempty(ValuePath) or InitiatingProcessFolderPath =~ ValuePath
       | where isempty(HostFilter) or DeviceName startswith HostFilter
@@ -41,7 +41,7 @@ query: |
   ),
   (
       DeviceProcessEvents
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where InitiatingProcessFileName =~ ValueFile
       | where isempty(ValuePath) or InitiatingProcessFolderPath =~ ValuePath
       | where isempty(HostFilter) or DeviceName startswith HostFilter
@@ -51,7 +51,7 @@ query: |
   )
   // @sentinel-only:begin
   , (
-      _Sysmon(StartTime, EndTime, dynamic([12, 13, 14]), ValueFile)
+      _Sysmon(StartTimestampstamp, EndTimestampstamp, dynamic([12, 13, 14]), ValueFile)
       | where ProcessFile == ValueFile
       | where isempty(ValuePath) or tolower(Image) == ValuePath
       | where isempty(HostFilter) or Computer startswith HostFilter
@@ -60,7 +60,7 @@ query: |
           Action = coalesce(RegistryEventType, EventName), Item = TargetObject, Detail = Details, CommandLine = ""
   ),
   (
-      _WinSecurity(StartTime, EndTime, dynamic([4657]), ValueFile)
+      _WinSecurity(StartTimestampstamp, EndTimestampstamp, dynamic([4657]), ValueFile)
       | where tolower(ProcessName) endswith strcat(@"\", ValueFile)
       | where isempty(HostFilter) or Computer startswith HostFilter
       | project TimeGenerated, DeviceName = tolower(Computer), Kind = "Registre (audit Windows)", Persistence = _IsPersistenceKey(ObjectName, ObjectValueName),
@@ -68,6 +68,6 @@ query: |
   )
   // @sentinel-only:end
   | extend MachineKey = _HostKey(DeviceName)
-  | lookup kind=leftouter (_MachineRoles(EndTime)) on MachineKey
+  | lookup kind=leftouter (_MachineRoles(EndTimestampstamp)) on MachineKey
   | project-away MachineKey, MachineRoleBasis
   | sort by Persistence desc, TimeGenerated asc

@@ -14,11 +14,11 @@ v1: true
 window: { before: 4h, after: 4h }
 uses: [signins]
 query: |
-  let UserIds = _Signins(StartTime - 1d, EndTime, "", ValueUpn) | where isnotempty(UserId) | distinct UserId;
+  let UserIds = _Signins(StartTimestampstamp - 1d, EndTimestampstamp, "", ValueUpn) | where isnotempty(UserId) | distinct UserId;
   union isfuzzy=true
   (
       MicrosoftGraphActivityLogs
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where UserId in (UserIds)
       | project TimeGenerated, Source = "MicrosoftGraphActivityLogs", Operation = strcat(RequestMethod, " ",
               replace_regex(tostring(parse_url(RequestUri).Path), @"[0-9a-fA-F-]{36}", "{id}")),
@@ -26,7 +26,7 @@ query: |
   ),
   (
       AuditLogs
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where InitiatedBy has ValueUpn or TargetResources has ValueUpn
       | project TimeGenerated, Source = "AuditLogs (Entra ID)", Operation = OperationName,
           Role = iff(tostring(InitiatedBy.user.userPrincipalName) =~ ValueUpn, "Auteur", "Cible"),
@@ -35,21 +35,21 @@ query: |
   ),
   (
       OfficeActivity
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where UserId =~ ValueUpn
       | project TimeGenerated, Source = strcat("OfficeActivity (", OfficeWorkload, ")"), Operation, Role = "Auteur",
           Target = coalesce(OfficeObjectId, SourceFileName), Result = ResultStatus, IP = ClientIP
   ),
   (
       CloudAppEvents
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where tostring(RawEventData.UserId) =~ ValueUpn
       | project TimeGenerated, Source = strcat("CloudAppEvents (", Application, ")"), Operation = ActionType, Role = "Auteur",
           Target = ObjectName, Result = "", IP = IPAddress
   ),
   (
       AzureActivity
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where Caller =~ ValueUpn
       | project TimeGenerated, Source = "AzureActivity", Operation = OperationNameValue, Role = "Auteur",
           Target = _ResourceId, Result = ActivityStatusValue, IP = CallerIpAddress

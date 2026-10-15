@@ -14,7 +14,7 @@ query: |
   union isfuzzy=true
   (
       MessageEvents
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where SenderEmailAddress =~ ValueMail or RecipientDetails has ValueMail
       | project TimeGenerated, Source = "MessageEvents", Sender = SenderEmailAddress, SenderName = SenderDisplayName, SenderType,
           Recipients = tostring(RecipientDetails), Subject = coalesce(MessageSubject, Subject), Thread = ThreadName,
@@ -22,7 +22,7 @@ query: |
   ),
   (
       OfficeActivity
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where OfficeWorkload == "MicrosoftTeams"
       | where UserId =~ ValueMail or Members has ValueMail
       | project TimeGenerated, Source = "OfficeActivity", Sender = UserId, SenderName = "", SenderType = UserType,
@@ -31,7 +31,7 @@ query: |
   ),
   (
       CloudAppEvents
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where Application == "Microsoft Teams"
       | where RawEventData has ValueMail
       | project TimeGenerated, Source = "CloudAppEvents", Sender = tostring(RawEventData.UserId), SenderName = AccountDisplayName,

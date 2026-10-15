@@ -20,14 +20,14 @@ query: |
   union isfuzzy=true
   (
       DeviceProcessEvents
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where FileName =~ ValueFile
       | where isempty(HostFilter) or DeviceName startswith HostFilter
       | project TimeGenerated, Source = "DeviceProcessEvents", DeviceName = tolower(DeviceName), AccountName = tolower(AccountName),
           FolderPath, SHA256, Company = ProcessVersionInfoCompanyName, OriginalName = ProcessVersionInfoOriginalFileName, Parent = InitiatingProcessFileName
   ),
   (
-      _WinSecurity(StartTime, EndTime, dynamic([4688]), ValueFile)
+      _WinSecurity(StartTimestampstamp, EndTimestampstamp, dynamic([4688]), ValueFile)
       | where tolower(NewProcessName) endswith strcat(@"\", ValueFile)
       | where isempty(HostFilter) or Computer startswith HostFilter
       | project TimeGenerated, Source = SourceTable, DeviceName = tolower(Computer), AccountName = tolower(SubjectUserName),
@@ -35,7 +35,7 @@ query: |
   ),
   (
       ASimProcessEventLogs
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where TargetProcessName has ValueFile
       | where tolower(TargetProcessFilename) == ValueFile
       | where isempty(HostFilter) or DvcHostname startswith HostFilter
@@ -44,14 +44,14 @@ query: |
           OriginalName = TargetProcessFileOriginalName, Parent = ActingProcessFilename
   ),
   (
-      _Sysmon(StartTime, EndTime, dynamic([1]), ValueFile)
+      _Sysmon(StartTimestampstamp, EndTimestampstamp, dynamic([1]), ValueFile)
       | where ProcessFile == ValueFile
       | where isempty(HostFilter) or Computer startswith HostFilter
       | project TimeGenerated, Source = "Sysmon 1", DeviceName = tolower(Computer), AccountName = UserSam, FolderPath = Image, SHA256,
           Company, OriginalName = OriginalFileName, Parent = ParentFile
   )
   | extend MachineKey = _HostKey(DeviceName)
-  | lookup kind=leftouter (_MachineRoles(EndTime)) on MachineKey
+  | lookup kind=leftouter (_MachineRoles(EndTimestampstamp)) on MachineKey
   | extend DeviceLabel = _Labeled(DeviceName, MachineRole)
   | extend NormPath = _NormPath(FolderPath)
   | summarize Executions = count(), Machines = dcount(DeviceName), Accounts = dcount(AccountName), ActiveDays = dcount(bin(TimeGenerated, 1d)),
