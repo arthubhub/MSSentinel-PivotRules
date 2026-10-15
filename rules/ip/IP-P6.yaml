@@ -24,18 +24,18 @@ query: |
       "Publique");
   let Owners = union isfuzzy=true
       (datatable(Machine:string, Basis:string)[]),
-      (DeviceNetworkInfo | where TimeGenerated between ((StartTimestampstamp - 1d) .. EndTimestampstamp) | where IPAddresses has Value
+      (DeviceNetworkInfo | where TimeGenerated between ((StartTimestamp - 1d) .. EndTimestamp) | where IPAddresses has Value
           | summarize by Machine = tolower(DeviceName) | extend Basis = "Carte réseau (DeviceNetworkInfo)"),
-      (Heartbeat | where TimeGenerated between ((StartTimestampstamp - 1d) .. EndTimestampstamp) | where ComputerIP == Value or ComputerPrivateIPs has Value
+      (Heartbeat | where TimeGenerated between ((StartTimestamp - 1d) .. EndTimestamp) | where ComputerIP == Value or ComputerPrivateIPs has Value
           | summarize by Machine = tolower(Computer) | extend Basis = "Agent Azure Monitor (Heartbeat)"),
-      (DeviceInfo | where TimeGenerated between ((StartTimestampstamp - 1d) .. EndTimestampstamp) | where PublicIP == Value
+      (DeviceInfo | where TimeGenerated between ((StartTimestamp - 1d) .. EndTimestamp) | where PublicIP == Value
           | summarize by Machine = tolower(DeviceName) | extend Basis = "IP publique de sortie (DeviceInfo)");
-  let Seen = _IpEvents(StartTimestampstamp, EndTimestampstamp, Value)
+  let Seen = _IpEvents(StartTimestamp, EndTimestamp, Value)
       | summarize Events = count(), Accounts = dcountif(Account, isnotempty(Account) and Account != "-"),
           Machines = dcountif(Host, isnotempty(Host)), Sources = make_set(Source, 30),
           FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated);
   Seen
-  | extend Ip = Value, Kind, KnownRole = _IpRoleOf(Value, EndTimestampstamp),
+  | extend Ip = Value, Kind, KnownRole = _IpRoleOf(Value, EndTimestamp),
       OwnerMachines = toscalar(Owners | summarize make_set(strcat(Machine, " (", Basis, ")"), 20)),
       OwnerCount = toscalar(Owners | summarize dcount(Machine))
   | extend Assessment = case(

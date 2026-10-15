@@ -19,35 +19,35 @@ query: |
   (
       union isfuzzy=true withsource=Source DeviceProcessEvents, DeviceNetworkEvents, DeviceFileEvents, DeviceLogonEvents,
           DeviceRegistryEvents, DeviceEvents, DeviceImageLoadEvents, DeviceInfo, DeviceNetworkInfo
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where DeviceName startswith ValueShort
       | where _IsHost(DeviceName)
       | project TimeGenerated, Source
   ),
   (
       union isfuzzy=true withsource=Source SecurityEvent, WindowsEvent, Event, Syslog, Heartbeat
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where Computer startswith ValueShort
       | where _IsHost(Computer)
       | project TimeGenerated, Source
   ),
   (
       union isfuzzy=true withsource=Source IdentityLogonEvents, IdentityQueryEvents, IdentityDirectoryEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where DeviceName has ValueShort or TargetDeviceName has ValueShort or DestinationDeviceName has ValueShort
       | where _IsHost(DeviceName) or _IsHost(TargetDeviceName) or _IsHost(DestinationDeviceName)
       | project TimeGenerated, Source
   ),
   (
       union isfuzzy=true withsource=Source ASimAuthenticationEventLogs, ASimProcessEventLogs, ASimFileEventLogs
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where DvcHostname startswith ValueShort
       | where _IsHost(DvcHostname)
       | project TimeGenerated, Source
   ),
   (
       CommonSecurityLog
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where SourceHostName has ValueShort or DestinationHostName has ValueShort
       | where _IsHost(SourceHostName) or _IsHost(DestinationHostName)
       | project TimeGenerated, Source = strcat("CommonSecurityLog (", DeviceVendor, ")")

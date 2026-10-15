@@ -15,51 +15,51 @@ v1: true
 window: { before: 2h, after: 2h }
 uses: [signins, win_security]
 query: |
-  let UserIds = _Signins(StartTimestampstamp - 1d, EndTimestampstamp, "", ValueUpn) | where isnotempty(UserId) | distinct UserId;
+  let UserIds = _Signins(StartTimestamp - 1d, EndTimestamp, "", ValueUpn) | where isnotempty(UserId) | distinct UserId;
   union isfuzzy=true
   (
-      _Signins(StartTimestampstamp, EndTimestampstamp, "", ValueUpn)
+      _Signins(StartTimestamp, EndTimestamp, "", ValueUpn)
       | project TimeGenerated, Source = strcat("Entra ID ", SignInType), Host = DeviceName, Account = tolower(UserPrincipalName),
           Action = iff(Succeeded, "Connexion réussie", strcat("Connexion échouée ", ResultType)),
           Detail = strcat(AppDisplayName, " · ", IPAddress, " · ", Location, " · ", OperatingSystem, " ", Browser)
   ),
   (
       AuditLogs
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where InitiatedBy has ValueUpn or TargetResources has ValueUpn
       | project TimeGenerated, Source = "AuditLogs", Host = "", Account = ValueUpn, Action = OperationName,
           Detail = strcat(tostring(TargetResources[0].displayName), " · ", Result, " · ", tostring(InitiatedBy.user.ipAddress))
   ),
   (
       OfficeActivity
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where UserId =~ ValueUpn
       | project TimeGenerated, Source = strcat("OfficeActivity (", OfficeWorkload, ")"), Host = "", Account = tolower(UserId), Action = Operation,
           Detail = strcat(coalesce(OfficeObjectId, SourceFileName), " · ", ClientIP)
   ),
   (
       CloudAppEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where tostring(RawEventData.UserId) =~ ValueUpn
       | project TimeGenerated, Source = strcat("CloudAppEvents (", Application, ")"), Host = "", Account = ValueUpn, Action = ActionType,
           Detail = strcat(ObjectName, " · ", IPAddress, " · ", CountryCode)
   ),
   (
       AzureActivity
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where Caller =~ ValueUpn
       | project TimeGenerated, Source = "AzureActivity", Host = "", Account = tolower(Caller), Action = OperationNameValue,
           Detail = strcat(_ResourceId, " · ", ActivityStatusValue, " · ", CallerIpAddress)
   ),
   (
       DeviceLogonEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where AccountName =~ ValueSam
       | project TimeGenerated, Source = "DeviceLogonEvents", Host = tolower(DeviceName), Account = tolower(AccountName),
           Action = strcat(ActionType, " ", LogonType), Detail = strcat(RemoteIP, " ", RemoteDeviceName)
   ),
   (
-      _WinSecurity(StartTimestampstamp, EndTimestampstamp, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776, 4740]), ValueSam)
+      _WinSecurity(StartTimestamp, EndTimestamp, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776, 4740]), ValueSam)
       | where TargetSam == ValueSam
       | project TimeGenerated, Source = SourceTable, Host = TargetHost, Account = ValueSam,
           Action = strcat(tostring(EventID), " · ", EventName, iff(isnotempty(LogonTypeName), strcat(" ", LogonTypeName), "")),
@@ -68,7 +68,7 @@ query: |
   ),
   (
       IdentityLogonEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where AccountUpn =~ ValueUpn or AccountName =~ ValueSam
       | project TimeGenerated, Source = "IdentityLogonEvents", Host = tolower(TargetDeviceName), Account = ValueSam,
           Action = strcat(ActionType, " ", Protocol, " ", LogonType),
@@ -76,7 +76,7 @@ query: |
   ),
   (
       MicrosoftGraphActivityLogs
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where UserId in (UserIds)
       | project TimeGenerated, Source = "MicrosoftGraphActivityLogs", Host = "", Account = ValueUpn,
           Action = strcat("Graph ", RequestMethod, " ", tostring(ResponseStatusCode)),
@@ -84,7 +84,7 @@ query: |
   ),
   (
       ASimAuthenticationEventLogs
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where TargetUsername has ValueSam
       | where tolower(TargetUsername) in (ValueSam, ValueUpn) or tolower(TargetUsername) endswith strcat(@"\", ValueSam)
       | project TimeGenerated, Source = strcat("ASIM ", EventProduct), Host = tolower(coalesce(TargetHostname, DvcHostname)), Account = ValueSam,
@@ -92,14 +92,14 @@ query: |
   ),
   (
       Syslog
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where ProcessName in~ ("sshd", "sshd-session", "sudo", "su") and SyslogMessage has ValueSam
       | project TimeGenerated, Source = strcat("Syslog (", ProcessName, ")"), Host = tolower(Computer), Account = ValueSam,
           Action = ProcessName, Detail = substring(SyslogMessage, 0, 300)
   ),
   (
       UrlClickEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where AccountUpn =~ ValueUpn
       | project TimeGenerated, Source = "UrlClickEvents", Host = "", Account = tolower(AccountUpn),
           Action = strcat("Clic ", ActionType), Detail = Url

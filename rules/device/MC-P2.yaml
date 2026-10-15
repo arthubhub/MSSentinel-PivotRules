@@ -12,7 +12,7 @@ reading:
 window: { before: 24h, after: 1h }
 query: |
   let Dest = DeviceNetworkEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where DeviceName startswith ValueShort
       | where _IsHost(DeviceName)
       | where RemoteIPType == "Public"
@@ -20,7 +20,7 @@ query: |
       | summarize Connections = count(), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
           Processes = make_set(InitiatingProcessFileName, 10), Ports = make_set(RemotePort, 10), IPs = make_set(RemoteIP, 10) by Destination;
   let Prevalence = DeviceNetworkEvents
-      | where TimeGenerated between ((T0 - 7d) .. EndTimestampstamp)
+      | where TimeGenerated between ((T0 - 7d) .. EndTimestamp)
       | where RemoteIPType == "Public"
       | extend Destination = iff(isnotempty(RemoteUrl), tolower(RemoteUrl), RemoteIP)
       | where Destination in ((Dest | project Destination))

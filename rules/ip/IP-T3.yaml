@@ -15,40 +15,40 @@ uses: [signins, spn_signins, win_security, roles]
 query: |
   union isfuzzy=true
   (
-      _Signins(StartTimestampstamp, EndTimestampstamp, Value, "")
+      _Signins(StartTimestamp, EndTimestamp, Value, "")
       | project TimeGenerated, Account = tolower(UserPrincipalName), Source = "Entra ID", Success = Succeeded
   ),
   (
-      _SpnSignins(StartTimestampstamp, EndTimestampstamp, "", Value)
+      _SpnSignins(StartTimestamp, EndTimestamp, "", Value)
       | project TimeGenerated, Account = tolower(ServicePrincipalName), Source = strcat("Entra ID ", SignInType), Success = Succeeded
   ),
   (
-      _WinSecurity(StartTimestampstamp, EndTimestampstamp, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776]), Value)
+      _WinSecurity(StartTimestamp, EndTimestamp, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776]), Value)
       | where IpAddress == Value
       | project TimeGenerated, Account = TargetSam, Source = SourceTable,
           Success = EventID !in (4625, 4771) and Status in ("", "-", "0x0")
   ),
   (
       DeviceLogonEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where RemoteIP == Value
       | project TimeGenerated, Account = tolower(AccountName), Source = "DeviceLogonEvents", Success = ActionType == "LogonSuccess"
   ),
   (
       IdentityLogonEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where IPAddress == Value
       | project TimeGenerated, Account = tolower(coalesce(AccountUpn, AccountName)), Source = "IdentityLogonEvents", Success = ActionType == "LogonSuccess"
   ),
   (
       ASimAuthenticationEventLogs
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where SrcIpAddr == Value
       | project TimeGenerated, Account = tolower(TargetUsername), Source = strcat("ASIM ", EventProduct), Success = EventResult == "Success"
   ),
   (
       Syslog
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where SyslogMessage has Value and ProcessName in~ ("sshd", "sshd-session")
       | extend User = extract(@"(?:Accepted|Failed) \S+ for (?:invalid user )?(\S+) from", 1, SyslogMessage)
       | where isnotempty(User)
@@ -58,7 +58,7 @@ query: |
   | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Attempts = count(),
       Successes = countif(Success), FirstSuccess = minif(TimeGenerated, Success), Sources = make_set(Source) by Account
   | extend AccountKey = _SamOf(Account)
-  | lookup kind=leftouter (_AccountRoles(EndTimestampstamp)) on AccountKey
+  | lookup kind=leftouter (_AccountRoles(EndTimestamp)) on AccountKey
   | extend AccountRole = _JoinRoles(_AccountKind(AccountKey), AccountRole)
   | sort by FirstSeen asc
   | extend Order = row_number()

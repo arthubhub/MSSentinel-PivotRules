@@ -15,6 +15,6 @@ window: { before: 24h, after: 1h }
 render: timechart
 uses: [ip_events]
 query: |
-  _IpEvents(StartTimestampstamp, EndTimestampstamp, Value)
+  _IpEvents(StartTimestamp, EndTimestamp, Value)
   | summarize Events = count() by bin(TimeGenerated, 10m), Serie = strcat(Source, " · ", EventType)
   | render timechart

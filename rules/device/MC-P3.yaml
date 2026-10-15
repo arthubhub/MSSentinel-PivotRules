@@ -18,7 +18,7 @@ query: |
   union isfuzzy=true
   (
       DeviceRegistryEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where DeviceName startswith ValueShort
       | where _IsHost(DeviceName)
       | where ActionType in ("RegistryValueSet", "RegistryKeyCreated")
@@ -28,7 +28,7 @@ query: |
   ),
   (
       DeviceEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where DeviceName startswith ValueShort
       | where _IsHost(DeviceName)
       | where ActionType in (_PersistenceActions)
@@ -39,7 +39,7 @@ query: |
   ),
   (
       DeviceProcessEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where DeviceName startswith ValueShort
       | where _IsHost(DeviceName)
       | where (FileName in~ ("schtasks.exe", "at.exe") and ProcessCommandLine has "/create")
@@ -51,7 +51,7 @@ query: |
   ),
   (
       DeviceFileEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where DeviceName startswith ValueShort
       | where _IsHost(DeviceName)
       | where ActionType == "FileCreated" and FolderPath has @"\Start Menu\Programs\Startup"
@@ -59,7 +59,7 @@ query: |
           Process = InitiatingProcessFileName, CommandLine = InitiatingProcessCommandLine
   ),
   (
-      _WinSecurity(StartTimestampstamp, EndTimestampstamp, dynamic([4697, 4698, 4702, 4720, 4732]), ValueShort)
+      _WinSecurity(StartTimestamp, EndTimestamp, dynamic([4697, 4698, 4702, 4720, 4732]), ValueShort)
       | where _IsHost(Computer)
       | project TimeGenerated, Mechanism = strcat(tostring(EventID), " ", EventName),
           Item = coalesce(TaskName, ServiceName, TargetUserName),
@@ -67,14 +67,14 @@ query: |
           Process = strcat(SubjectDomainName, @"\", SubjectUserName), CommandLine = ""
   ),
   (
-      _WinSecurity(StartTimestampstamp, EndTimestampstamp, dynamic([4657]), ValueShort)
+      _WinSecurity(StartTimestamp, EndTimestamp, dynamic([4657]), ValueShort)
       | where _IsHost(Computer)
       | where _IsPersistenceKey(ObjectName, ObjectValueName)
       | project TimeGenerated, Mechanism = "4657 · Registre (audit Windows)", Item = strcat(ObjectName, @"\", ObjectValueName), Detail = ObjectAccess,
           Process = ProcessName, CommandLine = ""
   ),
   (
-      _Sysmon(StartTimestampstamp, EndTimestampstamp, dynamic([12, 13, 14]), ValueShort)
+      _Sysmon(StartTimestamp, EndTimestamp, dynamic([12, 13, 14]), ValueShort)
       | where _IsHost(Computer)
       | extend ValueName = tostring(split(TargetObject, @"\")[-1])
       | where _IsPersistenceKey(TargetObject, ValueName)
@@ -83,11 +83,11 @@ query: |
   ),
   (
       union isfuzzy=true
-      (Event | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp) | where Source == "Service Control Manager" and EventID == 7045
+      (Event | where TimeGenerated between (StartTimestamp .. EndTimestamp) | where Source == "Service Control Manager" and EventID == 7045
           | where Computer startswith ValueShort and _IsHost(Computer)
           | project TimeGenerated, ServiceName = XMLFIELD(EventData, ServiceName), ImagePath = XMLFIELD(EventData, ImagePath),
               Account = XMLFIELD(EventData, AccountName)),
-      (WindowsEvent | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp) | where Provider == "Service Control Manager" and EventID == 7045
+      (WindowsEvent | where TimeGenerated between (StartTimestamp .. EndTimestamp) | where Provider == "Service Control Manager" and EventID == 7045
           | where Computer startswith ValueShort and _IsHost(Computer)
           | project TimeGenerated, ServiceName = tostring(EventData.ServiceName), ImagePath = tostring(EventData.ImagePath),
               Account = tostring(EventData.AccountName))

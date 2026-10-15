@@ -18,19 +18,19 @@ uses: [signins, spn_signins]
 query: |
   union isfuzzy=true
   (
-      _SpnSignins(StartTimestampstamp, EndTimestampstamp, ValueApp, "")
+      _SpnSignins(StartTimestamp, EndTimestamp, ValueApp, "")
       | project TimeGenerated, Source = SignInType, IPAddress, Location, Identity = ServicePrincipalName, AppOrigin,
           Success = Succeeded, Detail = strcat(ResourceDisplayName, " · ", Credential)
   ),
   (
-      _Signins(StartTimestampstamp, EndTimestampstamp, "", "")
+      _Signins(StartTimestamp, EndTimestamp, "", "")
       | where AppId == ValueApp or AppDisplayName =~ ValueApp
       | project TimeGenerated, Source = "Utilisateurs via l'application", IPAddress, Location, Identity = tolower(UserPrincipalName),
           AppOrigin = "", Success = Succeeded, Detail = ResourceDisplayName
   ),
   (
       MicrosoftGraphActivityLogs
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where AppId == ValueApp or ServicePrincipalId == ValueApp
       | project TimeGenerated, Source = "Microsoft Graph", IPAddress, Location = "", Identity = coalesce(UserId, ServicePrincipalId),
           AppOrigin = "", Success = ResponseStatusCode < 400, Detail = RequestMethod

@@ -13,7 +13,7 @@ v1: true
 window: { before: 30d, after: 1d }
 query: |
   EmailEvents
-  | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+  | where TimeGenerated between (StartTimestamp .. EndTimestamp)
   | where SenderFromDomain =~ ValueMailDomain or SenderMailFromDomain =~ ValueMailDomain
   | extend Scopes = iff(SenderFromAddress =~ ValueMail or SenderMailFromAddress =~ ValueMail,
       pack_array(strcat("Adresse ", ValueMail), strcat("Domaine ", ValueMailDomain)),

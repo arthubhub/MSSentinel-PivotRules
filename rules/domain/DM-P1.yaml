@@ -14,7 +14,7 @@ window: { before: 7d, after: 1d }
 uses: [web_functions]
 query: |
   UrlClickEvents
-  | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+  | where TimeGenerated between (StartTimestamp .. EndTimestamp)
   | where Url has ValueDomain
   | where _InDomain(_Host(Url), ValueDomain)
   | summarize Clicks = count(), Allowed = countif(ActionType == "ClickAllowed"), Blocked = countif(ActionType has "Blocked"),

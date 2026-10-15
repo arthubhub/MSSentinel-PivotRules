@@ -15,7 +15,7 @@ reading:
 window: { before: 24h, after: 1h }
 uses: [win_security, sysmon, roles]
 query: |
-  let Win = materialize(_WinSecurity(StartTimestampstamp, EndTimestampstamp, dynamic([4656, 4660, 4663, 4670, 5140, 5145]), ValueShort)
+  let Win = materialize(_WinSecurity(StartTimestamp, EndTimestamp, dynamic([4656, 4660, 4663, 4670, 5140, 5145]), ValueShort)
       | where _IsHost(Computer)
       | where EventID in (5140, 5145) or ObjectType in ("File", ""));
   let Handles = Win | where EventID in (4656, 4663) and isnotempty(HandleId) | summarize HandleObject = take_any(ObjectName) by Computer, HandleId;
@@ -31,7 +31,7 @@ query: |
   ),
   (
       DeviceFileEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where DeviceName startswith ValueShort and _IsHost(DeviceName)
       | where isnotempty(RequestAccountName) and RequestProtocol == "Smb"
       | project TimeGenerated, Source = "DeviceFileEvents", Account = tolower(strcat(RequestAccountDomain, @"\", RequestAccountName)),
@@ -40,7 +40,7 @@ query: |
           Process = tolower(InitiatingProcessFileName), SourceIp = RequestSourceIP
   ),
   (
-      _Sysmon(StartTimestampstamp, EndTimestampstamp, dynamic([11, 23, 26]), ValueShort)
+      _Sysmon(StartTimestamp, EndTimestamp, dynamic([11, 23, 26]), ValueShort)
       | where Computer startswith ValueShort and _IsHost(Computer)
       | where UserSam !in ("system", "local service", "network service")
       | project TimeGenerated, Source = strcat("Sysmon ", tostring(EventID)), Account = tolower(User), Kind = "Fichier (Sysmon)",
@@ -48,7 +48,7 @@ query: |
   ),
   (
       ASimFileEventLogs
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where DvcHostname startswith ValueShort and _IsHost(DvcHostname)
       | project TimeGenerated, Source = strcat("ASIM ", EventProduct), Account = tolower(ActorUsername), Kind = "Fichier (ASIM)",
           Object = TargetFilePath, Access = tolower(EventType), Process = tolower(tostring(split(ActingProcessName, @"\")[-1])), SourceIp = SrcIpAddr
@@ -61,7 +61,7 @@ query: |
       SampleFiles = make_set(File, 10), Processes = make_set_if(Process, isnotempty(Process), 5),
       SourceIps = make_set_if(SourceIp, isnotempty(SourceIp), 5), Sources = make_set(Source)
       by Account, AccountKey, Kind, Folder = coalesce(Folder, Object), Access
-  | lookup kind=leftouter (_AccountRoles(EndTimestampstamp)) on AccountKey
+  | lookup kind=leftouter (_AccountRoles(EndTimestamp)) on AccountKey
   | extend AccountRole = _JoinRoles(_AccountKind(AccountKey), AccountRole)
   | project Account, AccountRole, Kind, Folder, Access, Files, Events, FirstSeen, LastSeen, SampleFiles, Processes, SourceIps, Sources
   | sort by Files desc, FirstSeen asc

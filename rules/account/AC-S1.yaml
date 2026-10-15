@@ -13,7 +13,7 @@ reading:
 window: { before: 14d, after: 1d }
 uses: [signins]
 query: |
-  _Signins(StartTimestampstamp, EndTimestampstamp, "", ValueUpn)
+  _Signins(StartTimestamp, EndTimestamp, "", ValueUpn)
   | summarize SignIns = count(), Failures = countif(not(Succeeded)), ActiveDays = dcount(bin(TimeGenerated, 1d)),
       IPs = dcount(IPAddress), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated)
       by Country = Location, App = AppDisplayName

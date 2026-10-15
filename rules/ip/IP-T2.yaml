@@ -18,38 +18,38 @@ uses: [win_security, roles]
 query: |
   union isfuzzy=true
   (
-      _WinSecurity(StartTimestampstamp, EndTimestampstamp, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776]), Value)
+      _WinSecurity(StartTimestamp, EndTimestamp, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776]), Value)
       | where IpAddress == Value
       | project TimeGenerated, Target = iff(isnotempty(TargetHost), TargetHost, strcat(AuthAuthority, " · validation")),
           Outcome = iff(EventID in (4625, 4771) or Status !in ("", "-", "0x0"), "échec", "succès")
   ),
   (
       DeviceLogonEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where RemoteIP == Value
       | project TimeGenerated, Target = tolower(DeviceName), Outcome = iff(ActionType == "LogonSuccess", "succès", "échec")
   ),
   (
       IdentityLogonEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where IPAddress == Value
       | project TimeGenerated, Target = iff(isnotempty(TargetDeviceName), tolower(TargetDeviceName), strcat(tolower(DestinationDeviceName), " · validation")),
           Outcome = iff(ActionType == "LogonSuccess", "succès", "échec")
   ),
   (
       DeviceNetworkEvents
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where RemoteIP == Value and ActionType == "InboundConnectionAccepted"
       | project TimeGenerated, Target = tolower(DeviceName), Outcome = "connexion entrante"
   ),
   (
       ASimAuthenticationEventLogs
-      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where SrcIpAddr == Value
       | project TimeGenerated, Target = tolower(coalesce(TargetHostname, DvcHostname)), Outcome = iff(EventResult == "Success", "succès", "échec")
   )
   | where isnotempty(Target)
   | extend MachineKey = _HostKey(Target)
-  | lookup kind=leftouter (_MachineRoles(EndTimestampstamp)) on MachineKey
+  | lookup kind=leftouter (_MachineRoles(EndTimestamp)) on MachineKey
   | summarize Requests = count() by bin(TimeGenerated, 1m), Serie = strcat(_Labeled(Target, MachineRole), " · ", Outcome)
   | render timechart

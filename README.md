@@ -52,11 +52,11 @@ render: table                  # table | timechart | columnchart | barchart
 context: [HOST]                # paramètre de contexte facultatif
 uses: [signins, win_security]  # fragments nécessaires (leurs dépendances sont résolues)
 query: |
-  _Signins(StartTimestampstamp, EndTimestampstamp, Value, "")
+  _Signins(StartTimestamp, EndTimestamp, Value, "")
   | ...
 ```
 
-Dans `query`, les variables suivantes sont disponibles : `Value`, `T0`, `StartTimestampstamp`, `EndTimestampstamp`, les variables de l'indicateur (`ValueUpn`, `ValueSam`, `ValueMail`, `ValueDomain`, `ValueShort`, `ValueFile`, `ValuePath`, `ValueHash`, `ValueApp`), `HostFilter` si `context: [HOST]`, et les fonctions des fragments déclarés.
+Dans `query`, les variables suivantes sont disponibles : `Value`, `T0`, `StartTimestamp`, `EndTimestamp`, les variables de l'indicateur (`ValueUpn`, `ValueSam`, `ValueMail`, `ValueDomain`, `ValueShort`, `ValueFile`, `ValuePath`, `ValueHash`, `ValueApp`), `HostFilter` si `context: [HOST]`, et les fonctions des fragments déclarés.
 
 La macro `XMLFIELD(expr, Nom)` est développée à la compilation en `extract(@'<Data Name="Nom">([^<]*)</Data>', 1, expr)`.
 
@@ -167,7 +167,7 @@ Les contributions sont les bienvenues : une règle = un fichier YAML.
    - Une nouvelle table doit être ajoutée à une famille dans `schema/sources.json` (le build le vérifie).
    - Quand la règle liste des machines ou des comptes, annotez leur rôle avec le fragment `roles`. Dans les journaux Windows, utilisez `TargetHost` et `AuthAuthority` plutôt que `Computer`.
    - Remplissez `reading` (`decisive`, `context`, `noise`) afin d'aider l'analyste à interpréter le résultat.
-   - Réutilisez les fragments (`uses`) et les variables (`Value`, `ValueSam`, `StartTimestampstamp`, `EndTimestampstamp`) afin d'éviter de dupliquer du KQL.
+   - Réutilisez les fragments (`uses`) et les variables (`Value`, `ValueSam`, `StartTimestamp`, `EndTimestamp`) afin d'éviter de dupliquer du KQL.
    - Les colonnes utilisées doivent exister dans `schema/tables.json` (ou override).
 4. Vérifiez en local :
    ```
