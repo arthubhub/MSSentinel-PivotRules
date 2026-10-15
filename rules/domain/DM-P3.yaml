@@ -19,7 +19,7 @@ query: |
   union isfuzzy=true
   (
       DeviceNetworkEvents
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where RemoteUrl has ValueDomain
       | where _InDomain(_Host(RemoteUrl), ValueDomain)
       | project TimeGenerated, Source = "DeviceNetworkEvents", DeviceName = tolower(DeviceName), Account = tolower(InitiatingProcessAccountName),
@@ -27,7 +27,7 @@ query: |
   ),
   (
       DeviceFileEvents
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where FileOriginUrl has ValueDomain or FileOriginReferrerUrl has ValueDomain
       | where _InDomain(_Host(FileOriginUrl), ValueDomain) or _InDomain(_Host(FileOriginReferrerUrl), ValueDomain)
       | project TimeGenerated, Source = "DeviceFileEvents", DeviceName = tolower(DeviceName), Account = tolower(InitiatingProcessAccountName),
@@ -36,7 +36,7 @@ query: |
   ),
   (
       DeviceProcessEvents
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where ProcessCommandLine has ValueDomain
       | project TimeGenerated, Source = "DeviceProcessEvents", DeviceName = tolower(DeviceName), Account = tolower(AccountName),
           Process = tolower(FileName), CommandLine = ProcessCommandLine, Evidence = "Domaine dans la ligne de commande"
@@ -44,7 +44,7 @@ query: |
   // @sentinel-only:begin
   , (
       ASimWebSessionLogs
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where Url has ValueDomain or DstHostname has ValueDomain or HttpHost has ValueDomain
       | where _InDomain(_Host(Url), ValueDomain) or _InDomain(tolower(DstHostname), ValueDomain) or _InDomain(tolower(HttpHost), ValueDomain)
       | project TimeGenerated, Source = strcat("ASimWebSessionLogs (", EventProduct, ")"), DeviceName = tolower(coalesce(SrcHostname, SrcIpAddr)),
@@ -52,14 +52,14 @@ query: |
   ),
   (
       CommonSecurityLog
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where RequestURL has ValueDomain or DestinationHostName has ValueDomain
       | where _InDomain(_Host(RequestURL), ValueDomain) or _InDomain(tolower(DestinationHostName), ValueDomain)
       | project TimeGenerated, Source = strcat("CommonSecurityLog (", DeviceVendor, ")"), DeviceName = tolower(coalesce(SourceHostName, SourceIP)),
           Account = tolower(SourceUserName), Process = "", CommandLine = "", Evidence = strcat(coalesce(RequestURL, DestinationHostName), " · ", DeviceAction)
   ),
   (
-      _Sysmon(StartTime, EndTime, dynamic([3, 22]), ValueDomain)
+      _Sysmon(StartTimestampstamp, EndTimestampstamp, dynamic([3, 22]), ValueDomain)
       | extend Q = tolower(trim_end(@"\.", iff(EventID == 22, QueryName, DestinationHostname)))
       | where _InDomain(Q, ValueDomain)
       | project TimeGenerated, Source = strcat("Sysmon ", tostring(EventID)), DeviceName = tolower(Computer), Account = UserSam,
@@ -70,7 +70,7 @@ query: |
   | summarize Events = count(), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
       Evidence = make_set(Evidence, 10), CommandLines = make_set(CommandLine, 5) by DeviceName, Account, Process, Source
   | extend MachineKey = _HostKey(DeviceName)
-  | lookup kind=leftouter (_MachineRoles(EndTime)) on MachineKey
+  | lookup kind=leftouter (_MachineRoles(EndTimestampstamp)) on MachineKey
   | extend AccountKind = _AccountKind(_SamOf(Account))
   | project-away MachineKey, MachineRoleBasis
   | sort by FirstSeen asc

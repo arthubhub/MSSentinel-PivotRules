@@ -15,14 +15,14 @@ query: |
   union isfuzzy=true
   (
       AlertEvidence
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where DeviceName startswith ValueShort
       | where _IsHost(DeviceName)
       | summarize arg_min(TimeGenerated, Title, Severity) by AlertId
   ),
   (
       SecurityAlert
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where CompromisedEntity has ValueShort or Entities has ValueShort
       | summarize arg_max(TimeGenerated, AlertName, AlertSeverity) by SystemAlertId
       | project TimeGenerated, Title = AlertName, Severity = AlertSeverity, AlertId = SystemAlertId

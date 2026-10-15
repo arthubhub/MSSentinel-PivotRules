@@ -21,7 +21,7 @@ query: |
   union isfuzzy=true
   (
       DeviceProcessEvents
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where FileName =~ ValueFile or InitiatingProcessFileName =~ ValueFile
       | where isempty(HostFilter) or DeviceName startswith HostFilter
       | where isempty(ValuePath) or FolderPath =~ ValuePath or InitiatingProcessFolderPath =~ ValuePath
@@ -31,7 +31,7 @@ query: |
           CommandLine = ProcessCommandLine, ParentCommandLine = InitiatingProcessCommandLine, Account = tolower(AccountName)
   ),
   (
-      _WinSecurity(StartTime, EndTime, dynamic([4688]), ValueFile)
+      _WinSecurity(StartTimestampstamp, EndTimestampstamp, dynamic([4688]), ValueFile)
       | where tolower(NewProcessName) endswith strcat(@"\", ValueFile) or tolower(ParentProcessName) endswith strcat(@"\", ValueFile)
       | where isempty(HostFilter) or Computer startswith HostFilter
       | extend Role = iff(tolower(NewProcessName) endswith strcat(@"\", ValueFile), "1 · Lancement du processus", "2 · Enfant")
@@ -41,7 +41,7 @@ query: |
   ),
   (
       ASimProcessEventLogs
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where TargetProcessName has ValueFile or ActingProcessName has ValueFile
       | extend _t = tolower(TargetProcessFilename), _p = tolower(ActingProcessFilename)
       | where _t == ValueFile or _p == ValueFile
@@ -53,7 +53,7 @@ query: |
           CommandLine = TargetProcessCommandLine, ParentCommandLine = ActingProcessCommandLine, Account = tolower(ActorUsername)
   ),
   (
-      _Sysmon(StartTime, EndTime, dynamic([1]), ValueFile)
+      _Sysmon(StartTimestampstamp, EndTimestampstamp, dynamic([1]), ValueFile)
       | where ProcessFile == ValueFile or ParentFile == ValueFile
       | where isempty(HostFilter) or Computer startswith HostFilter
       | where isempty(ValuePath) or tolower(Image) == ValuePath or tolower(ParentImage) == ValuePath
@@ -62,7 +62,7 @@ query: |
           Process = ProcessFile, CommandLine, ParentCommandLine, Account = UserSam
   )
   | extend MachineKey = _HostKey(DeviceName)
-  | lookup kind=leftouter (_MachineRoles(EndTime)) on MachineKey
+  | lookup kind=leftouter (_MachineRoles(EndTimestampstamp)) on MachineKey
   | extend DeviceName = _Labeled(DeviceName, MachineRole), Account = _Labeled(Account, _AccountKind(_SamOf(Account)))
   | summarize Executions = count(), Machines = dcount(DeviceName), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
       CommandLines = make_set(CommandLine, 5), ParentCommandLines = make_set(ParentCommandLine, 3),

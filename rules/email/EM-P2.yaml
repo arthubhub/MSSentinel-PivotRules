@@ -12,11 +12,11 @@ reading:
 window: { before: 30m, after: 30m }
 query: |
   UrlClickEvents
-  | where TimeGenerated between (StartTime .. EndTime)
+  | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
   | where AccountUpn =~ ValueMail
   | join kind=leftouter (
       EmailEvents
-      | where TimeGenerated between ((StartTime - 7d) .. EndTime)
+      | where TimeGenerated between ((StartTimestampstamp - 7d) .. EndTimestampstamp)
       | where RecipientEmailAddress =~ ValueMail
       | summarize arg_min(TimeGenerated, Subject, SenderFromAddress) by NetworkMessageId
       | project NetworkMessageId, MailTime = TimeGenerated, Subject, SenderFromAddress

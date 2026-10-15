@@ -17,13 +17,13 @@ uses: [spn_signins]
 query: |
   union isfuzzy=true
   (
-      _SpnSignins(StartTime, EndTime, ValueApp, "")
+      _SpnSignins(StartTimestampstamp, EndTimestampstamp, ValueApp, "")
       | project TimeGenerated, Source = SignInType, Identity = ServicePrincipalName, AppOrigin, IPAddress, Location,
           Operation = strcat("Connexion à ", ResourceDisplayName), Result = ResultType, Credential
   ),
   (
       MicrosoftGraphActivityLogs
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where AppId == ValueApp or ServicePrincipalId == ValueApp
       | project TimeGenerated, Source = "Microsoft Graph", Identity = coalesce(UserId, ServicePrincipalId), AppOrigin = "", IPAddress, Location = "",
           Operation = strcat(RequestMethod, " ", replace_regex(tostring(parse_url(RequestUri).Path), @"[0-9a-fA-F-]{36}", "{id}")),

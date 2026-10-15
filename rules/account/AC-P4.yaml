@@ -28,14 +28,14 @@ query: |
   union isfuzzy=true
   (
       OfficeActivity
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where Operation in (MailboxOps)
       | where UserId =~ ValueUpn or Parameters has ValueUpn
       | project TimeGenerated, Source = "OfficeActivity", Operation, Detail = substring(Parameters, 0, 1000), IP = ClientIP, Flag = Flag(Parameters)
   ),
   (
       CloudAppEvents
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where ActionType in (MailboxOps)
       | where tostring(RawEventData.UserId) =~ ValueUpn or RawEventData has ValueUpn
       | extend Params = tostring(RawEventData.Parameters)
@@ -43,7 +43,7 @@ query: |
   ),
   (
       AuditLogs
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where OperationName in (EntraOps) or OperationName has "Certificates and secrets management"
       | where InitiatedBy has ValueUpn or TargetResources has ValueUpn
       | extend Changes = tostring(TargetResources[0].modifiedProperties)

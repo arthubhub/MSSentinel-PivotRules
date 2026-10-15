@@ -13,11 +13,11 @@ v1: true
 window: { before: 24h, after: 1h }
 uses: [signins]
 query: |
-  let Baseline = _Signins(StartTime - 30d, StartTime, "", ValueUpn)
+  let Baseline = _Signins(StartTimestampstamp - 30d, StartTimestampstamp, "", ValueUpn)
       | summarize KnownIPs = make_set(IPAddress, 2000), KnownCountries = make_set(Location, 200),
           KnownAsn = make_set(AutonomousSystemNumber, 500), KnownDevices = make_set(DeviceId, 200)
       | extend JoinKey = 1;
-  _Signins(StartTime, EndTime, "", ValueUpn)
+  _Signins(StartTimestampstamp, EndTimestampstamp, "", ValueUpn)
   | summarize SignIns = count(), Successes = countif(Succeeded), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
       Apps = make_set(AppDisplayName, 10), ClientApps = make_set(ClientAppUsed, 5), UserAgents = make_set(UserAgent, 5)
       by IPAddress, Location, City, AutonomousSystemNumber, DeviceName, DeviceId, OperatingSystem, Browser, IsManaged, IsCompliant

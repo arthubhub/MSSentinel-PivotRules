@@ -17,7 +17,7 @@ reading:
 window: { before: 24h, after: 1h }
 uses: [win_security, sysmon, roles]
 query: |
-  let Win = materialize(_WinSecurity(StartTime, EndTime, dynamic([4656, 4660, 4663, 4670, 5140, 5145]), ValueSam)
+  let Win = materialize(_WinSecurity(StartTimestampstamp, EndTimestampstamp, dynamic([4656, 4660, 4663, 4670, 5140, 5145]), ValueSam)
       | where SubjectSam == ValueSam
       | where EventID in (5140, 5145) or ObjectType in ("File", ""));
   let Handles = Win | where EventID in (4656, 4663) and isnotempty(HandleId) | summarize HandleObject = take_any(ObjectName) by Computer, HandleId;
@@ -34,7 +34,7 @@ query: |
   ),
   (
       DeviceFileEvents
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where InitiatingProcessAccountName =~ ValueSam or RequestAccountName =~ ValueSam
       | project TimeGenerated, Source = "DeviceFileEvents", Machine = tolower(DeviceName),
           Kind = iff(RequestProtocol == "Smb", "Partage réseau (Defender)", "Fichier (Defender)"), Object = FolderPath,
@@ -42,14 +42,14 @@ query: |
           Process = tolower(InitiatingProcessFileName), SourceIp = RequestSourceIP
   ),
   (
-      _Sysmon(StartTime, EndTime, dynamic([11, 15, 23, 26]), ValueSam)
+      _Sysmon(StartTimestampstamp, EndTimestampstamp, dynamic([11, 15, 23, 26]), ValueSam)
       | where UserSam == ValueSam
       | project TimeGenerated, Source = strcat("Sysmon ", tostring(EventID)), Machine = tolower(Computer), Kind = "Fichier (Sysmon)",
           Object = TargetFilename, Access = iff(EventID in (23, 26), "suppression", "écriture"), Process = ProcessFile, SourceIp = ""
   ),
   (
       ASimFileEventLogs
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where ActorUsername has ValueSam
       | where tolower(ActorUsername) in (ValueSam, ValueUpn) or tolower(ActorUsername) endswith strcat(@"\", ValueSam)
       | project TimeGenerated, Source = strcat("ASIM ", EventProduct), Machine = tolower(DvcHostname), Kind = "Fichier (ASIM)",
@@ -57,7 +57,7 @@ query: |
   ),
   (
       OfficeActivity
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where OfficeWorkload in ("SharePoint", "OneDrive")
       | where UserId =~ ValueUpn
       | where Operation has_any ("FileAccessed", "FileDownloaded", "FileSyncDownloadedFull", "FileModified", "FileUploaded", "FileDeleted",
@@ -71,7 +71,7 @@ query: |
   | where isnotempty(Object)
   | extend Folder = tostring(parse_path(Object).DirectoryPath), File = tostring(parse_path(Object).Filename)
   | extend MachineKey = _HostKey(Machine)
-  | lookup kind=leftouter (_MachineRoles(EndTime)) on MachineKey
+  | lookup kind=leftouter (_MachineRoles(EndTimestampstamp)) on MachineKey
   | summarize Events = count(), Files = dcount(Object), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
       SampleFiles = make_set(File, 10), Processes = make_set_if(Process, isnotempty(Process), 5),
       SourceIps = make_set_if(SourceIp, isnotempty(SourceIp), 5), Sources = make_set(Source)

@@ -13,10 +13,10 @@ reading:
 window: { before: 4h, after: 1h }
 query: |
   let Mails = EmailEvents
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where RecipientEmailAddress =~ ValueMail or SenderFromAddress =~ ValueMail or SenderMailFromAddress =~ ValueMail;
   let Campaign = EmailEvents
-      | where TimeGenerated between ((StartTime - 1d) .. (EndTime + 1d))
+      | where TimeGenerated between ((StartTimestampstamp - 1d) .. (EndTimestampstamp + 1d))
       | where Subject in ((Mails | distinct Subject))
       | summarize SameSubjectRecipients = dcount(RecipientEmailAddress) by Subject, SenderFromAddress;
   Mails

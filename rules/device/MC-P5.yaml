@@ -17,23 +17,23 @@ v1: true
 window: { before: 7d, after: 1d }
 uses: [roles]
 query: |
-  let Roles = _MachineRoles(EndTime) | where MachineKey == ValueShort;
+  let Roles = _MachineRoles(EndTimestampstamp) | where MachineKey == ValueShort;
   let Inventory = DeviceInfo
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where DeviceName startswith ValueShort and _IsHost(DeviceName)
       | summarize arg_max(TimeGenerated, OSPlatform, OSVersion, DeviceType, MachineGroup, ExposureLevel, AssetValue, JoinType,
           IsInternetFacing, OnboardingStatus, SensorHealthState, PublicIP, LoggedOnUsers, DeviceId, DeviceName)
       | project-rename LastInventory = TimeGenerated;
   let Ips = union isfuzzy=true
       (datatable(Ip:string)[]),
-      (DeviceNetworkInfo | where TimeGenerated between (StartTime .. EndTime) | where DeviceName startswith ValueShort and _IsHost(DeviceName)
+      (DeviceNetworkInfo | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp) | where DeviceName startswith ValueShort and _IsHost(DeviceName)
           | mv-expand A = IPAddresses | project Ip = tostring(A.IPAddress)),
-      (Heartbeat | where TimeGenerated between (StartTime .. EndTime) | where Computer startswith ValueShort and _IsHost(Computer)
+      (Heartbeat | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp) | where Computer startswith ValueShort and _IsHost(Computer)
           | project Ip = ComputerIP)
       | where isnotempty(Ip) and Ip !startswith "127." and Ip != "::1" and Ip !startswith "fe80:"
       | summarize Ips = make_set(Ip, 20);
   let Agent = Heartbeat
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where Computer startswith ValueShort and _IsHost(Computer)
       | summarize LastHeartbeat = max(TimeGenerated), AgentOS = take_any(strcat(OSType, " ", OSName, " ", OSMajorVersion)),
           AgentCategory = take_any(Category);
@@ -41,7 +41,7 @@ query: |
       // @sentinel-only:begin
       , SecurityEvent, WindowsEvent, Syslog
       // @sentinel-only:end
-      | where TimeGenerated between ((EndTime - 1d) .. EndTime)
+      | where TimeGenerated between ((EndTimestampstamp - 1d) .. EndTimestampstamp)
       | extend H = coalesce(tostring(column_ifexists("DeviceName", "")), tostring(column_ifexists("Computer", "")))
       | where H startswith ValueShort and _IsHost(H)
       | summarize by Table

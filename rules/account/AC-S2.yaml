@@ -17,37 +17,37 @@ uses: [signins, win_security]
 query: |
   union isfuzzy=true
   (
-      _Signins(StartTime, EndTime, "", ValueUpn)
+      _Signins(StartTimestampstamp, EndTimestampstamp, "", ValueUpn)
       | project TimeGenerated, Serie = strcat("Entra ID · ", iff(Succeeded, "succès", "échec"))
   ),
   (
-      _WinSecurity(StartTime, EndTime, dynamic([4624, 4625, 4768, 4771, 4776]), ValueSam)
+      _WinSecurity(StartTimestampstamp, EndTimestampstamp, dynamic([4624, 4625, 4768, 4771, 4776]), ValueSam)
       | where TargetSam == ValueSam
       | project TimeGenerated, Serie = strcat(iff(EventID in (4624, 4625), "Windows session · ", "Windows validation DC · "),
           iff(EventID in (4625, 4771) or Status !in ("", "-", "0x0"), "échec", "succès"))
   ),
   (
       DeviceLogonEvents
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where AccountName =~ ValueSam
       | project TimeGenerated, Serie = strcat("Defender · ", iff(ActionType == "LogonSuccess", "succès", "échec"))
   ),
   (
       IdentityLogonEvents
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where AccountUpn =~ ValueUpn or AccountName =~ ValueSam
       | project TimeGenerated, Serie = strcat("Defender for Identity · ", iff(ActionType == "LogonSuccess", "succès", "échec"))
   ),
   (
       ASimAuthenticationEventLogs
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where TargetUsername has ValueSam
       | where tolower(TargetUsername) in (ValueSam, ValueUpn) or tolower(TargetUsername) endswith strcat(@"\", ValueSam)
       | project TimeGenerated, Serie = strcat("ASIM ", EventProduct, " · ", iff(EventResult == "Success", "succès", "échec"))
   ),
   (
       Syslog
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where ProcessName in~ ("sshd", "sshd-session") and SyslogMessage has ValueSam
       | where tolower(extract(@"(?:Accepted|Failed) \S+ for (?:invalid user )?(\S+) from", 1, SyslogMessage)) == ValueSam
       | project TimeGenerated, Serie = strcat("SSH · ", iff(SyslogMessage startswith "Accepted", "succès", "échec"))

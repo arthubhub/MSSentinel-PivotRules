@@ -15,18 +15,18 @@ uses: [domain_hits, roles]
 query: |
   union isfuzzy=true
   (
-      _DomainHits(StartTime, EndTime, ValueDomain)
+      _DomainHits(StartTimestampstamp, EndTimestampstamp, ValueDomain)
       | project TimeGenerated, Source, Host, Account, Action, Detail = Url
   ),
   (
       DeviceProcessEvents
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where ProcessCommandLine has ValueDomain
       | project TimeGenerated, Source = "DeviceProcessEvents", Host = tolower(DeviceName), Account = tolower(AccountName),
           Action = strcat("Processus ", FileName), Detail = strcat(InitiatingProcessFileName, " → ", ProcessCommandLine)
   )
   | extend MachineKey = _HostKey(Host)
-  | lookup kind=leftouter (_MachineRoles(EndTime)) on MachineKey
+  | lookup kind=leftouter (_MachineRoles(EndTimestampstamp)) on MachineKey
   | extend Host = _Labeled(Host, MachineRole)
   | project-away MachineKey, MachineRole, MachineRoleBasis
   | sort by TimeGenerated asc

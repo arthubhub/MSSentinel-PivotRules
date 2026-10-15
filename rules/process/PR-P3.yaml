@@ -19,7 +19,7 @@ query: |
   union isfuzzy=true
   (
       DeviceFileEvents
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where InitiatingProcessFileName =~ ValueFile
       | where isempty(HostFilter) or DeviceName startswith HostFilter
       | where isempty(ValuePath) or InitiatingProcessFolderPath =~ ValuePath
@@ -28,7 +28,7 @@ query: |
   )
   // @sentinel-only:begin
   , (
-      _WinSecurity(StartTime, EndTime, dynamic([4656, 4660, 4663, 4670]), ValueFile)
+      _WinSecurity(StartTimestampstamp, EndTimestampstamp, dynamic([4656, 4660, 4663, 4670]), ValueFile)
       | where tolower(ProcessName) endswith strcat(@"\", ValueFile)
       | where isempty(ValuePath) or tolower(ProcessName) == ValuePath
       | where isempty(HostFilter) or Computer startswith HostFilter
@@ -37,7 +37,7 @@ query: |
           FolderPath = ObjectName, FileName = tostring(parse_path(ObjectName).Filename), FileSize = long(null), SHA256 = "", FileOriginUrl = ""
   ),
   (
-      _Sysmon(StartTime, EndTime, dynamic([11, 15, 23, 26]), ValueFile)
+      _Sysmon(StartTimestampstamp, EndTimestampstamp, dynamic([11, 15, 23, 26]), ValueFile)
       | where ProcessFile == ValueFile
       | where isempty(ValuePath) or tolower(Image) == ValuePath
       | where isempty(HostFilter) or Computer startswith HostFilter
@@ -52,6 +52,6 @@ query: |
       by DeviceName, ActionType, FolderPath, FileName
   | extend UserWritablePath = _IsUserWritable(FolderPath)
   | extend MachineKey = _HostKey(DeviceName)
-  | lookup kind=leftouter (_MachineRoles(EndTime)) on MachineKey
+  | lookup kind=leftouter (_MachineRoles(EndTimestampstamp)) on MachineKey
   | project-away MachineKey, MachineRoleBasis
   | sort by FirstSeen asc

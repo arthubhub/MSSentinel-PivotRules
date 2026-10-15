@@ -14,7 +14,7 @@ query: |
   union isfuzzy=true
   (
       SecurityAlert
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where Entities has Value or CompromisedEntity == Value
       | summarize arg_max(TimeGenerated, AlertName, AlertSeverity, ProductName, CompromisedEntity, Status) by SystemAlertId
       | project TimeGenerated, Source = "SecurityAlert", Title = AlertName, Severity = AlertSeverity, Provider = ProductName,
@@ -22,7 +22,7 @@ query: |
   ),
   (
       AlertEvidence
-      | where TimeGenerated between (StartTime .. EndTime)
+      | where TimeGenerated between (StartTimestampstamp .. EndTimestampstamp)
       | where RemoteIP == Value or LocalIP == Value
       | summarize arg_min(TimeGenerated, Title, Severity, ServiceSource, EntityType, EvidenceRole, DeviceName) by AlertId
       | project TimeGenerated, Source = "AlertEvidence", Title, Severity, Provider = ServiceSource,
@@ -30,7 +30,7 @@ query: |
   ),
   (
       ThreatIntelIndicators
-      | where TimeGenerated between ((StartTime - 60d) .. EndTime)
+      | where TimeGenerated between ((StartTimestampstamp - 60d) .. EndTimestampstamp)
       | where ObservableValue == Value or Pattern has Value
       | summarize arg_max(TimeGenerated, *) by Id
       | where not(IsDeleted) and not(Revoked)
