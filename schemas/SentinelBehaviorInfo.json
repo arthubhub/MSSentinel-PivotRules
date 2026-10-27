@@ -1,0 +1,65 @@
+{
+  "table": "SentinelBehaviorInfo",
+  "fields": [
+    {
+      "name": "ActionType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields",
+      "type": "string"
+    },
+    {
+      "name": "AttackTechniques",
+      "type": "string"
+    },
+    {
+      "name": "BehaviorId",
+      "type": "string"
+    },
+    {
+      "name": "Categories",
+      "type": "string"
+    },
+    {
+      "name": "DataSources",
+      "type": "string"
+    },
+    {
+      "name": "Description",
+      "type": "string"
+    },
+    {
+      "name": "DetectionSource",
+      "type": "string"
+    },
+    {
+      "name": "EndTime",
+      "type": "datetime"
+    },
+    {
+      "name": "ServiceSource",
+      "type": "string"
+    },
+    {
+      "name": "StartTime",
+      "type": "datetime"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Title",
+      "type": "string"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

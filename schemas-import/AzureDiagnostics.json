@@ -1,0 +1,1749 @@
+{
+  "table": "AzureDiagnostics",
+  "fields": [
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "action_id_s",
+      "type": "string"
+    },
+    {
+      "name": "action_name_s",
+      "type": "string"
+    },
+    {
+      "name": "Action_s",
+      "type": "string"
+    },
+    {
+      "name": "action_s",
+      "type": "string"
+    },
+    {
+      "name": "ActionReason_s",
+      "type": "string"
+    },
+    {
+      "name": "affected_rows_d",
+      "type": "double"
+    },
+    {
+      "name": "Age_DatFrozenxid_d",
+      "type": "double"
+    },
+    {
+      "name": "Age_DatMinmxid_d",
+      "type": "double"
+    },
+    {
+      "name": "algorithm_s",
+      "type": "string"
+    },
+    {
+      "name": "Analyze_count_d",
+      "type": "double"
+    },
+    {
+      "name": "AppImage_s",
+      "type": "string"
+    },
+    {
+      "name": "application_name_s",
+      "type": "string"
+    },
+    {
+      "name": "appliedAssignmentId_g",
+      "type": "string"
+    },
+    {
+      "name": "AppType_s",
+      "type": "string"
+    },
+    {
+      "name": "AppVersion_s",
+      "type": "string"
+    },
+    {
+      "name": "ArchiveTieringMode_s",
+      "type": "string"
+    },
+    {
+      "name": "ArchiveTierStorageConsumedInMBs_s",
+      "type": "string"
+    },
+    {
+      "name": "audit_schema_version_d",
+      "type": "double"
+    },
+    {
+      "name": "Autoanalyze_count_d",
+      "type": "double"
+    },
+    {
+      "name": "Autovacuum_count_d",
+      "type": "double"
+    },
+    {
+      "name": "Autovacuum_freeze_max_age_d",
+      "type": "double"
+    },
+    {
+      "name": "Autovacuum_multixact_freeze_max_age_d",
+      "type": "double"
+    },
+    {
+      "name": "Backend_start_t",
+      "type": "datetime"
+    },
+    {
+      "name": "Backend_type_s",
+      "type": "string"
+    },
+    {
+      "name": "backend_type_s",
+      "type": "string"
+    },
+    {
+      "name": "Backend_xid_d",
+      "type": "double"
+    },
+    {
+      "name": "Backend_xmin_d",
+      "type": "double"
+    },
+    {
+      "name": "backendPoolName_s",
+      "type": "string"
+    },
+    {
+      "name": "backendSettingName_s",
+      "type": "string"
+    },
+    {
+      "name": "backendSslCipher_s",
+      "type": "string"
+    },
+    {
+      "name": "backendSslProtocol_s",
+      "type": "string"
+    },
+    {
+      "name": "BackupDaysOfTheWeek_s",
+      "type": "string"
+    },
+    {
+      "name": "BackupFrequency_s",
+      "type": "string"
+    },
+    {
+      "name": "BackupIntervalInHours_s",
+      "type": "string"
+    },
+    {
+      "name": "BackupItemFrontEndSize_s",
+      "type": "string"
+    },
+    {
+      "name": "BackupItemUniqueId_s",
+      "type": "string"
+    },
+    {
+      "name": "BackupManagementServerUniqueId_s",
+      "type": "string"
+    },
+    {
+      "name": "BackupManagementType_s",
+      "type": "string"
+    },
+    {
+      "name": "BackupTimes_s",
+      "type": "string"
+    },
+    {
+      "name": "cacheStatus_s",
+      "type": "string"
+    },
+    {
+      "name": "CallerIPAddress",
+      "type": "string"
+    },
+    {
+      "name": "Category",
+      "type": "string"
+    },
+    {
+      "name": "class_type_description_s",
+      "type": "string"
+    },
+    {
+      "name": "class_type_s",
+      "type": "string"
+    },
+    {
+      "name": "Client_addr_s",
+      "type": "string"
+    },
+    {
+      "name": "client_ip_s",
+      "type": "string"
+    },
+    {
+      "name": "client_tls_version_d",
+      "type": "double"
+    },
+    {
+      "name": "client_tls_version_name_s",
+      "type": "string"
+    },
+    {
+      "name": "clientCountry_s",
+      "type": "string"
+    },
+    {
+      "name": "clientInfo_s",
+      "type": "string"
+    },
+    {
+      "name": "clientIP_s",
+      "type": "string"
+    },
+    {
+      "name": "clientIp_s",
+      "type": "string"
+    },
+    {
+      "name": "clientIpXff_s",
+      "type": "string"
+    },
+    {
+      "name": "clientJA4FingerPrint_s",
+      "type": "string"
+    },
+    {
+      "name": "clientPort_d",
+      "type": "double"
+    },
+    {
+      "name": "clientPort_s",
+      "type": "string"
+    },
+    {
+      "name": "clientResponseTime_d",
+      "type": "double"
+    },
+    {
+      "name": "Collection_time_t",
+      "type": "datetime"
+    },
+    {
+      "name": "connection_id_g",
+      "type": "string"
+    },
+    {
+      "name": "connectionLatencyMilliseconds_s",
+      "type": "string"
+    },
+    {
+      "name": "connectionSerialNumber_d",
+      "type": "double"
+    },
+    {
+      "name": "contentType_s",
+      "type": "string"
+    },
+    {
+      "name": "context_s",
+      "type": "string"
+    },
+    {
+      "name": "CorrelationId",
+      "type": "string"
+    },
+    {
+      "name": "count_executions_d",
+      "type": "double"
+    },
+    {
+      "name": "cpu_time_d",
+      "type": "double"
+    },
+    {
+      "name": "DailyRetentionDuration_s",
+      "type": "string"
+    },
+    {
+      "name": "DailyRetentionTimes_s",
+      "type": "string"
+    },
+    {
+      "name": "Database_name_s",
+      "type": "string"
+    },
+    {
+      "name": "database_name_s",
+      "type": "string"
+    },
+    {
+      "name": "database_principal_id_d",
+      "type": "double"
+    },
+    {
+      "name": "database_principal_name_s",
+      "type": "string"
+    },
+    {
+      "name": "database_transaction_id_d",
+      "type": "double"
+    },
+    {
+      "name": "DatabaseActualMode_s",
+      "type": "string"
+    },
+    {
+      "name": "DatabaseDesiredMode_s",
+      "type": "string"
+    },
+    {
+      "name": "DatabaseName_s",
+      "type": "string"
+    },
+    {
+      "name": "DatConnLimit_d",
+      "type": "double"
+    },
+    {
+      "name": "Datdba_d",
+      "type": "double"
+    },
+    {
+      "name": "DatFrozenxid_d",
+      "type": "double"
+    },
+    {
+      "name": "Datid_d",
+      "type": "double"
+    },
+    {
+      "name": "DatMinmxid_d",
+      "type": "double"
+    },
+    {
+      "name": "delta_max_wait_time_ms_d",
+      "type": "double"
+    },
+    {
+      "name": "delta_signal_wait_time_ms_d",
+      "type": "double"
+    },
+    {
+      "name": "delta_wait_time_ms_d",
+      "type": "double"
+    },
+    {
+      "name": "delta_waiting_tasks_count_d",
+      "type": "double"
+    },
+    {
+      "name": "DeploymentUnit_s",
+      "type": "string"
+    },
+    {
+      "name": "DestinationIp_s",
+      "type": "string"
+    },
+    {
+      "name": "DestinationPort_d",
+      "type": "double"
+    },
+    {
+      "name": "details_data_s",
+      "type": "string"
+    },
+    {
+      "name": "details_file_s",
+      "type": "string"
+    },
+    {
+      "name": "details_line_s",
+      "type": "string"
+    },
+    {
+      "name": "details_matches_s",
+      "type": "string"
+    },
+    {
+      "name": "details_message_s",
+      "type": "string"
+    },
+    {
+      "name": "details_msg_s",
+      "type": "string"
+    },
+    {
+      "name": "DNSLatencyMicroseconds_s",
+      "type": "string"
+    },
+    {
+      "name": "DnssecOkBit_b",
+      "type": "bool"
+    },
+    {
+      "name": "domain_s",
+      "type": "string"
+    },
+    {
+      "name": "dop_d",
+      "type": "double"
+    },
+    {
+      "name": "duration_d",
+      "type": "double"
+    },
+    {
+      "name": "duration_milliseconds_d",
+      "type": "double"
+    },
+    {
+      "name": "DurationMs",
+      "type": "long"
+    },
+    {
+      "name": "edgeActionsAgentType_s",
+      "type": "string"
+    },
+    {
+      "name": "edgeActionsStatusCode_s",
+      "type": "string"
+    },
+    {
+      "name": "EDNS0BufferSize_d",
+      "type": "double"
+    },
+    {
+      "name": "end_utc_date_t",
+      "type": "datetime"
+    },
+    {
+      "name": "endpoint_s",
+      "type": "string"
+    },
+    {
+      "name": "engine_s",
+      "type": "string"
+    },
+    {
+      "name": "EnqueueTime_t",
+      "type": "datetime"
+    },
+    {
+      "name": "error_info_s",
+      "type": "string"
+    },
+    {
+      "name": "Error_s",
+      "type": "string"
+    },
+    {
+      "name": "ErrorInfo_s",
+      "type": "string"
+    },
+    {
+      "name": "errorInfo_s",
+      "type": "string"
+    },
+    {
+      "name": "errorLevel_s",
+      "type": "string"
+    },
+    {
+      "name": "ErrorNumber_d",
+      "type": "double"
+    },
+    {
+      "name": "event_id_g",
+      "type": "string"
+    },
+    {
+      "name": "event_s",
+      "type": "string"
+    },
+    {
+      "name": "event_time_t",
+      "type": "datetime"
+    },
+    {
+      "name": "EventId_d",
+      "type": "double"
+    },
+    {
+      "name": "EventName_s",
+      "type": "string"
+    },
+    {
+      "name": "exec_type_d",
+      "type": "double"
+    },
+    {
+      "name": "execution_type_d",
+      "type": "double"
+    },
+    {
+      "name": "FluentdIngestTimestamp_s",
+      "type": "string"
+    },
+    {
+      "name": "Fqdn_s",
+      "type": "string"
+    },
+    {
+      "name": "grpcStatusCode_s",
+      "type": "string"
+    },
+    {
+      "name": "healthProbeId_g",
+      "type": "string"
+    },
+    {
+      "name": "host_name_s",
+      "type": "string"
+    },
+    {
+      "name": "host_s",
+      "type": "string"
+    },
+    {
+      "name": "hostName_s",
+      "type": "string"
+    },
+    {
+      "name": "hostname_s",
+      "type": "string"
+    },
+    {
+      "name": "httpMethod_s",
+      "type": "string"
+    },
+    {
+      "name": "httpStatus_d",
+      "type": "double"
+    },
+    {
+      "name": "httpStatusCode_d",
+      "type": "double"
+    },
+    {
+      "name": "httpStatusCode_s",
+      "type": "string"
+    },
+    {
+      "name": "httpStatusDetails_s",
+      "type": "string"
+    },
+    {
+      "name": "httpVerb_s",
+      "type": "string"
+    },
+    {
+      "name": "httpVersion_s",
+      "type": "string"
+    },
+    {
+      "name": "id_s",
+      "type": "string"
+    },
+    {
+      "name": "identity_claim_appid_g",
+      "type": "string"
+    },
+    {
+      "name": "identity_claim_appidacr_s",
+      "type": "string"
+    },
+    {
+      "name": "identity_claim_aud_g",
+      "type": "string"
+    },
+    {
+      "name": "identity_claim_exp_s",
+      "type": "string"
+    },
+    {
+      "name": "identity_claim_http_schemas_microsoft_com_identity_claims_objectidentifier_g",
+      "type": "string"
+    },
+    {
+      "name": "identity_claim_iat_s",
+      "type": "string"
+    },
+    {
+      "name": "identity_claim_idtyp_s",
+      "type": "string"
+    },
+    {
+      "name": "identity_claim_iss_s",
+      "type": "string"
+    },
+    {
+      "name": "identity_claim_nbf_s",
+      "type": "string"
+    },
+    {
+      "name": "identity_claim_oid_g",
+      "type": "string"
+    },
+    {
+      "name": "identity_claim_uti_s",
+      "type": "string"
+    },
+    {
+      "name": "identity_claim_xms_az_nwperimid_s",
+      "type": "string"
+    },
+    {
+      "name": "identity_claim_xms_az_tm_s",
+      "type": "string"
+    },
+    {
+      "name": "identity_claim_xms_mirid_s",
+      "type": "string"
+    },
+    {
+      "name": "Idx_scan_d",
+      "type": "double"
+    },
+    {
+      "name": "Idx_tup_fetch_d",
+      "type": "double"
+    },
+    {
+      "name": "instanceId_s",
+      "type": "string"
+    },
+    {
+      "name": "interval_end_time_d",
+      "type": "double"
+    },
+    {
+      "name": "interval_start_time_d",
+      "type": "double"
+    },
+    {
+      "name": "is_column_permission_s",
+      "type": "string"
+    },
+    {
+      "name": "is_local_secondary_replica_s",
+      "type": "string"
+    },
+    {
+      "name": "is_parameterizable_s",
+      "type": "string"
+    },
+    {
+      "name": "is_primary_b",
+      "type": "bool"
+    },
+    {
+      "name": "is_server_level_audit_s",
+      "type": "string"
+    },
+    {
+      "name": "isAccessPolicyMatch_b",
+      "type": "bool"
+    },
+    {
+      "name": "isAddressAuthorized_b",
+      "type": "bool"
+    },
+    {
+      "name": "IsDisabledBySystem_d",
+      "type": "double"
+    },
+    {
+      "name": "IsExplicitProxyRequest_b",
+      "type": "bool"
+    },
+    {
+      "name": "isRbacAuthorized_b",
+      "type": "bool"
+    },
+    {
+      "name": "IsTlsInspected_b",
+      "type": "bool"
+    },
+    {
+      "name": "ja4Fingerprint_s",
+      "type": "string"
+    },
+    {
+      "name": "keyProperties_attributes_hsmPlatform_s",
+      "type": "string"
+    },
+    {
+      "name": "keyProperties_type_s",
+      "type": "string"
+    },
+    {
+      "name": "LatestRecoveryPointLocation_s",
+      "type": "string"
+    },
+    {
+      "name": "LatestRecoveryPointTime_s",
+      "type": "string"
+    },
+    {
+      "name": "ledger_start_sequence_number_d",
+      "type": "double"
+    },
+    {
+      "name": "Level",
+      "type": "string"
+    },
+    {
+      "name": "listenerName_s",
+      "type": "string"
+    },
+    {
+      "name": "location_s",
+      "type": "string"
+    },
+    {
+      "name": "LOCPATH_s",
+      "type": "string"
+    },
+    {
+      "name": "log_bytes_used_d",
+      "type": "double"
+    },
+    {
+      "name": "LogBackupFrequency_s",
+      "type": "string"
+    },
+    {
+      "name": "LogBackupRetentionDuration_s",
+      "type": "string"
+    },
+    {
+      "name": "logical_io_reads_d",
+      "type": "double"
+    },
+    {
+      "name": "logical_io_writes_d",
+      "type": "double"
+    },
+    {
+      "name": "LogicalServerName_s",
+      "type": "string"
+    },
+    {
+      "name": "max_cpu_time_d",
+      "type": "double"
+    },
+    {
+      "name": "max_dop_d",
+      "type": "double"
+    },
+    {
+      "name": "max_duration_d",
+      "type": "double"
+    },
+    {
+      "name": "max_log_bytes_used_d",
+      "type": "double"
+    },
+    {
+      "name": "max_logical_io_reads_d",
+      "type": "double"
+    },
+    {
+      "name": "max_logical_io_writes_d",
+      "type": "double"
+    },
+    {
+      "name": "max_num_physical_io_reads_d",
+      "type": "double"
+    },
+    {
+      "name": "max_page_server_reads_d",
+      "type": "double"
+    },
+    {
+      "name": "max_physical_io_reads_d",
+      "type": "double"
+    },
+    {
+      "name": "max_query_max_used_memory_d",
+      "type": "double"
+    },
+    {
+      "name": "max_query_wait_time_ms_d",
+      "type": "double"
+    },
+    {
+      "name": "max_rowcount_d",
+      "type": "double"
+    },
+    {
+      "name": "Message",
+      "type": "string"
+    },
+    {
+      "name": "msg_s",
+      "type": "string"
+    },
+    {
+      "name": "N_dead_tup_d",
+      "type": "double"
+    },
+    {
+      "name": "N_live_tup_d",
+      "type": "double"
+    },
+    {
+      "name": "N_mod_since_analyze_d",
+      "type": "double"
+    },
+    {
+      "name": "N_tup_del_d",
+      "type": "double"
+    },
+    {
+      "name": "N_tup_hot_upd_d",
+      "type": "double"
+    },
+    {
+      "name": "N_tup_ins_d",
+      "type": "double"
+    },
+    {
+      "name": "N_tup_upd_d",
+      "type": "double"
+    },
+    {
+      "name": "noOfConnectionRequests_d",
+      "type": "double"
+    },
+    {
+      "name": "num_physical_io_reads_d",
+      "type": "double"
+    },
+    {
+      "name": "object_id_d",
+      "type": "double"
+    },
+    {
+      "name": "object_name_s",
+      "type": "string"
+    },
+    {
+      "name": "OldestRecoveryPointLocation_s",
+      "type": "string"
+    },
+    {
+      "name": "OldestRecoveryPointTime_s",
+      "type": "string"
+    },
+    {
+      "name": "onbehalfAnnotations_s",
+      "type": "string"
+    },
+    {
+      "name": "onbehalfServiceId_s",
+      "type": "string"
+    },
+    {
+      "name": "OperationName",
+      "type": "string"
+    },
+    {
+      "name": "OperationVersion",
+      "type": "string"
+    },
+    {
+      "name": "OptionActualState_s",
+      "type": "string"
+    },
+    {
+      "name": "OptionDesiredState_s",
+      "type": "string"
+    },
+    {
+      "name": "OptionDisableReason_s",
+      "type": "string"
+    },
+    {
+      "name": "OptionName_s",
+      "type": "string"
+    },
+    {
+      "name": "originalEventTimestamp_t",
+      "type": "datetime"
+    },
+    {
+      "name": "originalHost_s",
+      "type": "string"
+    },
+    {
+      "name": "OriginalPrimaryServerName_s",
+      "type": "string"
+    },
+    {
+      "name": "originalRequestUriWithArgs_s",
+      "type": "string"
+    },
+    {
+      "name": "originCryptCipher_s",
+      "type": "string"
+    },
+    {
+      "name": "originCryptProtocol_s",
+      "type": "string"
+    },
+    {
+      "name": "originIP_s",
+      "type": "string"
+    },
+    {
+      "name": "originIp_s",
+      "type": "string"
+    },
+    {
+      "name": "originName_s",
+      "type": "string"
+    },
+    {
+      "name": "originUrl_s",
+      "type": "string"
+    },
+    {
+      "name": "page_server_reads_d",
+      "type": "double"
+    },
+    {
+      "name": "paranoiaLevel_s",
+      "type": "string"
+    },
+    {
+      "name": "PartitionId_s",
+      "type": "string"
+    },
+    {
+      "name": "permission_bitmask_g",
+      "type": "string"
+    },
+    {
+      "name": "physical_io_reads_d",
+      "type": "double"
+    },
+    {
+      "name": "Pid_d",
+      "type": "double"
+    },
+    {
+      "name": "plan_id_d",
+      "type": "double"
+    },
+    {
+      "name": "Policy_s",
+      "type": "string"
+    },
+    {
+      "name": "policy_s",
+      "type": "string"
+    },
+    {
+      "name": "policyId_s",
+      "type": "string"
+    },
+    {
+      "name": "policyMode_s",
+      "type": "string"
+    },
+    {
+      "name": "PolicyName_s",
+      "type": "string"
+    },
+    {
+      "name": "policyScope_s",
+      "type": "string"
+    },
+    {
+      "name": "policyScopeName_s",
+      "type": "string"
+    },
+    {
+      "name": "PolicySubType_s",
+      "type": "string"
+    },
+    {
+      "name": "PolicyTimeZone_s",
+      "type": "string"
+    },
+    {
+      "name": "PolicyUniqueId_g",
+      "type": "string"
+    },
+    {
+      "name": "pop_s",
+      "type": "string"
+    },
+    {
+      "name": "priority_d",
+      "type": "double"
+    },
+    {
+      "name": "privateEndpointId_s",
+      "type": "string"
+    },
+    {
+      "name": "probeUrl_s",
+      "type": "string"
+    },
+    {
+      "name": "processID_d",
+      "type": "double"
+    },
+    {
+      "name": "processId_d",
+      "type": "double"
+    },
+    {
+      "name": "properties_enableCrossTenantAccessProtection_b",
+      "type": "bool"
+    },
+    {
+      "name": "properties_enabledForDeployment_b",
+      "type": "bool"
+    },
+    {
+      "name": "properties_enabledForDiskEncryption_b",
+      "type": "bool"
+    },
+    {
+      "name": "properties_enabledForTemplateDeployment_b",
+      "type": "bool"
+    },
+    {
+      "name": "properties_enablePurgeProtection_b",
+      "type": "bool"
+    },
+    {
+      "name": "properties_enableRbacAuthorization_b",
+      "type": "bool"
+    },
+    {
+      "name": "properties_enableSoftDelete_b",
+      "type": "bool"
+    },
+    {
+      "name": "properties_networkAcls_bypass_s",
+      "type": "string"
+    },
+    {
+      "name": "properties_networkAcls_defaultAction_s",
+      "type": "string"
+    },
+    {
+      "name": "properties_s",
+      "type": "string"
+    },
+    {
+      "name": "properties_sku_Family_s",
+      "type": "string"
+    },
+    {
+      "name": "properties_sku_Name_s",
+      "type": "string"
+    },
+    {
+      "name": "properties_softDeleteRetentionInDays_d",
+      "type": "double"
+    },
+    {
+      "name": "properties_tenantId_g",
+      "type": "string"
+    },
+    {
+      "name": "ProtectedContainerFriendlyName_s",
+      "type": "string"
+    },
+    {
+      "name": "ProtectedContainerLocation_s",
+      "type": "string"
+    },
+    {
+      "name": "ProtectedContainerName_s",
+      "type": "string"
+    },
+    {
+      "name": "ProtectedContainerType_s",
+      "type": "string"
+    },
+    {
+      "name": "ProtectedContainerUniqueId_s",
+      "type": "string"
+    },
+    {
+      "name": "ProtectedContainerWorkloadType_s",
+      "type": "string"
+    },
+    {
+      "name": "ProtectedInstanceCount_s",
+      "type": "string"
+    },
+    {
+      "name": "ProtectedServerFriendlyName_s",
+      "type": "string"
+    },
+    {
+      "name": "ProtectedServerName_s",
+      "type": "string"
+    },
+    {
+      "name": "ProtectedServerType_s",
+      "type": "string"
+    },
+    {
+      "name": "ProtectedServerUniqueId_s",
+      "type": "string"
+    },
+    {
+      "name": "Protocol_s",
+      "type": "string"
+    },
+    {
+      "name": "query_hash_s",
+      "type": "string"
+    },
+    {
+      "name": "query_id_d",
+      "type": "double"
+    },
+    {
+      "name": "query_max_used_memory_d",
+      "type": "double"
+    },
+    {
+      "name": "query_param_type_d",
+      "type": "double"
+    },
+    {
+      "name": "query_plan_hash_s",
+      "type": "string"
+    },
+    {
+      "name": "Query_start_t",
+      "type": "datetime"
+    },
+    {
+      "name": "QueryClass_s",
+      "type": "string"
+    },
+    {
+      "name": "QueryId_d",
+      "type": "double"
+    },
+    {
+      "name": "QueryName_s",
+      "type": "string"
+    },
+    {
+      "name": "QueryType_s",
+      "type": "string"
+    },
+    {
+      "name": "receivedBytes_d",
+      "type": "double"
+    },
+    {
+      "name": "referer_s",
+      "type": "string"
+    },
+    {
+      "name": "Region_s",
+      "type": "string"
+    },
+    {
+      "name": "RegisteredContainerId_s",
+      "type": "string"
+    },
+    {
+      "name": "Remaining_mxids_till_emergency_autovacuum_d",
+      "type": "double"
+    },
+    {
+      "name": "Remaining_mxids_till_wraparound_d",
+      "type": "double"
+    },
+    {
+      "name": "Remaining_xids_till_emergency_autovacuum_d",
+      "type": "double"
+    },
+    {
+      "name": "Remaining_xids_till_wraparound_d",
+      "type": "double"
+    },
+    {
+      "name": "replica_group_id_d",
+      "type": "double"
+    },
+    {
+      "name": "ReplicaRole_s",
+      "type": "string"
+    },
+    {
+      "name": "requestBytes_s",
+      "type": "string"
+    },
+    {
+      "name": "RequestDurationSecs_d",
+      "type": "double"
+    },
+    {
+      "name": "requestProtocol_s",
+      "type": "string"
+    },
+    {
+      "name": "requestQuery_s",
+      "type": "string"
+    },
+    {
+      "name": "RequestSize_d",
+      "type": "double"
+    },
+    {
+      "name": "requestUri_s",
+      "type": "string"
+    },
+    {
+      "name": "Resource",
+      "type": "string"
+    },
+    {
+      "name": "ResourceGroup",
+      "type": "string"
+    },
+    {
+      "name": "ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "ResourceProvider",
+      "type": "string"
+    },
+    {
+      "name": "ResourceType",
+      "type": "string"
+    },
+    {
+      "name": "response_rows_d",
+      "type": "double"
+    },
+    {
+      "name": "responseBodyBytes_s",
+      "type": "string"
+    },
+    {
+      "name": "responseBytes_s",
+      "type": "string"
+    },
+    {
+      "name": "ResponseCode_s",
+      "type": "string"
+    },
+    {
+      "name": "ResponseFlags_s",
+      "type": "string"
+    },
+    {
+      "name": "ResponseSize_d",
+      "type": "double"
+    },
+    {
+      "name": "result_s",
+      "type": "string"
+    },
+    {
+      "name": "ResultDescription",
+      "type": "string"
+    },
+    {
+      "name": "ResultSignature",
+      "type": "string"
+    },
+    {
+      "name": "ResultType",
+      "type": "string"
+    },
+    {
+      "name": "routingRuleName_s",
+      "type": "string"
+    },
+    {
+      "name": "rowcount_d",
+      "type": "double"
+    },
+    {
+      "name": "roxyConnectStatusCode_s",
+      "type": "string"
+    },
+    {
+      "name": "Rule_s",
+      "type": "string"
+    },
+    {
+      "name": "RuleCollection_s",
+      "type": "string"
+    },
+    {
+      "name": "RuleCollectionGroup_s",
+      "type": "string"
+    },
+    {
+      "name": "ruleGroup_s",
+      "type": "string"
+    },
+    {
+      "name": "ruleId_s",
+      "type": "string"
+    },
+    {
+      "name": "ruleName_s",
+      "type": "string"
+    },
+    {
+      "name": "rulesEngineMatchNames_s",
+      "type": "string"
+    },
+    {
+      "name": "ruleSetType_s",
+      "type": "string"
+    },
+    {
+      "name": "ruleSetVersion_s",
+      "type": "string"
+    },
+    {
+      "name": "ScheduleWindowDuration_s",
+      "type": "string"
+    },
+    {
+      "name": "ScheduleWindowStartTime_s",
+      "type": "string"
+    },
+    {
+      "name": "Schemaname_s",
+      "type": "string"
+    },
+    {
+      "name": "SchemaVersion_s",
+      "type": "string"
+    },
+    {
+      "name": "securable_class_type_s",
+      "type": "string"
+    },
+    {
+      "name": "securityCipher_s",
+      "type": "string"
+    },
+    {
+      "name": "securityCurves_s",
+      "type": "string"
+    },
+    {
+      "name": "securityProtocol_s",
+      "type": "string"
+    },
+    {
+      "name": "sentBytes_d",
+      "type": "double"
+    },
+    {
+      "name": "Seq_scan_d",
+      "type": "double"
+    },
+    {
+      "name": "Seq_tup_read_d",
+      "type": "double"
+    },
+    {
+      "name": "sequence_group_id_g",
+      "type": "string"
+    },
+    {
+      "name": "sequence_number_d",
+      "type": "double"
+    },
+    {
+      "name": "server_instance_name_s",
+      "type": "string"
+    },
+    {
+      "name": "server_principal_id_d",
+      "type": "double"
+    },
+    {
+      "name": "server_principal_name_s",
+      "type": "string"
+    },
+    {
+      "name": "server_principal_sid_s",
+      "type": "string"
+    },
+    {
+      "name": "serverConnectTime_s",
+      "type": "string"
+    },
+    {
+      "name": "serverHeaderTime_s",
+      "type": "string"
+    },
+    {
+      "name": "ServerIp_s",
+      "type": "string"
+    },
+    {
+      "name": "ServerLocation_s",
+      "type": "string"
+    },
+    {
+      "name": "ServerPort_d",
+      "type": "double"
+    },
+    {
+      "name": "serverResponseLatency_s",
+      "type": "string"
+    },
+    {
+      "name": "serverRouted_s",
+      "type": "string"
+    },
+    {
+      "name": "serverStatus_s",
+      "type": "string"
+    },
+    {
+      "name": "ServerType_s",
+      "type": "string"
+    },
+    {
+      "name": "ServerVersion_s",
+      "type": "string"
+    },
+    {
+      "name": "Session_duration_s",
+      "type": "string"
+    },
+    {
+      "name": "session_id_d",
+      "type": "double"
+    },
+    {
+      "name": "session_server_principal_name_s",
+      "type": "string"
+    },
+    {
+      "name": "sni_s",
+      "type": "string"
+    },
+    {
+      "name": "socketIP_s",
+      "type": "string"
+    },
+    {
+      "name": "socketIp_s",
+      "type": "string"
+    },
+    {
+      "name": "SourceIP",
+      "type": "string"
+    },
+    {
+      "name": "SourcePort_d",
+      "type": "double"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "sqlerrcode_s",
+      "type": "string"
+    },
+    {
+      "name": "sslCipher_s",
+      "type": "string"
+    },
+    {
+      "name": "sslClientVerify_s",
+      "type": "string"
+    },
+    {
+      "name": "sslEnabled_s",
+      "type": "string"
+    },
+    {
+      "name": "sslProtocol_s",
+      "type": "string"
+    },
+    {
+      "name": "start_utc_date_t",
+      "type": "datetime"
+    },
+    {
+      "name": "State_change_t",
+      "type": "datetime"
+    },
+    {
+      "name": "State_s",
+      "type": "string"
+    },
+    {
+      "name": "statement_key_hash_s",
+      "type": "string"
+    },
+    {
+      "name": "statement_s",
+      "type": "string"
+    },
+    {
+      "name": "statement_sql_handle_s",
+      "type": "string"
+    },
+    {
+      "name": "statement_type_s",
+      "type": "string"
+    },
+    {
+      "name": "StorageConsumedInMBs_s",
+      "type": "string"
+    },
+    {
+      "name": "StorageName_s",
+      "type": "string"
+    },
+    {
+      "name": "StorageType_s",
+      "type": "string"
+    },
+    {
+      "name": "StorageUniqueId_s",
+      "type": "string"
+    },
+    {
+      "name": "subnetId_s",
+      "type": "string"
+    },
+    {
+      "name": "SubscriptionId",
+      "type": "string"
+    },
+    {
+      "name": "succeeded_s",
+      "type": "string"
+    },
+    {
+      "name": "Tables_analyzed_d",
+      "type": "double"
+    },
+    {
+      "name": "Tables_autoanalyzed_d",
+      "type": "double"
+    },
+    {
+      "name": "Tables_autovacuumed_d",
+      "type": "double"
+    },
+    {
+      "name": "Tables_counter_d",
+      "type": "double"
+    },
+    {
+      "name": "Tables_vacuumed_d",
+      "type": "double"
+    },
+    {
+      "name": "Tag_s",
+      "type": "string"
+    },
+    {
+      "name": "target_database_principal_id_d",
+      "type": "double"
+    },
+    {
+      "name": "target_server_principal_id_d",
+      "type": "double"
+    },
+    {
+      "name": "TargetUrl_s",
+      "type": "string"
+    },
+    {
+      "name": "TelemetryProperties_s",
+      "type": "string"
+    },
+    {
+      "name": "Tenant_s",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "threadID_d",
+      "type": "double"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "timestamp_s",
+      "type": "string"
+    },
+    {
+      "name": "timeStamp_t",
+      "type": "datetime"
+    },
+    {
+      "name": "timeTaken_d",
+      "type": "double"
+    },
+    {
+      "name": "timeTaken_s",
+      "type": "string"
+    },
+    {
+      "name": "timeToFirstByte_s",
+      "type": "string"
+    },
+    {
+      "name": "tlsVersion_s",
+      "type": "string"
+    },
+    {
+      "name": "total_query_wait_time_ms_d",
+      "type": "double"
+    },
+    {
+      "name": "Total_remaining_mxids_d",
+      "type": "double"
+    },
+    {
+      "name": "Total_remaining_xids_d",
+      "type": "double"
+    },
+    {
+      "name": "totalLatencyMilliseconds_s",
+      "type": "string"
+    },
+    {
+      "name": "trackingReference_s",
+      "type": "string"
+    },
+    {
+      "name": "transaction_id_d",
+      "type": "double"
+    },
+    {
+      "name": "transactionId_g",
+      "type": "string"
+    },
+    {
+      "name": "TranslatedIp_s",
+      "type": "string"
+    },
+    {
+      "name": "TranslatedPort_d",
+      "type": "double"
+    },
+    {
+      "name": "trustedService_s",
+      "type": "string"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "upstreamSourcePort_s",
+      "type": "string"
+    },
+    {
+      "name": "user_defined_event_id_d",
+      "type": "double"
+    },
+    {
+      "name": "userAgent_s",
+      "type": "string"
+    },
+    {
+      "name": "Usesysid_d",
+      "type": "double"
+    },
+    {
+      "name": "Vacuum_count_d",
+      "type": "double"
+    },
+    {
+      "name": "Vacuum_freeze_min_age_d",
+      "type": "double"
+    },
+    {
+      "name": "Vacuum_multixact_freeze_min_age_d",
+      "type": "double"
+    },
+    {
+      "name": "VaultUniqueId_s",
+      "type": "string"
+    },
+    {
+      "name": "WAFEvaluationTime_s",
+      "type": "string"
+    },
+    {
+      "name": "WAFMode_s",
+      "type": "string"
+    },
+    {
+      "name": "WAFPolicyID_s",
+      "type": "string"
+    },
+    {
+      "name": "wait_category_s",
+      "type": "string"
+    },
+    {
+      "name": "Wait_event_s",
+      "type": "string"
+    },
+    {
+      "name": "Wait_event_type_s",
+      "type": "string"
+    },
+    {
+      "name": "wait_type_s",
+      "type": "string"
+    },
+    {
+      "name": "WeeklyRetentionDaysOfTheWeek_s",
+      "type": "string"
+    },
+    {
+      "name": "WeeklyRetentionDuration_s",
+      "type": "string"
+    },
+    {
+      "name": "WeeklyRetentionTimes_s",
+      "type": "string"
+    },
+    {
+      "name": "Xact_start_t",
+      "type": "datetime"
+    }
+  ]
+}

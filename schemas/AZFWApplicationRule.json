@@ -1,0 +1,77 @@
+{
+  "table": "AZFWApplicationRule",
+  "fields": [
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "Action",
+      "type": "string"
+    },
+    {
+      "name": "ActionReason",
+      "type": "string"
+    },
+    {
+      "name": "DestinationPort",
+      "type": "long"
+    },
+    {
+      "name": "Fqdn",
+      "type": "string"
+    },
+    {
+      "name": "IsExplicitProxyRequest",
+      "type": "bool"
+    },
+    {
+      "name": "IsTlsInspected",
+      "type": "bool"
+    },
+    {
+      "name": "Policy",
+      "type": "string"
+    },
+    {
+      "name": "Protocol",
+      "type": "string"
+    },
+    {
+      "name": "Rule",
+      "type": "string"
+    },
+    {
+      "name": "RuleCollection",
+      "type": "string"
+    },
+    {
+      "name": "RuleCollectionGroup",
+      "type": "string"
+    },
+    {
+      "name": "SourceIp",
+      "type": "string"
+    },
+    {
+      "name": "SourcePort",
+      "type": "long"
+    },
+    {
+      "name": "TargetUrl",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

@@ -1,0 +1,185 @@
+{
+  "table": "AWSCloudTrail",
+  "fields": [
+    {
+      "name": "AdditionalEventData",
+      "type": "string"
+    },
+    {
+      "name": "APIVersion",
+      "type": "string"
+    },
+    {
+      "name": "AwsEventId",
+      "type": "string"
+    },
+    {
+      "name": "AWSRegion",
+      "type": "string"
+    },
+    {
+      "name": "AwsRequestId_",
+      "type": "string"
+    },
+    {
+      "name": "CipherSuite",
+      "type": "string"
+    },
+    {
+      "name": "ClientProvidedHostHeader",
+      "type": "string"
+    },
+    {
+      "name": "EC2RoleDelivery",
+      "type": "string"
+    },
+    {
+      "name": "ErrorCode",
+      "type": "string"
+    },
+    {
+      "name": "ErrorMessage",
+      "type": "string"
+    },
+    {
+      "name": "EventName",
+      "type": "string"
+    },
+    {
+      "name": "EventSource",
+      "type": "string"
+    },
+    {
+      "name": "EventTypeName",
+      "type": "string"
+    },
+    {
+      "name": "EventVersion",
+      "type": "string"
+    },
+    {
+      "name": "ManagementEvent",
+      "type": "bool"
+    },
+    {
+      "name": "ReadOnly",
+      "type": "bool"
+    },
+    {
+      "name": "RecipientAccountId",
+      "type": "string"
+    },
+    {
+      "name": "RequestParameters",
+      "type": "string"
+    },
+    {
+      "name": "Resources",
+      "type": "string"
+    },
+    {
+      "name": "ResponseElements",
+      "type": "string"
+    },
+    {
+      "name": "ServiceEventDetails",
+      "type": "string"
+    },
+    {
+      "name": "SessionCreationDate",
+      "type": "datetime"
+    },
+    {
+      "name": "SessionIssuerAccountId",
+      "type": "string"
+    },
+    {
+      "name": "SessionIssuerArn",
+      "type": "string"
+    },
+    {
+      "name": "SessionIssuerPrincipalId",
+      "type": "string"
+    },
+    {
+      "name": "SessionIssuerType",
+      "type": "string"
+    },
+    {
+      "name": "SessionIssuerUserName",
+      "type": "string"
+    },
+    {
+      "name": "SessionMfaAuthenticated",
+      "type": "bool"
+    },
+    {
+      "name": "SharedEventId",
+      "type": "string"
+    },
+    {
+      "name": "SourceIpAddress",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "TlsVersion",
+      "type": "string"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "UserAgent",
+      "type": "string"
+    },
+    {
+      "name": "UserIdentityAccessKeyId",
+      "type": "string"
+    },
+    {
+      "name": "UserIdentityAccountId",
+      "type": "string"
+    },
+    {
+      "name": "UserIdentityArn",
+      "type": "string"
+    },
+    {
+      "name": "UserIdentityInvokedBy",
+      "type": "string"
+    },
+    {
+      "name": "UserIdentityPrincipalid",
+      "type": "string"
+    },
+    {
+      "name": "UserIdentityStoreArn",
+      "type": "string"
+    },
+    {
+      "name": "UserIdentityType",
+      "type": "string"
+    },
+    {
+      "name": "UserIdentityUserId",
+      "type": "string"
+    },
+    {
+      "name": "UserIdentityUserName",
+      "type": "string"
+    },
+    {
+      "name": "VpcEndpointId",
+      "type": "string"
+    }
+  ]
+}

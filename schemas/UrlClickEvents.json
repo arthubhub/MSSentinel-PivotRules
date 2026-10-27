@@ -1,0 +1,69 @@
+{
+  "table": "UrlClickEvents",
+  "fields": [
+    {
+      "name": "AccountUpn",
+      "type": "string"
+    },
+    {
+      "name": "ActionType",
+      "type": "string"
+    },
+    {
+      "name": "AppName",
+      "type": "string"
+    },
+    {
+      "name": "AppVersion",
+      "type": "string"
+    },
+    {
+      "name": "IPAddress",
+      "type": "string"
+    },
+    {
+      "name": "IsClickedThrough",
+      "type": "bool"
+    },
+    {
+      "name": "NetworkMessageId",
+      "type": "string"
+    },
+    {
+      "name": "ReportId",
+      "type": "string"
+    },
+    {
+      "name": "SourceId",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Timestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "Url",
+      "type": "string"
+    },
+    {
+      "name": "UrlChain",
+      "type": "string"
+    },
+    {
+      "name": "Workload",
+      "type": "string"
+    }
+  ]
+}

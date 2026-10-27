@@ -1,0 +1,289 @@
+{
+  "table": "SentinelHealth",
+  "fields": [
+    {
+      "name": "Description",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties",
+      "type": "object"
+    },
+    {
+      "name": "ExtendedProperties.ActionsTriggeredSuccessfully",
+      "type": "long"
+    },
+    {
+      "name": "ExtendedProperties.AggregationKind",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.AlertsGeneratedAmount",
+      "type": "long"
+    },
+    {
+      "name": "ExtendedProperties.AwsRoleArn",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.ConnectorDataType",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.CorrelationId",
+      "type": "guid"
+    },
+    {
+      "name": "ExtendedProperties.DestinationTable",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.EndTime",
+      "type": "datetime"
+    },
+    {
+      "name": "ExtendedProperties.EntitiesDroppedDueToMappingIssuesAmount",
+      "type": "long"
+    },
+    {
+      "name": "ExtendedProperties.EntitiesGeneratedAmount",
+      "type": "long"
+    },
+    {
+      "name": "ExtendedProperties.FailureSummary",
+      "type": "object"
+    },
+    {
+      "name": "ExtendedProperties.FailureSummary.[]",
+      "type": "object"
+    },
+    {
+      "name": "ExtendedProperties.FailureSummary.[].HealthResultType",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.FailureSummary.[].StatusCode",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.FailureSummary.[].StatusMessage",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.IncidentName",
+      "type": "guid"
+    },
+    {
+      "name": "ExtendedProperties.IncidentNumber",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.ingestionEndpoint",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.Issues",
+      "type": "object"
+    },
+    {
+      "name": "ExtendedProperties.Issues.[]",
+      "type": "null"
+    },
+    {
+      "name": "ExtendedProperties.Issues.[].Code",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.Issues.[].Description",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.projectId",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.pubSubSubscriptionNames",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.QueryEndTimeUTC",
+      "type": "datetime"
+    },
+    {
+      "name": "ExtendedProperties.QueryFrequency",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.QueryPerformanceIndicators",
+      "type": "object"
+    },
+    {
+      "name": "ExtendedProperties.QueryPerformanceIndicators.AgeOfOldestDataUsed",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.QueryPerformanceIndicators.DataUsedForQueryProcessing",
+      "type": "long"
+    },
+    {
+      "name": "ExtendedProperties.QueryPerformanceIndicators.NumberOfRegions",
+      "type": "long"
+    },
+    {
+      "name": "ExtendedProperties.QueryPerformanceIndicators.NumberOfWorkspaces",
+      "type": "long"
+    },
+    {
+      "name": "ExtendedProperties.QueryPerformanceIndicators.Parallelism",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.QueryPerformanceIndicators.TimeSpanOfProcessedData",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.QueryPerformanceIndicators.TotalCpu",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.QueryPeriod",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.QueryResultAmount",
+      "type": "long"
+    },
+    {
+      "name": "ExtendedProperties.QueryStartTimeUTC",
+      "type": "datetime"
+    },
+    {
+      "name": "ExtendedProperties.RuleId",
+      "type": "guid"
+    },
+    {
+      "name": "ExtendedProperties.S3SqsNotificationQueue",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.StartTime",
+      "type": "datetime"
+    },
+    {
+      "name": "ExtendedProperties.StorageQueueInfo",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.StreamName",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.SuppressionDuration",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.SuppressionEnabled",
+      "type": "bool"
+    },
+    {
+      "name": "ExtendedProperties.tenantId",
+      "type": "guid"
+    },
+    {
+      "name": "ExtendedProperties.TotalActions",
+      "type": "long"
+    },
+    {
+      "name": "ExtendedProperties.TriggeredOn",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.TriggeredPlaybooks",
+      "type": "object"
+    },
+    {
+      "name": "ExtendedProperties.TriggeredPlaybooks.[]",
+      "type": "null"
+    },
+    {
+      "name": "ExtendedProperties.TriggeredPlaybooks.[].RunId",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.TriggeredPlaybooks.[].WorkflowId",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.TriggeredWhen",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.TriggerOperator",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.TriggerThreshold",
+      "type": "long"
+    },
+    {
+      "name": "ExtendedProperties.TriggerType",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.workspaceId",
+      "type": "guid"
+    },
+    {
+      "name": "ExtendedProperties.workspaceRegion",
+      "type": "string"
+    },
+    {
+      "name": "OperationName",
+      "type": "string"
+    },
+    {
+      "name": "Reason",
+      "type": "string"
+    },
+    {
+      "name": "RecordId",
+      "type": "string"
+    },
+    {
+      "name": "SentinelResourceId",
+      "type": "string"
+    },
+    {
+      "name": "SentinelResourceKind",
+      "type": "string"
+    },
+    {
+      "name": "SentinelResourceName",
+      "type": "string"
+    },
+    {
+      "name": "SentinelResourceType",
+      "type": "string"
+    },
+    {
+      "name": "Status",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "WorkspaceId",
+      "type": "string"
+    }
+  ]
+}

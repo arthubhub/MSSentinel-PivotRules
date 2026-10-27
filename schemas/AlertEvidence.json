@@ -1,0 +1,1677 @@
+{
+  "table": "AlertEvidence",
+  "fields": [
+    {
+      "name": "AccountDomain",
+      "type": "string"
+    },
+    {
+      "name": "AccountName",
+      "type": "string"
+    },
+    {
+      "name": "AccountObjectId",
+      "type": "string"
+    },
+    {
+      "name": "AccountSid",
+      "type": "string"
+    },
+    {
+      "name": "AccountUpn",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.AadId",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.AadUserId",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.Account",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Account.$id",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Account.AadUserId",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.Account.Asset",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.Account.DetectionStatus",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Account.DisplayName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Account.Host",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Account.Host.$ref",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Account.InventoryIdentityId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Account.IsDomainJoined",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.Account.IsIoc",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.Account.LastRemediationState",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Account.LastVerdict",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Account.MergeByKey",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Account.MergeByKeyHex",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Account.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Account.NTDomain",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Account.RbacScopes",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Account.RbacScopes.ScopesPerType",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Account.RbacScopes.ScopesPerType.MachineGroupIds",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Account.RbacScopes.ScopesPerType.MachineGroupIds.Mode",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Account.RbacScopes.ScopesPerType.MachineGroupIds.Scopes",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Account.RbacScopes.ScopesPerType.MachineGroupIds.Scopes.[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Account.RbacScopes.ScopesPerType.Workloads",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Account.RbacScopes.ScopesPerType.Workloads.Mode",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Account.RbacScopes.ScopesPerType.Workloads.Scopes",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Account.RbacScopes.ScopesPerType.Workloads.Scopes.[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Account.ReferenceId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Account.RemediationProviders",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Account.RemediationProviders.[]",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Account.RemediationProviders.[].RemediationDate",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.Account.RemediationProviders.[].RemediationState",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Account.RemediationProviders.[].Type",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Account.Role",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.Account.Sid",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Account.SuspicionLevel",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Account.ThreatAnalysisSummary",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Account.ThreatAnalysisSummary.[]",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Account.ThreatAnalysisSummary.[].AnalysisDate",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.Account.ThreatAnalysisSummary.[].AnalyzersResult",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Account.ThreatAnalysisSummary.[].AnalyzersResult.[]",
+      "type": "null"
+    },
+    {
+      "name": "AdditionalFields.Account.ThreatAnalysisSummary.[].Verdict",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Account.Type",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Account.UPNSuffix",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Account.UserPrincipalName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.AccountName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Address",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.AntispamDirection",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Asset",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.AttachmentCount",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.CampaignID",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ClusterBy",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ClusterByValue",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ClusterGroup",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ClusterQueryEndTime",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.ClusterQueryStartTime",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.ClusterSourceIdentifier",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ClusterSourceType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.CommandLine",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.CountByDeliveryLocation",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.CountByDeliveryLocation.Quarantine",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.CountByProtectionStatus",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.CountByProtectionStatus.Blocked",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.CountByThreatType",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.CountByThreatType.HighConfPhish",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.CountByThreatType.Malware",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.CountByThreatType.Phish",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.CountByThreatType.Spam",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.CreatedTimeUtc",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.CreationTimeUtc",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.DeliveryAction",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DeliveryLocation",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DetailedRoles",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.DetailedRoles.[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DetectionStatus",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DisplayName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DnsDomain",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DomainName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ElevationToken",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.EndTimeUtc",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.EnrichmentType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.EntitySources",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.EntitySources.[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Files",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Files.[]",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Files.[].$id",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Files.[].FileHashes",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Files.[].FileHashes.[]",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Files.[].FileHashes.[].$id",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Files.[].FileHashes.[].Algorithm",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Files.[].FileHashes.[].Type",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Files.[].FileHashes.[].Value",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Files.[].Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Files.[].Type",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.FirstSeen",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.Host",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Host.$id",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Host.$ref",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Host.Asset",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.Host.DetailedRoles",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Host.DetailedRoles.[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Host.DetectionStatus",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Host.DnsDomain",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Host.EnrichmentType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Host.HostName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Host.ioa",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.Host.IpInterfaces",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Host.IpInterfaces.[]",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Host.IpInterfaces.[].$id",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Host.IpInterfaces.[].Address",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Host.IpInterfaces.[].Type",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Host.IsDomainJoined",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.Host.IsIoc",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.Host.LastRemediationState",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Host.LastVerdict",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Host.LeadingHost",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.Host.MachineId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Host.MachineIdType",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.Host.MergeByKey",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Host.MergeByKeyHex",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Host.NetBiosName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Host.OSFamily",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Host.OSVersion",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Host.RbacScopes",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Host.RbacScopes.ScopesPerType",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Host.RbacScopes.ScopesPerType.MachineGroupIds",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Host.RbacScopes.ScopesPerType.MachineGroupIds.Mode",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Host.RbacScopes.ScopesPerType.MachineGroupIds.Scopes",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Host.RbacScopes.ScopesPerType.MachineGroupIds.Scopes.[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Host.RbacScopes.ScopesPerType.Workloads",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Host.RbacScopes.ScopesPerType.Workloads.Mode",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Host.RbacScopes.ScopesPerType.Workloads.Scopes",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Host.RbacScopes.ScopesPerType.Workloads.Scopes.[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Host.RemediationProviders",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Host.RemediationProviders.[]",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Host.RemediationProviders.[].RemediationDate",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.Host.RemediationProviders.[].RemediationState",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Host.RemediationProviders.[].Type",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Host.Role",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.Host.SuspicionLevel",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Host.ThreatAnalysisSummary",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Host.ThreatAnalysisSummary.[]",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Host.ThreatAnalysisSummary.[].AnalysisDate",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.Host.ThreatAnalysisSummary.[].AnalyzersResult",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Host.ThreatAnalysisSummary.[].AnalyzersResult.[]",
+      "type": "null"
+    },
+    {
+      "name": "AdditionalFields.Host.ThreatAnalysisSummary.[].Verdict",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Host.Type",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.HostName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.$id",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.CreatedTimeUtc",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Directory",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.FileHashes",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.FileHashes.[]",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.FileHashes.[].$id",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.FileHashes.[].Algorithm",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.FileHashes.[].Type",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.FileHashes.[].Value",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.FirstSeen",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.$id",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.Asset",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.DetailedRoles",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.DetailedRoles.[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.DetectionStatus",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.DnsDomain",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.EnrichmentType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.HostName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.IpInterfaces",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.IpInterfaces.[]",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.IpInterfaces.[].$id",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.IpInterfaces.[].Address",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.IpInterfaces.[].Type",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.IsDomainJoined",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.IsIoc",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.LastRemediationState",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.LastVerdict",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.LeadingHost",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.MachineId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.MachineIdType",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.MergeByKey",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.MergeByKeyHex",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.NetBiosName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.OSFamily",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.OSVersion",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.RbacScopes",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.RbacScopes.ScopesPerType",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.RbacScopes.ScopesPerType.MachineGroupIds",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.RbacScopes.ScopesPerType.MachineGroupIds.Mode",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.RbacScopes.ScopesPerType.MachineGroupIds.Scopes",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.RbacScopes.ScopesPerType.MachineGroupIds.Scopes.[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.RbacScopes.ScopesPerType.Workloads",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.RbacScopes.ScopesPerType.Workloads.Mode",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.RbacScopes.ScopesPerType.Workloads.Scopes",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.RbacScopes.ScopesPerType.Workloads.Scopes.[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.RemediationProviders",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.RemediationProviders.[]",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.RemediationProviders.[].RemediationDate",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.RemediationProviders.[].RemediationState",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.RemediationProviders.[].Type",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.Role",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.SuspicionLevel",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.ThreatAnalysisSummary",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.ThreatAnalysisSummary.[]",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.ThreatAnalysisSummary.[].AnalysisDate",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.ThreatAnalysisSummary.[].AnalyzersResult",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.ThreatAnalysisSummary.[].AnalyzersResult.[]",
+      "type": "null"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.ThreatAnalysisSummary.[].Verdict",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Host.Type",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.IsPe",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.KnownPrevalence",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.LastAccessTimeUtc",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.LastWriteTimeUtc",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.LsHash",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Publisher",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.SizeInBytes",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.ImageFile.Type",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InternetMessageId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InventoryIdentityId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ioa",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.IpInterfaces",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.IpInterfaces.[]",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.IpInterfaces.[].$id",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.IpInterfaces.[].Address",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.IpInterfaces.[].Type",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.IsDomainJoined",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.IsIoc",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.IsVolumeAnomaly",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.LastRemediationState",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.LastVerdict",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.LeadingHost",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.MachineId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.MachineIdType",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.MailboxPrimaryAddress",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.MailCount",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.MergeByKey",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.MergeByKeyHex",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.NetBiosName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.NetworkMessageId",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.NTDomain",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ObservedByDevice",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ObservedByDevice.Asset",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.ObservedByDevice.DetailedRoles",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ObservedByDevice.DetailedRoles.[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ObservedByDevice.DnsDomain",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ObservedByDevice.HostName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ObservedByDevice.IsDomainJoined",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.ObservedByDevice.LeadingHost",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.ObservedByDevice.MachineId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ObservedByDevice.MachineIdType",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.ObservedByDevice.NetBiosName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ObservedByDevice.OSFamily",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ObservedByDevice.OSVersion",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ObservedByDevice.RbacScopes",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ObservedByDevice.RbacScopes.ScopesPerType",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ObservedByDevice.RbacScopes.ScopesPerType.MachineGroupIds",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ObservedByDevice.RbacScopes.ScopesPerType.MachineGroupIds.Mode",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ObservedByDevice.RbacScopes.ScopesPerType.MachineGroupIds.Scopes",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ObservedByDevice.RbacScopes.ScopesPerType.MachineGroupIds.Scopes.[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ObservedByDevice.RbacScopes.ScopesPerType.Workloads",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ObservedByDevice.RbacScopes.ScopesPerType.Workloads.Mode",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ObservedByDevice.RbacScopes.ScopesPerType.Workloads.Scopes",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ObservedByDevice.RbacScopes.ScopesPerType.Workloads.Scopes.[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ObservedByDevice.Role",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.ObservedByDevice.Type",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.OSFamily",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.OSVersion",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.P1Sender",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.P1SenderDisplayName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.P1SenderDomain",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.P2Sender",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.P2SenderDisplayName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.P2SenderDomain",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.$id",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.Account",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.Account.$ref",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.CommandLine",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.CreatedTimeUtc",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.CreationTimeUtc",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.Host",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.Host.$ref",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.ImageFile",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.ImageFile.$id",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.ImageFile.CreatedTimeUtc",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.ImageFile.Directory",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.ImageFile.FileHashes",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.ImageFile.FileHashes.[]",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.ImageFile.FileHashes.[].$id",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.ImageFile.FileHashes.[].Algorithm",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.ImageFile.FileHashes.[].Type",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.ImageFile.FileHashes.[].Value",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.ImageFile.FirstSeen",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.ImageFile.Host",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.ImageFile.Host.$ref",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.ImageFile.IsPe",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.ImageFile.KnownPrevalence",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.ImageFile.LastAccessTimeUtc",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.ImageFile.LastWriteTimeUtc",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.ImageFile.LsHash",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.ImageFile.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.ImageFile.Publisher",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.ImageFile.SizeInBytes",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.ImageFile.Type",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.ProcessId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ParentProcess.Type",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ProcessId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Query",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.QueryStartTime",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.QueryTime",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.RbacScopes",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.RbacScopes.ScopesPerType",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.RbacScopes.ScopesPerType.MachineGroupIds",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.RbacScopes.ScopesPerType.MachineGroupIds.Mode",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.RbacScopes.ScopesPerType.MachineGroupIds.Scopes",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.RbacScopes.ScopesPerType.MachineGroupIds.Scopes.[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.RbacScopes.ScopesPerType.Workloads",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.RbacScopes.ScopesPerType.Workloads.Mode",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.RbacScopes.ScopesPerType.Workloads.Scopes",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.RbacScopes.ScopesPerType.Workloads.Scopes.[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.RbacScopes.ScopesPerType.Workspace",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.RbacScopes.ScopesPerType.Workspace.Mode",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.RbacScopes.ScopesPerType.Workspace.Scopes",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.RbacScopes.ScopesPerType.Workspace.Scopes.[]",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.ReceivedDate",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.Recipient",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ReferenceId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.RemediationProviders",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.RemediationProviders.[]",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.RemediationProviders.[].RemediationDate",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.RemediationProviders.[].RemediationState",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.RemediationProviders.[].Type",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.RiskLevel",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Role",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.Sender",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SenderIP",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Sid",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Source",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SourceEntityId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SourceEntityType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SourceExtendedProperties",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SourceThreatName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SourceThreatType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.StartTimeUtc",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.Subject",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SuspicionLevel",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ThreatAnalysisSummary",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ThreatAnalysisSummary.[]",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ThreatAnalysisSummary.[].AnalysisDate",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.ThreatAnalysisSummary.[].AnalyzersResult",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ThreatAnalysisSummary.[].AnalyzersResult.[]",
+      "type": "null"
+    },
+    {
+      "name": "AdditionalFields.ThreatAnalysisSummary.[].AnalyzersResult.[].AnalysisDate",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.ThreatAnalysisSummary.[].AnalyzersResult.[].EngineReport",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ThreatAnalysisSummary.[].AnalyzersResult.[].ThreatIntelligence",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ThreatAnalysisSummary.[].AnalyzersResult.[].ThreatIntelligence.ProviderName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ThreatAnalysisSummary.[].AnalyzersResult.[].ThreatIntelligence.ThreatName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ThreatAnalysisSummary.[].AnalyzersResult.[].ThreatIntelligence.ThreatType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ThreatAnalysisSummary.[].AnalyzersResult.[].Verdict",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ThreatAnalysisSummary.[].Verdict",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ThreatDetectionMethods",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ThreatDetectionMethods.[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ThreatIntelligence",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ThreatIntelligence.[]",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ThreatIntelligence.[].ProviderName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ThreatIntelligence.[].ThreatName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ThreatIntelligence.[].ThreatType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Threats",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Threats.[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Type",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Upn",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.UPNSuffix",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Url",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.UrlCount",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.Urls",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Urls.[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Urn",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.UserPrincipalName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.UserSid",
+      "type": "string"
+    },
+    {
+      "name": "AlertId",
+      "type": "string"
+    },
+    {
+      "name": "AttackTechniques",
+      "type": "string"
+    },
+    {
+      "name": "AzureResourceId",
+      "type": "string"
+    },
+    {
+      "name": "AzureSubscriptionId",
+      "type": "string"
+    },
+    {
+      "name": "Categories",
+      "type": "string"
+    },
+    {
+      "name": "CloudPlatform",
+      "type": "string"
+    },
+    {
+      "name": "DetectionSource",
+      "type": "string"
+    },
+    {
+      "name": "DeviceId",
+      "type": "string"
+    },
+    {
+      "name": "DeviceName",
+      "type": "string"
+    },
+    {
+      "name": "EmailSubject",
+      "type": "string"
+    },
+    {
+      "name": "EntityType",
+      "type": "string"
+    },
+    {
+      "name": "EvidenceRole",
+      "type": "string"
+    },
+    {
+      "name": "FileName",
+      "type": "string"
+    },
+    {
+      "name": "FileSize",
+      "type": "long"
+    },
+    {
+      "name": "FolderPath",
+      "type": "string"
+    },
+    {
+      "name": "LocalIP",
+      "type": "string"
+    },
+    {
+      "name": "NetworkMessageId",
+      "type": "string"
+    },
+    {
+      "name": "ProcessCommandLine",
+      "type": "string"
+    },
+    {
+      "name": "RemoteIP",
+      "type": "string"
+    },
+    {
+      "name": "RemoteUrl",
+      "type": "string"
+    },
+    {
+      "name": "ServiceSource",
+      "type": "string"
+    },
+    {
+      "name": "Severity",
+      "type": "string"
+    },
+    {
+      "name": "SHA1",
+      "type": "string"
+    },
+    {
+      "name": "SHA256",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Timestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "Title",
+      "type": "string"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

@@ -1,0 +1,241 @@
+{
+  "table": "StorageBlobLogs",
+  "fields": [
+    {
+      "name": "AccessTier",
+      "type": "string"
+    },
+    {
+      "name": "AccountName",
+      "type": "string"
+    },
+    {
+      "name": "AuthenticationHash",
+      "type": "string"
+    },
+    {
+      "name": "AuthenticationType",
+      "type": "string"
+    },
+    {
+      "name": "AuthorizationDetails",
+      "type": "dynamic"
+    },
+    {
+      "name": "_BilledSize",
+      "type": "real"
+    },
+    {
+      "name": "CallerIpAddress",
+      "type": "string"
+    },
+    {
+      "name": "Category",
+      "type": "string"
+    },
+    {
+      "name": "ClientRequestId",
+      "type": "string"
+    },
+    {
+      "name": "ConditionsUsed",
+      "type": "string"
+    },
+    {
+      "name": "ContentLengthHeader",
+      "type": "long"
+    },
+    {
+      "name": "CopyDestinationArmId",
+      "type": "string"
+    },
+    {
+      "name": "CorrelationId",
+      "type": "string"
+    },
+    {
+      "name": "DestinationUri",
+      "type": "string"
+    },
+    {
+      "name": "DurationMs",
+      "type": "real"
+    },
+    {
+      "name": "EncryptionKeyTypeOfBlob",
+      "type": "string"
+    },
+    {
+      "name": "Etag",
+      "type": "string"
+    },
+    {
+      "name": "_IsBillable",
+      "type": "string"
+    },
+    {
+      "name": "LastModifiedTime",
+      "type": "datetime"
+    },
+    {
+      "name": "Location",
+      "type": "string"
+    },
+    {
+      "name": "MetricResponseType",
+      "type": "string"
+    },
+    {
+      "name": "ObjectKey",
+      "type": "string"
+    },
+    {
+      "name": "OperationCount",
+      "type": "int"
+    },
+    {
+      "name": "OperationName",
+      "type": "string"
+    },
+    {
+      "name": "OperationVersion",
+      "type": "string"
+    },
+    {
+      "name": "Protocol",
+      "type": "string"
+    },
+    {
+      "name": "ReferrerHeader",
+      "type": "string"
+    },
+    {
+      "name": "RehydratePriority",
+      "type": "string"
+    },
+    {
+      "name": "RequestBodySize",
+      "type": "long"
+    },
+    {
+      "name": "RequesterAppId",
+      "type": "string"
+    },
+    {
+      "name": "RequesterAudience",
+      "type": "string"
+    },
+    {
+      "name": "RequesterObjectId",
+      "type": "string"
+    },
+    {
+      "name": "RequesterTenantId",
+      "type": "string"
+    },
+    {
+      "name": "RequesterTokenIssuer",
+      "type": "string"
+    },
+    {
+      "name": "RequesterUpn",
+      "type": "string"
+    },
+    {
+      "name": "RequestHeaderSize",
+      "type": "long"
+    },
+    {
+      "name": "RequestMd5",
+      "type": "string"
+    },
+    {
+      "name": "RequestRegion",
+      "type": "string"
+    },
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "ResponseBodySize",
+      "type": "long"
+    },
+    {
+      "name": "ResponseHeaderSize",
+      "type": "long"
+    },
+    {
+      "name": "ResponseMd5",
+      "type": "string"
+    },
+    {
+      "name": "SasExpiryStatus",
+      "type": "string"
+    },
+    {
+      "name": "SchemaVersion",
+      "type": "string"
+    },
+    {
+      "name": "ServerLatencyMs",
+      "type": "real"
+    },
+    {
+      "name": "ServiceType",
+      "type": "string"
+    },
+    {
+      "name": "SourceAccessTier",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "SourceUri",
+      "type": "string"
+    },
+    {
+      "name": "StatusCode",
+      "type": "string"
+    },
+    {
+      "name": "StatusText",
+      "type": "string"
+    },
+    {
+      "name": "_SubscriptionId",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "TlsVersion",
+      "type": "string"
+    },
+    {
+      "name": "TrafficClassification",
+      "type": "string"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "Uri",
+      "type": "string"
+    },
+    {
+      "name": "UserAgentHeader",
+      "type": "string"
+    }
+  ]
+}

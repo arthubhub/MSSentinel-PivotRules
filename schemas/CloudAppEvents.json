@@ -1,0 +1,4897 @@
+{
+  "table": "CloudAppEvents",
+  "fields": [
+    {
+      "name": "AccountDisplayName",
+      "type": "string"
+    },
+    {
+      "name": "AccountId",
+      "type": "string"
+    },
+    {
+      "name": "AccountObjectId",
+      "type": "string"
+    },
+    {
+      "name": "AccountType",
+      "type": "string"
+    },
+    {
+      "name": "ActionType",
+      "type": "string"
+    },
+    {
+      "name": "ActivityObjects",
+      "type": "object"
+    },
+    {
+      "name": "ActivityObjects.[]",
+      "type": "object"
+    },
+    {
+      "name": "ActivityObjects.[].ApplicationId",
+      "type": "long"
+    },
+    {
+      "name": "ActivityObjects.[].ApplicationInstance",
+      "type": "long"
+    },
+    {
+      "name": "ActivityObjects.[].Id",
+      "type": "array"
+    },
+    {
+      "name": "ActivityObjects.[].Name",
+      "type": "array"
+    },
+    {
+      "name": "ActivityObjects.[].Role",
+      "type": "string"
+    },
+    {
+      "name": "ActivityObjects.[].ServiceObjectType",
+      "type": "string"
+    },
+    {
+      "name": "ActivityObjects.[].Type",
+      "type": "string"
+    },
+    {
+      "name": "ActivityObjects.[].Value",
+      "type": "array"
+    },
+    {
+      "name": "ActivityType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.IsSatelliteProvider",
+      "type": "bool"
+    },
+    {
+      "name": "AppInstanceId",
+      "type": "long"
+    },
+    {
+      "name": "Application",
+      "type": "string"
+    },
+    {
+      "name": "ApplicationId",
+      "type": "long"
+    },
+    {
+      "name": "AuditSource",
+      "type": "string"
+    },
+    {
+      "name": "City",
+      "type": "string"
+    },
+    {
+      "name": "CountryCode",
+      "type": "string"
+    },
+    {
+      "name": "DeviceType",
+      "type": "string"
+    },
+    {
+      "name": "IPAddress",
+      "type": "string"
+    },
+    {
+      "name": "IPCategory",
+      "type": "string"
+    },
+    {
+      "name": "IPTags",
+      "type": "object"
+    },
+    {
+      "name": "IPTags.[]",
+      "type": "string"
+    },
+    {
+      "name": "IsAdminOperation",
+      "type": "bool"
+    },
+    {
+      "name": "IsAnonymousProxy",
+      "type": "bool"
+    },
+    {
+      "name": "IsExternalUser",
+      "type": "bool"
+    },
+    {
+      "name": "IsImpersonated",
+      "type": "bool"
+    },
+    {
+      "name": "ISP",
+      "type": "string"
+    },
+    {
+      "name": "LastSeenForUser",
+      "type": "object"
+    },
+    {
+      "name": "LastSeenForUser.ActionType",
+      "type": "long"
+    },
+    {
+      "name": "LastSeenForUser.Application",
+      "type": "long"
+    },
+    {
+      "name": "LastSeenForUser.CopilotCredentialRelatedTerm",
+      "type": "long"
+    },
+    {
+      "name": "LastSeenForUser.CopilotFinancialRelatedTerm",
+      "type": "long"
+    },
+    {
+      "name": "LastSeenForUser.CopilotNetworkRelatedTerm",
+      "type": "long"
+    },
+    {
+      "name": "LastSeenForUser.CountryCode",
+      "type": "long"
+    },
+    {
+      "name": "LastSeenForUser.IPAddress",
+      "type": "long"
+    },
+    {
+      "name": "LastSeenForUser.ISP",
+      "type": "long"
+    },
+    {
+      "name": "LastSeenForUser.OSPlatform",
+      "type": "long"
+    },
+    {
+      "name": "LastSeenForUser.Site",
+      "type": "long"
+    },
+    {
+      "name": "LastSeenForUser.SubscriptionID",
+      "type": "long"
+    },
+    {
+      "name": "LastSeenForUser.UserAgent",
+      "type": "long"
+    },
+    {
+      "name": "OAuthAppId",
+      "type": "string"
+    },
+    {
+      "name": "ObjectId",
+      "type": "string"
+    },
+    {
+      "name": "ObjectName",
+      "type": "string"
+    },
+    {
+      "name": "ObjectType",
+      "type": "string"
+    },
+    {
+      "name": "OSPlatform",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.AadAppId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AADGroupId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.AccountMoniker",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AccountMonikerLocation",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Actions",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Actions.[]",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Activity",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.activityAction",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ActivityDateTime",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.ActivityId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.ActivityParameters",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Actor",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Actor.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Actor.[].ID",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.Actor.[].Type",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.ActorAppId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.ActorContextId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.ActorInfoString",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AddedGALMemberships",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.AddedGALMemberships.[]",
+      "type": "null"
+    },
+    {
+      "name": "RawEventData.AdditionalActionsAndResults",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.AdditionalActionsAndResults.[]",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AdditionalInfo",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AddOnGuid",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.AddOnType",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.AffectedItems",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.AffectedItems.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.AffectedItems.[].Attachments",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AffectedItems.[].Id",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AffectedItems.[].InternetMessageId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AffectedItems.[].ParentFolder",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.AffectedItems.[].ParentFolder.Id",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AffectedItems.[].ParentFolder.Path",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AffectedItems.[].Subject",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AgentBlueprintId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.AgentId",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.AgentName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AgentPlatform",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AgentType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AgentVersion",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AggregatedWorkspaceInformation",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.AggregatedWorkspaceInformation.WorkspaceCount",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.AggregatedWorkspaceInformation.WorkspacesByCapacitySku",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AggregatedWorkspaceInformation.WorkspacesByType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AlertEntityId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AlertId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.AlertLinks",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.AlertLinks.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.AlertLinks.[].AlertLinkHref",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AlertType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AlternateStreamId",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.AppAccessContext",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.AppAccessContext.AADSessionId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.AppAccessContext.APIId",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.AppAccessContext.AuthTime",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.AppAccessContext.ClientAppId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.AppAccessContext.ClientAppName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AppAccessContext.CorrelationId",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.AppAccessContext.DeviceId",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.AppAccessContext.IssuedAtTime",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.AppAccessContext.PFTTokenAppId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.AppAccessContext.RequestMethod",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AppAccessContext.TokenIssuedAtTime",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.AppAccessContext.UniqueTokenId",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.AppAccessContext.UserObjectId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.AppClassFilter",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AppId",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.AppIdentity",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Application",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ApplicationDisplayName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ApplicationId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.applicationId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.ApplicationMode",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ApplicationName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AppName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AppPoolName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AppReportId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.armServiceRequestId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.ArtifactId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.ArtifactKind",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ArtifactName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ArtifactsShared",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ArtifactsShared.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ArtifactsShared.[].ArtifactSharedName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ArtifactsShared.[].ArtifactShareSessions",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ArtifactsShared.[].ArtifactShareSessions.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ArtifactsShared.[].ArtifactShareSessions.[].EndTimestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.ArtifactsShared.[].ArtifactShareSessions.[].ScreenShareId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ArtifactsShared.[].ArtifactShareSessions.[].StartTimestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.AssertingApplicationId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.AssociatedAdminUnits",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.AssociatedAdminUnits.[]",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.AttachmentData",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.AttachmentData.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.AttachmentData.[].FileName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AttachmentData.[].FileType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AttachmentData.[].FileVerdict",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.AttachmentData.[].SHA256",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AttackSimulationInfo",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.AttackSimulationInfo.AttackSimDate",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.AttackSimulationInfo.AttackSimDuration",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AttackSimulationInfo.AttackSimId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.AttackSimulationInfo.AttackSimUserId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.Attendees",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Attendees.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Attendees.[].DisplayName",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.Attendees.[].InviterInfo",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Attendees.[].InviterInfo.DisplayName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Attendees.[].InviterInfo.InviteTime",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.Attendees.[].InviterInfo.OrganizationId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.Attendees.[].InviterInfo.UPN",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Attendees.[].InviterInfo.UserIdentifier",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Attendees.[].InviterInfo.UserType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Attendees.[].IsAADGuest",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.Attendees.[].IsOrganizer",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.Attendees.[].OrganizationId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.Attendees.[].ProviderType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Attendees.[].RecipientType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Attendees.[].Role",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.Attendees.[].UPN",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Attendees.[].UserIdType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Attendees.[].UserObjectId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.audience",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AuthDetails",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.AuthDetails.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.AuthDetails.[].Name",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AuthDetails.[].Value",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AuthenticationType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.authorization",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AuthorizedGroup",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.AuthorizedGroup.AuthorizedGroupId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.AuthorizedGroup.AuthorizedGroupName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AuthorizedGroup.EntityProperties",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.AuthorizedGroup.EntityProperties.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.AuthorizedGroup.EntityProperties.[].PropertyName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AuthorizedGroup.EntityProperties.[].PropertyValue",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AuthorizedGroup.GroupType",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.AuthType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.AutomationId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.AzureActiveDirectoryEventType",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.BCLValue",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.BillingType",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.BlockedControls",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.BlockedControls.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.BlockedControls.[].AdditionalInfo",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.BlockedControls.[].Clsid",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.BlockedControls.[].FriendlyName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.BrowserName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.BrowserVersion",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CallId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.CapacityId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.CapacityName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Category",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ChannelGuid",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ChannelName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.channels",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.ChannelType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ChatName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ChatThreadId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.claims",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Classification",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ClientAppId",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.ClientApplication",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ClientInfoString",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ClientIP",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ClientIPAddress",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ClientProcessName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ClientRegion",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ClientRequestId",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.ClientUserAgent",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ClientVersion",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CmdletVersion",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CommandType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Comments",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Common",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Common.ApplicationId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.Common.ApplicationName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Common.DeviceName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Common.Location",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Common.Platform",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.Common.ProcessName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Common.ProductVersion",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CommunicationSubType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CommunicationType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CompletionTime",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.ConferenceUri",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Connector",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ConsumptionMethod",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ContactEmail1DisplayName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ContactEmail1EmailAddress",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ContactEmail2DisplayName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ContactEmail2EmailAddress",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ContainerId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.ContainerInstanceId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ContainerType",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.ContainerTypeId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.ContentType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ConversationId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.CopilotEventData",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.AccessedResources",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.AccessedResources.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.AccessedResources.[].Action",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.AccessedResources.[].Id",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.AccessedResources.[].listItemUniqueId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.AccessedResources.[].Name",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.AccessedResources.[].PolicyDetails",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.AccessedResources.[].SensitivityLabelId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.AccessedResources.[].SiteUrl",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.AccessedResources.[].Status",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.AccessedResources.[].Type",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.AccessedResources.[].XPIADetected",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.AISystemPlugin",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.AISystemPlugin.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.AISystemPlugin.[].Id",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.AISystemPlugin.[].Name",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.AppHost",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.ChannelName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.CompletionTime",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.Contexts",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.Contexts.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.Contexts.[].Id",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.Contexts.[].Type",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.ConversationId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.CorrelationId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.DLPEvaluationDeferred",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.ErrorMessage",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.ErrorType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.FabricCapacityId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.GuardrailDetails",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.GuardrailDetails.[]",
+      "type": "null"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.GuardrailDetails.[].DecisionReason",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.GuardrailDetails.[].DecisionType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.GuardrailDetails.[].Findings",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.GuardrailDetails.[].Findings.[]",
+      "type": "null"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.GuardrailDetails.[].GuardianId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.GuardrailDetails.[].GuardianName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.GuardrailDetails.[].GuardianProviderName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.GuardrailDetails.[].TargetId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.GuardrailDetails.[].TargetType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.LicenseType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.MemoryCorrelationId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.MemoryUpdated",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.MessageIds",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.MessageIds.[]",
+      "type": "null"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.Messages",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.Messages.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.Messages.[].Id",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.Messages.[].isPrompt",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.Messages.[].JailbreakDetected",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.ModelTransparencyDetails",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.ModelTransparencyDetails.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.ModelTransparencyDetails.[].ModelName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.ModelTransparencyDetails.[].ModelProviderName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.ParticipatingAgents",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.ParticipatingAgents.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.ParticipatingAgents.[].AgentBlueprintId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.ParticipatingAgents.[].AgentId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.ParticipatingAgents.[].AgentName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.ParticipatingAgents.[].AgentVersion",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.ParticipatingAgents.[].PlatformAgentId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.PlatformAgentId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.PlatformAgentType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.RequestId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.ResponseId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.SensitivityLabelId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.TargetAgentName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.TargetPlatformAgentId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.TargetTaskIds",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.TargetTaskIds.[]",
+      "type": "null"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.ThreadId",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.CopilotEventData.TraceId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotLogVersion",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotSharingEventData",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.CopilotSharingEventData.AppHost",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotSharingEventData.ShareId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.CopilotSharingEventData.ShareRangeEnd",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.CopilotSharingEventData.ShareRangeStart",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.CopilotSharingEventData.ShareScope",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotSharingEventData.ShareType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CopilotSharingEventData.ThreadId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CorrelationID",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CorrelationId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.correlationId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.CorrelationIdentity",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.CreationTime",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.CrmOrganizationUniqueName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CrossMailboxOperation",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.CrossScopeSyncDelete",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.CurrentProtectionType",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.CurrentProtectionType.documentEncrypted",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.CurrentProtectionType.owner",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CurrentProtectionType.protectionType",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.CurrentProtectionType.templateId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CustomData",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.customerOperationName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CustomizedDoclib",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.CustomProperties",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.CustomProperties.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.CustomProperties.[].Name",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CustomProperties.[].Value",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.CustomUniqueId",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.Data",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DatabaseType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.dataBoundary",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DataConnectivityMode",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DatasetId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.DatasetName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DatasourceId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.DatasourceInformations",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.DatasourceInformations.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.DatasourceInformations.[].CredentialType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DatasourceInformations.[].DatasourceObjectId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.DatasourceInformations.[].DatasourceReference",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DatasourceInformations.[].GatewayObjectId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.DatasourceInformations.[].SingleSignOnType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DataState",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DataType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DateFilters",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.DateFilters.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.DateFilters.[].FilterEndDate",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.DateFilters.[].FilterStartDate",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.DeepLinkUrl",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DeliveryAction",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DeliveryMessageInfo",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.DeliveryMessageInfo.DeliveryControlSource",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DeliveryMessageInfo.DeliveryControlType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DeliveryMessageInfo.DeliveryReason",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DeliveryMessageInfo.Destination",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DeliveryMessageInfo.FinalFilterVerdict",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DeliveryMessageInfo.FinalFilterVerdictControlSource",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DeliveryMessageInfo.FinalVerdict",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DeliveryMessageInfo.FinalVerdictSource",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DeliveryMessageInfo.Id",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.DeliveryMessageInfo.IsValid",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.DeliveryMessageInfo.PolicyDetail",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DeliveryMessageInfo.PolicyHit",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.DeliveryMessageInfo.PolicyOverride",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DeliveryMessageInfo.PolicySource",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DeliveryMessageInfo.TenantActionPolicyType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DeliveryMessageInfo.TenantPolicyFinalVerdict",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DeliveryMessageInfo.Timestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.DeliveryMessageInfo.UserPolicyFinalVerdict",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Deployment",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DeploymentPipelineId",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.DeploymentPipelineObjectId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.DeploymentPipelineOperationId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.DeploymentPipelineStageOrder",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.description",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DestFolder",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.DestFolder.Id",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DestFolder.Path",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DestinationFileExtension",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DestinationFileName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DestinationLabel",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.DestinationLocationType",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.DestinationRelativeUrl",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DetectedDateTime",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.DetectionMethod",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DetectionTimingType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DetectionType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DeviceDisplayName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DeviceId",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.DeviceInformation",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DeviceName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.deviceType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Directionality",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DisplayName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DistributionMethod",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DlpAuditEventMetadata",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.DlpAuditEventMetadata.DlpPolicyMatchId",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.DlpAuditEventMetadata.EvaluationTime",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.DlpOriginalFilePath",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.DoNotDistributeEvent",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.EffectiveOrganization",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EmailInfo",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.EmailInfo.bcc",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.EmailInfo.bcc.[]",
+      "type": "null"
+    },
+    {
+      "name": "RawEventData.EmailInfo.Cc",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.EmailInfo.cc",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.EmailInfo.Cc.[]",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EmailInfo.cc.[]",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EmailInfo.From",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EmailInfo.from",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EmailInfo.Subject",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EmailInfo.subject",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EmailInfo.To",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.EmailInfo.to",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.EmailInfo.To.[]",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EmailInfo.to.[]",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.Application",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.DestinationLocationType",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.DeviceName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.DlpAuditEventMetadata",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.DlpAuditEventMetadata.DlpPolicyMatchId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.DlpAuditEventMetadata.EvaluationTime",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.EAv2Enriched",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.EndpointOperation",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.EnforcementMode",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.FileExtension",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.FileSize",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.FileType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.Hidden",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.IsViewableByExternalUsers",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.Justification",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.MDATPDeviceId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.OriginatingDomain",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.Platform",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.PreviousFileName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.RemovableMediaDeviceAttributes",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.RemovableMediaDeviceAttributes.DeviceId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.RemovableMediaDeviceAttributes.FriendlyName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.RemovableMediaDeviceAttributes.HardwareId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.RemovableMediaDeviceAttributes.InstancePath",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.RemovableMediaDeviceAttributes.Manufacturer",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.RemovableMediaDeviceAttributes.Model",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.RemovableMediaDeviceAttributes.SerialNumber",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.RMSEncrypted",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.SensitiveInfoTypeData",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.SensitiveInfoTypeData.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.SensitiveInfoTypeData.[].Confidence",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.SensitiveInfoTypeData.[].Count",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.SensitiveInfoTypeData.[].SensitiveInformationDetailedClassificationAttributes",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.SensitiveInfoTypeData.[].SensitiveInformationDetailedClassificationAttributes.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.SensitiveInfoTypeData.[].SensitiveInformationDetailedClassificationAttributes.[].Confidence",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.SensitiveInfoTypeData.[].SensitiveInformationDetailedClassificationAttributes.[].Count",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.SensitiveInfoTypeData.[].SensitiveInfoTypeId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.SensitiveInfoTypeData.[].SensitiveInfoTypeName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.SensitivityLabelEventData",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.SensitivityLabelEventData.SensitivityLabelId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.SensitivityLabelIds",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.SensitivityLabelIds.[]",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.Sha1",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.Sha256",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.SourceLocationType",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.TargetDomain",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.TargetFilePath",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.TargetPrinterName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EndpointMetaData.TargetUrl",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EndTime",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.EndTimeUtc",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.EnforcementMode",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.EntityId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.EntityName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EntityType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EnvironmentId",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.ErrorCode",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ErrorMessage",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ErrorType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EvaluationSource",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.eventCategory",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EventData",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EventDeepLink",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EventEnvironment",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EventId",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.eventInstanceId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.EventName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.eventName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EventNamespace",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EventSignature",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EventSource",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.eventSource",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.eventTimestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.EventVersion",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EvidenceFile",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.EvidenceFile.FullUrl",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.EvidenceFile.StorageName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ExceptionInfo",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ExceptionInfo.FalsePositive",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.ExceptionInfo.Justification",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ExceptionInfo.Reason",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ExceptionInfo.Rules",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ExceptionInfo.Rules.[]",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.ExchangeId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ExchangeMetaData",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ExchangeMetaData.AttachmentDetails",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ExchangeMetaData.AttachmentDetails.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ExchangeMetaData.AttachmentDetails.[].Labels",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ExchangeMetaData.AttachmentDetails.[].Labels.[]",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.ExchangeMetaData.AttachmentDetails.[].Name",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ExchangeMetaData.AttachmentDetails.[].Size",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.ExchangeMetaData.BCC",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ExchangeMetaData.BCC.[]",
+      "type": "null"
+    },
+    {
+      "name": "RawEventData.ExchangeMetaData.CC",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ExchangeMetaData.CC.[]",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ExchangeMetaData.FileSize",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.ExchangeMetaData.From",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ExchangeMetaData.IsViewableByExternalUsers",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.ExchangeMetaData.MessageID",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ExchangeMetaData.RecipientCount",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.ExchangeMetaData.SensitivityLabelIds",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ExchangeMetaData.SensitivityLabelIds.[]",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.ExchangeMetaData.SensitivityLabelNames",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ExchangeMetaData.SensitivityLabelNames.[]",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ExchangeMetaData.Sent",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.ExchangeMetaData.Subject",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ExchangeMetaData.To",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ExchangeMetaData.To.[]",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ExchangeMetaData.UniqueID",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.ExecutionType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Experience",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ExtendedProperties",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ExtendedProperties.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ExtendedProperties.[].Name",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ExtendedProperties.[].Value",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ExternalAccess",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.ExtraProperties",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ExtraProperties.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ExtraProperties.[].Key",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ExtraProperties.[].Value",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Fields",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Fields.[]",
+      "type": "null"
+    },
+    {
+      "name": "RawEventData.FileExtension",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.FileFormatType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.FileSize",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.FileSizeBytes",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.FileSyncBytesCommitted",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.FileType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.FilteringDate",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.Folder",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Folder.Id",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Folder.Path",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Folders",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Folders.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Folders.[].FolderItems",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Folders.[].FolderItems.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Folders.[].FolderItems.[].ClientRequestId",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.Folders.[].FolderItems.[].CreationTime",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.Folders.[].FolderItems.[].Id",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Folders.[].FolderItems.[].ImmutableId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Folders.[].FolderItems.[].InternetMessageId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Folders.[].FolderItems.[].Sensitivity",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.Folders.[].FolderItems.[].SizeInBytes",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.Folders.[].FolderItems.[].Subject",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Folders.[].Id",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Folders.[].Path",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.FormId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.FormName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.FormsUserType",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.FromApp",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.GALChangeType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.GatewayClusterDatasources",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.GatewayClusterDatasources.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.GatewayClusterDatasources.[].capabilities",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.GatewayClusterDatasources.[].clusterId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.GatewayClusterDatasources.[].credentialDetails",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.GatewayClusterDatasources.[].credentialDetails.credentialType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.GatewayClusterDatasources.[].credentialDetails.encryptedConnection",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.GatewayClusterDatasources.[].credentialDetails.encryptionAlgorithm",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.GatewayClusterDatasources.[].credentialDetails.privacyLevel",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.GatewayClusterDatasources.[].credentialDetails.skipTestConnection",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.GatewayClusterDatasources.[].credentialDetails.useCustomOAuthApp",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.GatewayClusterDatasources.[].credentialType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.GatewayClusterDatasources.[].datasourceName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.GatewayClusterDatasources.[].datasourceReference",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.GatewayClusterDatasources.[].datasourceType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.GatewayClusterDatasources.[].id",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.GatewayClusterDatasources.[].users",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.GatewayClusterDatasources.[].users.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.GatewayClusterDatasources.[].users.[].identifier",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.GatewayClusterId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.GDSEnqueueTimeUtc",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.GeoLocation",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.GoalList",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.GradingResult",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.GradingResult.FirstTriagedBy",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.GradingResult.Id",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.GradingResult.LastUpdatedBy",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.GradingResult.Timestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.GradingResult.TriageCategory",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.GradingResult.TriageVerdict",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Hidden",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.HighPriorityMediaProcessing",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.HostAppId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.HostedContents",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.HostedContents.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.HostedContents.[].Id",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.HostedContents.[].SizeInBytes",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.httpRequest",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ICalUid",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Id",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.Identity",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ImplicitShare",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.IncidentId",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.IncidentTags",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.InstanceUrl",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.InternalLogonType",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.InternalTarget",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.InternetMessageId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.InterSystemsId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.IntraSystemId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.InvestigationId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.InvestigationName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.InvestigationType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.InvokeSource",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ipAddress",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.IrmContentId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.IsBilateral",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.IsCopilotMentioned",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.IsCustomEntity",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.IsJoinedFromLobby",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.IsManagedDevice",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.IsModernViewFallback",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.isRetry",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.IsSuccess",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.issuedAt",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.issuer",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.IsTenantAdminApi",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.Item",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Item.Attachments",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Item.Id",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Item.ImmutableId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Item.InternetMessageId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Item.IsRecord",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.Item.ParentFolder",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Item.ParentFolder.Id",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Item.ParentFolder.MemberRights",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Item.ParentFolder.MemberSid",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Item.ParentFolder.MemberUpn",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Item.ParentFolder.Name",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Item.ParentFolder.Path",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Item.Recipients",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Item.Recipients.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Item.Recipients.[].Address",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Item.Recipients.[].Name",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Item.RecipientsCount",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.Item.Sensitivity",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.Item.SizeInBytes",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.Item.Subject",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ItemCount",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.ItemId",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.ItemMetadata",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ItemMetadata.CorrelationId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.ItemMetadata.Id",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.ItemMetadata.Method",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ItemMetadata.Name",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ItemMetadata.Path",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ItemMetadata.SensitivityLabelIds",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ItemMetadata.SensitivityLabelIds.[]",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.ItemMetadata.SequenceNo",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.ItemName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ItemType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ItemUrl",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.JitTriggered",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.jobId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.jobType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.JoinTime",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.JsonPropertiesCollection",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Justification",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.KesMailId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.LabelAction",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.LabelAppliedDateTime",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.LabelId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.LabelName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Language",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.LastRefreshTime",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.LastUpdatedDateTime",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.LastUpdateTimeUtc",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.LatestDeliveryLocation",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.LeaveTime",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.Level",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.level",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.ListBaseTemplateType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ListBaseType",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.ListColor",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ListIcon",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ListId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.ListItemUniqueId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.ListItemVersion",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ListName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ListServerTemplate",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.ListTitle",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.ListUrl",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Location",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.LogonType",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.LogonUserDisplayName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.LogonUserSid",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.MachineDomainInfo",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.MachineId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.MailboxGuid",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.MailboxOwnerMasterAccountSid",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.MailboxOwnerSid",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.MailboxOwnerUPN",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.MatchedPolicies",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.MatchedPolicies.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.MatchedPolicies.[].PolicyId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.MatchedPolicies.[].PolicyName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.MatchedPolicies.[].RuleId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.MatchedPolicies.[].RuleName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.MDATPDeviceId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.MeetingDetailId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.MeetingURL",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Members",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Members.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Members.[].DisplayName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Members.[].MRI",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Members.[].OrganizationId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.Members.[].Role",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.Members.[].UPN",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.Members.[].UserObjectId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.Message",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.MessageDate",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.MessageDeleteType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.MessageFiles",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.MessageFiles.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.MessageFiles.[].FileUrl",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.MessageId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.MessageImages",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.MessageImages.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.MessageImages.[].ItemType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.MessageImages.[].Url",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.MessageLinks",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.MessageLinks.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.MessageLinks.[].Url",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.MessageReactionType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Messages",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Messages.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Messages.[].AADGroupId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.Messages.[].ChannelGuid",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Messages.[].ChatThreadId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Messages.[].Id",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Messages.[].MessageItems",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Messages.[].MessageItems.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Messages.[].MessageItems.[].Id",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Messages.[].MessageItems.[].SizeInBytes",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.Messages.[].Path",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Messages.[].SizeInBytes",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.Messages.[].TeamGuid",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.Messages.[].ThreadId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Messages.[].Version",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.MessagesExportedCount",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.MessageSizeInBytes",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.MessageTime",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.MessageURLs",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.MessageURLs.[]",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.MessageVersion",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.MessageVisibilityTime",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.Modalities",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Mode",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ModifiedProperties",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ModifiedProperties.[]",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.ModifiedProperties.[][].Name",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ModifiedProperties.[][].NewValue",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.ModifiedProperties.[][].OldValue",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Name",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.NetworkMessageId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.NonPIIParameters",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ObjectDisplayName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ObjectId",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.ObjectType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.OldValue",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.OnlineMeetingId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Operation",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.OperationCount",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.OperationDateTime",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.OperationId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.operationId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.OperationName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.operationName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.OperationProperties",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.OperationProperties.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.OperationProperties.[].Name",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.OperationProperties.[].Value",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.OperationProperties[].[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.OperationProperties[].[].Name",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.OperationProperties[].[].Value",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.OperationScope",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.OperationType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.OpId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.OrganizationId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.OrganizationName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Organizer",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Organizer.OrganizationId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.Organizer.RecipientType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Organizer.Role",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.Organizer.UserObjectId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.OriginalDeliveryLocation",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.OriginalEnqueueTimeUtc",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.OriginatingDomain",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.OriginatingServer",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.OutputMessageId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.P1Sender",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.P1SenderDomain",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.P2Sender",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.P2SenderDomain",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Parameters",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Parameters.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Parameters.[].Name",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Parameters.[].Value",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Parameters[].[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Parameters[].[].Name",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Parameters[].[].Value",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ParentId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ParentMessageId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ParticipantInfo",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ParticipantInfo.HasForeignTenantUsers",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.ParticipantInfo.HasGuestUsers",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.ParticipantInfo.HasOtherGuestUsers",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.ParticipantInfo.HasUnauthenticatedUsers",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.ParticipantInfo.ParticipatingDomains",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ParticipantInfo.ParticipatingDomains.[]",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ParticipantInfo.ParticipatingSIPDomains",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ParticipantInfo.ParticipatingSIPDomains.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ParticipantInfo.ParticipatingSIPDomains.[].DomainName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ParticipantInfo.ParticipatingSIPDomains.[].TenantId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.ParticipantInfo.ParticipatingTenantIds",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ParticipantInfo.ParticipatingTenantIds.[]",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.Permission",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PhishConfidenceLevel",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Pid",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.PlanId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PlanList",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Platform",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.PlatformAgentId",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.PlatformAgentType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PlatformTargetAgentId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PlatformTargetAgentType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Policy",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PolicyAction",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PolicyChangeType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PolicyDetails",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].PolicyId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].PolicyName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].PolicyVersion",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].ActionParameters",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].ActionParameters.[]",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].Actions",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].Actions.[]",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].AlertProperties",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].AlertProperties.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].AlertProperties.[].Name",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].AlertProperties.[].Value",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].ConditionsMatched",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].ConditionsMatched.ConditionMatchedInNewScheme",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].ConditionsMatched.OtherConditions",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].ConditionsMatched.OtherConditions.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].ConditionsMatched.OtherConditions.[].Name",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].ConditionsMatched.OtherConditions.[].Value",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].ConditionsMatched.SensitiveInformation",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].ConditionsMatched.SensitiveInformation.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].ConditionsMatched.SensitiveInformation.[].ClassifierType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].ConditionsMatched.SensitiveInformation.[].Confidence",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].ConditionsMatched.SensitiveInformation.[].Count",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].ConditionsMatched.SensitiveInformation.[].Location",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].ConditionsMatched.SensitiveInformation.[].SensitiveInformationDetailedClassificationAttributes",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].ConditionsMatched.SensitiveInformation.[].SensitiveInformationDetailedClassificationAttributes.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].ConditionsMatched.SensitiveInformation.[].SensitiveInformationDetailedClassificationAttributes.[].Confidence",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].ConditionsMatched.SensitiveInformation.[].SensitiveInformationDetailedClassificationAttributes.[].Count",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].ConditionsMatched.SensitiveInformation.[].SensitiveInformationDetailedClassificationAttributes.[].IsMatch",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].ConditionsMatched.SensitiveInformation.[].SensitiveInformationTypeName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].ConditionsMatched.SensitiveInformation.[].SensitiveType",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].ConditionsMatched.SensitiveInformation.[].SensitiveTypeSource",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].ConditionsMatched.SensitiveInformation.[].UniqueCount",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].ManagementRuleId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].OverriddenActions",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].OverriddenActions.[]",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].RuleId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].RuleMode",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].RuleName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].RuleVersion",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.PolicyDetails.[].Rules.[].Severity",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PolicyId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.PolicyMatchInfo",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.PolicyMatchInfo.PolicyId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.PolicyMatchInfo.PolicyName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PolicyMatchInfo.RuleId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.PolicyMatchInfo.RuleName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PreciseTimeStamp",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.PreviousFileName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PreviousProtectionType",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.PreviousProtectionType.documentEncrypted",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.PreviousProtectionType.owner",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PreviousProtectionType.protectionType",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.PreviousProtectionType.templateId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PreviousTarget",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PrimaryFieldValue",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.principalOid",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.principalPuid",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.properties",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PropertyCollection",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.PropertyCollection.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.PropertyCollection.[].Name",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.PropertyCollection.[].Value",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.ProtectionEventData",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ProtectionEventData.IsProtected",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.ProtectionEventData.IsProtectedBefore",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.ProtectionEventType",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.ProviderGuid",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.ProviderName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ProviderTypes",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Purpose",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.QuarantinePolicy",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.QuarantineType",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.Query",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.QueryResults",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.QuerySource",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.QueryText",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Receivers",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Receivers.[]",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.RecipientId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.Recipients",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Recipients.[]",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.RecipientTags",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.RecordType",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.RefreshEnforcementPolicy",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.RefreshType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.RelativeUrl",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ReleaseTo",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ReleaseVersion",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.RemediationDetails",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.RemediationDetails.RemediationActivity",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.RemoteItemWebUrl",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.RemovableMediaDeviceAttributes",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.RemovableMediaDeviceAttributes.DeviceId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.RemovableMediaDeviceAttributes.FriendlyName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.RemovableMediaDeviceAttributes.HardwareId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.RemovableMediaDeviceAttributes.InstancePath",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.RemovableMediaDeviceAttributes.Manufacturer",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.RemovableMediaDeviceAttributes.Model",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.RemovableMediaDeviceAttributes.SerialNumber",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.RemovedGALMemberships",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.RemovedGALMemberships.[]",
+      "type": "null"
+    },
+    {
+      "name": "RawEventData.ReportId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.ReportName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ReportType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.RequestId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.RequestSource",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.requestTime",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.RequestType",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.RequiresCustomerKeyEncryption",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.RescanResult",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.RescanResult.Id",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.RescanResult.RescanVerdict",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.RescanResult.Timestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.ResolvingComment",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.resourceProvider",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ResourceTenantId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.resourceUri",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ResponseId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.ResultCount",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ResultStatus",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.RiskDetail",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.RiskEventType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.RiskId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.RiskLevel",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.RiskState",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.RMSEncrypted",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.Role",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.RoleInstance",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.RoleLocation",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.RowKey",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.RunningTime",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.SaveToSentItems",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.ScenarioName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ScenarioType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Scope",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.ScopingEntityType",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.ScreenShareControl",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ScreenShareControl.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ScreenShareControl.[].ControlEndTimestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.ScreenShareControl.[].ControlRecipientOrganizationId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.ScreenShareControl.[].ControlRecipientUserId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.ScreenShareControl.[].ControlStartTimestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.ScreenShareControl.[].Events",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ScreenShareControl.[].Events.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ScreenShareControl.[].Events.[].Status",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ScreenShareControl.[].Events.[].Time",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.ScreenShareControl.[].ScreenShareId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SDSQueryExecutionTimeUtc",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.SearchQueryText",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SecurityComplianceCenterEventType",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.SendAsUserMailboxGuid",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.SendAsUserSmtp",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Sender",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SenderIP",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SenderIp",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SendOnBehalfOfUserMailboxGuid",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.SendOnBehalfOfUserSmtp",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SensitiveInfoDetectionIsIncluded",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.SensitiveInfoTypeData",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.SensitiveInfoTypeData.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.SensitiveInfoTypeData.[].Confidence",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.SensitiveInfoTypeData.[].Count",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.SensitiveInfoTypeData.[].SensitiveInformationDetailedClassificationAttributes",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.SensitiveInfoTypeData.[].SensitiveInformationDetailedClassificationAttributes.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.SensitiveInfoTypeData.[].SensitiveInformationDetailedClassificationAttributes.[].Confidence",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.SensitiveInfoTypeData.[].SensitiveInformationDetailedClassificationAttributes.[].Count",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.SensitiveInfoTypeData.[].SensitiveInfoTypeId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.SensitiveInfoTypeData.[].SensitiveInfoTypeName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SensitivityLabelEventData",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.SensitivityLabelEventData.ActionSource",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.SensitivityLabelEventData.ActionSourceDetail",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.SensitivityLabelEventData.ContentType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SensitivityLabelEventData.JustificationText",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SensitivityLabelEventData.LabelEventType",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.SensitivityLabelEventData.OldSensitivityLabelId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.SensitivityLabelEventData.OldSensitivityLabelOwnerEmail",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SensitivityLabelEventData.SensitivityLabelId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.SensitivityLabelEventData.SensitivityLabelOwnerEmail",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SensitivityLabelEventFailureData",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.SensitivityLabelEventFailureData.FailReason",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SensitivityLabelId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.SensitivityLabelJustificationText",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SensitivityLabelOwnerEmail",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ServerAddress",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ServiceContextId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.ServiceContextIdType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ServiceName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SessionId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.sessionId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SessionIdentity",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.SessionMetadata",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.SessionMetadata.AppHost",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SessionMetadata.AppHostCategories",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.SessionMetadata.AppHostCategories.[]",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SessionMetadata.AppHostFqdn",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SessionMetadata.DeviceManagementType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SessionMetadata.DeviceType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SessionMetadata.EnforcementPlane",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SessionMetadata.OSPlatform",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SessionMetadata.OSVersion",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Severity",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Sha1",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Sha256",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SharePointMetaData",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.SharePointMetaData.FileID",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SharePointMetaData.FileName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SharePointMetaData.FileOwner",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SharePointMetaData.FilePathUrl",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SharePointMetaData.FileSize",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.SharePointMetaData.From",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SharePointMetaData.IsViewableByExternalUsers",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.SharePointMetaData.IsVisibleOnlyToOdbOwner",
+      "type": "bool"
+    },
+    {
+      "name": "RawEventData.SharePointMetaData.ItemCreationTime",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.SharePointMetaData.ItemLastModifiedTime",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.SharePointMetaData.ItemLastSharedTime",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.SharePointMetaData.SensitivityLabelIds",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.SharePointMetaData.SensitivityLabelIds.[]",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.SharePointMetaData.SensitivityLabelNames",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.SharePointMetaData.SensitivityLabelNames.[]",
+      "type": "null"
+    },
+    {
+      "name": "RawEventData.SharePointMetaData.SharedBy",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.SharePointMetaData.SharedBy.[]",
+      "type": "null"
+    },
+    {
+      "name": "RawEventData.SharePointMetaData.SiteAdmin",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.SharePointMetaData.SiteAdmin.[]",
+      "type": "null"
+    },
+    {
+      "name": "RawEventData.SharePointMetaData.SiteCollectionGuid",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.SharePointMetaData.SiteCollectionUrl",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SharePointMetaData.UniqueID",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.SharingLinkScope",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SharingType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Site",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.SiteSensitivityLabelId",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.SiteTemplate",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SiteTitle",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SiteUrl",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Source",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SourceApp",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SourceFileExtension",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SourceFileName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SourceLabel",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.SourceLocationType",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.SourceRelativeUrl",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SPFeatureName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Stamp",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.StartTime",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.StartTimeUtc",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.Status",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.status",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Subject",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SubjectType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SubmissionChannel",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.SubmissionConfidenceLevel",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.SubmissionContentSubType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SubmissionContentType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SubmissionId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.SubmissionState",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SubmissionType",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.SubmitterId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.SubscriptionId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.subscriptionId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.subStatus",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SubstrateGroupId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.SupportTicketId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.systemAccount",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SystemOverrides",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.SystemOverrides.[]",
+      "type": "null"
+    },
+    {
+      "name": "RawEventData.SystemOverrides.[].Details",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SystemOverrides.[].FinalOverride",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SystemOverrides.[].Result",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SystemOverrides.[].Source",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.SystemUserId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.Target",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.target",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Target.[]",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.Target.[].ID",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.Target.[].Type",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.target.descriptor",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.target.id",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.TargetActorId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.TargetActorTenantId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.TargetAgentBlueprintID",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.TargetAgentId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.TargetAgentName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.TargetAgentUserKey",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.TargetContextId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.TargetDomain",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.TargetFilePath",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.TargetLocation",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.TargetPrinterName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.TargetUrl",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.TargetUserId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.TargetUserOrGroupName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.TargetUserOrGroupType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.taskDisplayName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.taskId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.TaskList",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.TaskName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.TeamGuid",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.TeamName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.TemplateTypeId",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.tenantId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.ThreatsAndDetectionTech",
+      "type": "object"
+    },
+    {
+      "name": "RawEventData.ThreatsAndDetectionTech.[]",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Tid",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.TIMESTAMP",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.Timestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "RawEventData.TokenIssuerType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.TokenObjectId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.TokenTenantId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.TokenType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ToolId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ToolName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ToolType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.TraceId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.UniqueSharingId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.uniqueTokenId",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.UserAgent",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.userAgent",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.UserId",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.UserKey",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.UserMRI",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.UserServicePlan",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.UserSessionId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.UserSku",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.UserTenantId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.UserType",
+      "type": "array"
+    },
+    {
+      "name": "RawEventData.UserUpn",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Verdict",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.Version",
+      "type": "long"
+    },
+    {
+      "name": "RawEventData.VmSku",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.WebId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.Workload",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.WorkloadType",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.WorkspaceId",
+      "type": "guid"
+    },
+    {
+      "name": "RawEventData.WorkSpaceName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.WorkspaceName",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData.ZipFileName",
+      "type": "string"
+    },
+    {
+      "name": "ReportId",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Timestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "UncommonForUser",
+      "type": "object"
+    },
+    {
+      "name": "UncommonForUser.[]",
+      "type": "string"
+    },
+    {
+      "name": "UserAgent",
+      "type": "string"
+    },
+    {
+      "name": "UserAgentTags",
+      "type": "object"
+    },
+    {
+      "name": "UserAgentTags.[]",
+      "type": "string"
+    }
+  ]
+}

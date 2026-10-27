@@ -1,0 +1,69 @@
+{
+  "table": "EmailAttachmentInfo",
+  "fields": [
+    {
+      "name": "FileExtension",
+      "type": "string"
+    },
+    {
+      "name": "FileName",
+      "type": "string"
+    },
+    {
+      "name": "FileSize",
+      "type": "long"
+    },
+    {
+      "name": "FileType",
+      "type": "string"
+    },
+    {
+      "name": "NetworkMessageId",
+      "type": "string"
+    },
+    {
+      "name": "RecipientEmailAddress",
+      "type": "string"
+    },
+    {
+      "name": "RecipientObjectId",
+      "type": "string"
+    },
+    {
+      "name": "ReportId",
+      "type": "string"
+    },
+    {
+      "name": "SenderDisplayName",
+      "type": "string"
+    },
+    {
+      "name": "SenderFromAddress",
+      "type": "string"
+    },
+    {
+      "name": "SenderObjectId",
+      "type": "string"
+    },
+    {
+      "name": "SHA256",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Timestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

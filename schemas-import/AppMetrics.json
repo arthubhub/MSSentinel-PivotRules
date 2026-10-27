@@ -1,0 +1,237 @@
+{
+  "table": "AppMetrics",
+  "fields": [
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "AppRoleInstance",
+      "type": "string"
+    },
+    {
+      "name": "AppRoleName",
+      "type": "string"
+    },
+    {
+      "name": "ClientBrowser",
+      "type": "string"
+    },
+    {
+      "name": "ClientCity",
+      "type": "string"
+    },
+    {
+      "name": "ClientCountryOrRegion",
+      "type": "string"
+    },
+    {
+      "name": "ClientIP",
+      "type": "string"
+    },
+    {
+      "name": "ClientModel",
+      "type": "string"
+    },
+    {
+      "name": "ClientOS",
+      "type": "string"
+    },
+    {
+      "name": "ClientStateOrProvince",
+      "type": "string"
+    },
+    {
+      "name": "ClientType",
+      "type": "string"
+    },
+    {
+      "name": "IKey",
+      "type": "string"
+    },
+    {
+      "name": "ItemCount",
+      "type": "long"
+    },
+    {
+      "name": "Max",
+      "type": "double"
+    },
+    {
+      "name": "Min",
+      "type": "double"
+    },
+    {
+      "name": "Name",
+      "type": "string"
+    },
+    {
+      "name": "OperationId",
+      "type": "string"
+    },
+    {
+      "name": "Properties",
+      "type": "object"
+    },
+    {
+      "name": "Properties._MS.AggregationIntervalMs",
+      "type": "string"
+    },
+    {
+      "name": "Properties.appSrv_SiteName",
+      "type": "string"
+    },
+    {
+      "name": "Properties.appSrv_SlotName",
+      "type": "string"
+    },
+    {
+      "name": "Properties.appSrv_wsHost",
+      "type": "string"
+    },
+    {
+      "name": "Properties.appSrv_wsOwner",
+      "type": "string"
+    },
+    {
+      "name": "Properties.appSrv_wsStamp",
+      "type": "string"
+    },
+    {
+      "name": "Properties.azure.functions.health_check.tag",
+      "type": "string"
+    },
+    {
+      "name": "Properties.baseSdkTargetFramework",
+      "type": "string"
+    },
+    {
+      "name": "Properties.brique",
+      "type": "string"
+    },
+    {
+      "name": "Properties.Category",
+      "type": "string"
+    },
+    {
+      "name": "Properties.computeType",
+      "type": "string"
+    },
+    {
+      "name": "Properties.HostInstanceId",
+      "type": "guid"
+    },
+    {
+      "name": "Properties.language",
+      "type": "string"
+    },
+    {
+      "name": "Properties.LogLevel",
+      "type": "string"
+    },
+    {
+      "name": "Properties.microsoft.applicationId",
+      "type": "guid"
+    },
+    {
+      "name": "Properties.osType",
+      "type": "string"
+    },
+    {
+      "name": "Properties.outcome",
+      "type": "string"
+    },
+    {
+      "name": "Properties.ProcessId",
+      "type": "string"
+    },
+    {
+      "name": "Properties.processSessionId",
+      "type": "guid"
+    },
+    {
+      "name": "Properties.retryCode",
+      "type": "string"
+    },
+    {
+      "name": "Properties.retryReason",
+      "type": "string"
+    },
+    {
+      "name": "Properties.runtimeFramework",
+      "type": "string"
+    },
+    {
+      "name": "Properties.service.instance.id",
+      "type": "guid"
+    },
+    {
+      "name": "Properties.service.name",
+      "type": "string"
+    },
+    {
+      "name": "Properties.skill",
+      "type": "string"
+    },
+    {
+      "name": "Properties.source",
+      "type": "string"
+    },
+    {
+      "name": "Properties.telemetry.sdk.language",
+      "type": "string"
+    },
+    {
+      "name": "Properties.telemetry.sdk.name",
+      "type": "string"
+    },
+    {
+      "name": "Properties.telemetry.sdk.version",
+      "type": "string"
+    },
+    {
+      "name": "Properties.telemetryType",
+      "type": "string"
+    },
+    {
+      "name": "Properties.tool",
+      "type": "string"
+    },
+    {
+      "name": "Properties.version",
+      "type": "string"
+    },
+    {
+      "name": "ResourceGUID",
+      "type": "string"
+    },
+    {
+      "name": "SDKVersion",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "Sum",
+      "type": "double"
+    },
+    {
+      "name": "SyntheticSource",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

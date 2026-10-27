@@ -1,0 +1,81 @@
+{
+  "table": "AZFWDnsQuery",
+  "fields": [
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "DnssecOkBit",
+      "type": "bool"
+    },
+    {
+      "name": "EDNS0BufferSize",
+      "type": "long"
+    },
+    {
+      "name": "ErrorNumber",
+      "type": "long"
+    },
+    {
+      "name": "Protocol",
+      "type": "string"
+    },
+    {
+      "name": "QueryClass",
+      "type": "string"
+    },
+    {
+      "name": "QueryId",
+      "type": "long"
+    },
+    {
+      "name": "QueryName",
+      "type": "string"
+    },
+    {
+      "name": "QueryType",
+      "type": "string"
+    },
+    {
+      "name": "RequestDurationSecs",
+      "type": "double"
+    },
+    {
+      "name": "RequestSize",
+      "type": "long"
+    },
+    {
+      "name": "ResponseCode",
+      "type": "string"
+    },
+    {
+      "name": "ResponseFlags",
+      "type": "string"
+    },
+    {
+      "name": "ResponseSize",
+      "type": "long"
+    },
+    {
+      "name": "SourceIp",
+      "type": "string"
+    },
+    {
+      "name": "SourcePort",
+      "type": "long"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

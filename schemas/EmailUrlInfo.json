@@ -1,0 +1,49 @@
+{
+  "table": "EmailUrlInfo",
+  "fields": [
+    {
+      "name": "NetworkMessageId",
+      "type": "string"
+    },
+    {
+      "name": "ReportId",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Timestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "Url",
+      "type": "string"
+    },
+    {
+      "name": "UrlChainId",
+      "type": "string"
+    },
+    {
+      "name": "UrlChainPosition",
+      "type": "long"
+    },
+    {
+      "name": "UrlDomain",
+      "type": "string"
+    },
+    {
+      "name": "UrlLocation",
+      "type": "string"
+    }
+  ]
+}

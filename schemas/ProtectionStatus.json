@@ -1,0 +1,133 @@
+{
+  "table": "ProtectionStatus",
+  "fields": [
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "AMProductVersion",
+      "type": "string"
+    },
+    {
+      "name": "Computer",
+      "type": "string"
+    },
+    {
+      "name": "ComputerEnvironment",
+      "type": "string"
+    },
+    {
+      "name": "ComputerIP_Hidden",
+      "type": "string"
+    },
+    {
+      "name": "DateCollected",
+      "type": "string"
+    },
+    {
+      "name": "DetectionId",
+      "type": "string"
+    },
+    {
+      "name": "DeviceName",
+      "type": "string"
+    },
+    {
+      "name": "ManagementGroupName",
+      "type": "string"
+    },
+    {
+      "name": "MG",
+      "type": "string"
+    },
+    {
+      "name": "OSName",
+      "type": "string"
+    },
+    {
+      "name": "ProtectionStatus",
+      "type": "string"
+    },
+    {
+      "name": "ProtectionStatusDetails",
+      "type": "string"
+    },
+    {
+      "name": "ProtectionStatusRank",
+      "type": "long"
+    },
+    {
+      "name": "Resource",
+      "type": "string"
+    },
+    {
+      "name": "ResourceGroup",
+      "type": "string"
+    },
+    {
+      "name": "ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "ResourceProvider",
+      "type": "string"
+    },
+    {
+      "name": "ResourceType",
+      "type": "string"
+    },
+    {
+      "name": "ScanDate",
+      "type": "datetime"
+    },
+    {
+      "name": "SignatureVersion",
+      "type": "string"
+    },
+    {
+      "name": "SourceComputerId",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "SubscriptionId",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "ThreatStatus",
+      "type": "string"
+    },
+    {
+      "name": "ThreatStatusDetails",
+      "type": "string"
+    },
+    {
+      "name": "ThreatStatusRank",
+      "type": "long"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "TypeofProtection",
+      "type": "string"
+    },
+    {
+      "name": "VMUUID",
+      "type": "string"
+    }
+  ]
+}

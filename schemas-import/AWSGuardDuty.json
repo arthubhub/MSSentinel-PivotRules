@@ -1,0 +1,477 @@
+{
+  "table": "AWSGuardDuty",
+  "fields": [
+    {
+      "name": "AccountId",
+      "type": "string"
+    },
+    {
+      "name": "ActivityType",
+      "type": "string"
+    },
+    {
+      "name": "Arn",
+      "type": "string"
+    },
+    {
+      "name": "Description",
+      "type": "string"
+    },
+    {
+      "name": "Id",
+      "type": "string"
+    },
+    {
+      "name": "Partition",
+      "type": "string"
+    },
+    {
+      "name": "Region",
+      "type": "string"
+    },
+    {
+      "name": "ResourceDetails",
+      "type": "object"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails",
+      "type": "object"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.availabilityZone",
+      "type": "string"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.iamInstanceProfile",
+      "type": "object"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.iamInstanceProfile.arn",
+      "type": "string"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.iamInstanceProfile.id",
+      "type": "string"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.imageDescription",
+      "type": "string"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.imageId",
+      "type": "string"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.instanceId",
+      "type": "string"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.instanceState",
+      "type": "string"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.instanceType",
+      "type": "string"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.launchTime",
+      "type": "datetime"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.networkInterfaces",
+      "type": "object"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.networkInterfaces.[]",
+      "type": "object"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.networkInterfaces.[].ipv6Addresses",
+      "type": "object"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.networkInterfaces.[].ipv6Addresses.[]",
+      "type": "null"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.networkInterfaces.[].networkInterfaceId",
+      "type": "string"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.networkInterfaces.[].privateDnsName",
+      "type": "string"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.networkInterfaces.[].privateIpAddress",
+      "type": "string"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.networkInterfaces.[].privateIpAddresses",
+      "type": "object"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.networkInterfaces.[].privateIpAddresses.[]",
+      "type": "object"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.networkInterfaces.[].privateIpAddresses.[].privateDnsName",
+      "type": "string"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.networkInterfaces.[].privateIpAddresses.[].privateIpAddress",
+      "type": "string"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.networkInterfaces.[].publicDnsName",
+      "type": "string"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.networkInterfaces.[].publicIp",
+      "type": "string"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.networkInterfaces.[].securityGroups",
+      "type": "object"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.networkInterfaces.[].securityGroups.[]",
+      "type": "object"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.networkInterfaces.[].securityGroups.[].groupId",
+      "type": "string"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.networkInterfaces.[].securityGroups.[].groupName",
+      "type": "string"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.networkInterfaces.[].subnetId",
+      "type": "string"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.networkInterfaces.[].vpcId",
+      "type": "string"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.productCodes",
+      "type": "object"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.productCodes.[]",
+      "type": "object"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.productCodes.[].productCodeId",
+      "type": "string"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.productCodes.[].productCodeType",
+      "type": "string"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.tags",
+      "type": "object"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.tags.[]",
+      "type": "object"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.tags.[].key",
+      "type": "string"
+    },
+    {
+      "name": "ResourceDetails.instanceDetails.tags.[].value",
+      "type": "string"
+    },
+    {
+      "name": "ResourceDetails.resourceType",
+      "type": "string"
+    },
+    {
+      "name": "SchemaVersion",
+      "type": "string"
+    },
+    {
+      "name": "ServiceDetails",
+      "type": "object"
+    },
+    {
+      "name": "ServiceDetails.action",
+      "type": "object"
+    },
+    {
+      "name": "ServiceDetails.action.actionType",
+      "type": "string"
+    },
+    {
+      "name": "ServiceDetails.action.portProbeAction",
+      "type": "object"
+    },
+    {
+      "name": "ServiceDetails.action.portProbeAction.blocked",
+      "type": "bool"
+    },
+    {
+      "name": "ServiceDetails.action.portProbeAction.portProbeDetails",
+      "type": "object"
+    },
+    {
+      "name": "ServiceDetails.action.portProbeAction.portProbeDetails.[]",
+      "type": "object"
+    },
+    {
+      "name": "ServiceDetails.action.portProbeAction.portProbeDetails.[].localPortDetails",
+      "type": "object"
+    },
+    {
+      "name": "ServiceDetails.action.portProbeAction.portProbeDetails.[].localPortDetails.port",
+      "type": "long"
+    },
+    {
+      "name": "ServiceDetails.action.portProbeAction.portProbeDetails.[].localPortDetails.portName",
+      "type": "string"
+    },
+    {
+      "name": "ServiceDetails.action.portProbeAction.portProbeDetails.[].remoteIpDetails",
+      "type": "object"
+    },
+    {
+      "name": "ServiceDetails.action.portProbeAction.portProbeDetails.[].remoteIpDetails.city",
+      "type": "object"
+    },
+    {
+      "name": "ServiceDetails.action.portProbeAction.portProbeDetails.[].remoteIpDetails.city.cityName",
+      "type": "string"
+    },
+    {
+      "name": "ServiceDetails.action.portProbeAction.portProbeDetails.[].remoteIpDetails.country",
+      "type": "object"
+    },
+    {
+      "name": "ServiceDetails.action.portProbeAction.portProbeDetails.[].remoteIpDetails.country.countryName",
+      "type": "string"
+    },
+    {
+      "name": "ServiceDetails.action.portProbeAction.portProbeDetails.[].remoteIpDetails.geoLocation",
+      "type": "object"
+    },
+    {
+      "name": "ServiceDetails.action.portProbeAction.portProbeDetails.[].remoteIpDetails.geoLocation.lat",
+      "type": "double"
+    },
+    {
+      "name": "ServiceDetails.action.portProbeAction.portProbeDetails.[].remoteIpDetails.geoLocation.lon",
+      "type": "double"
+    },
+    {
+      "name": "ServiceDetails.action.portProbeAction.portProbeDetails.[].remoteIpDetails.ipAddressV4",
+      "type": "string"
+    },
+    {
+      "name": "ServiceDetails.action.portProbeAction.portProbeDetails.[].remoteIpDetails.organization",
+      "type": "object"
+    },
+    {
+      "name": "ServiceDetails.action.portProbeAction.portProbeDetails.[].remoteIpDetails.organization.asn",
+      "type": "string"
+    },
+    {
+      "name": "ServiceDetails.action.portProbeAction.portProbeDetails.[].remoteIpDetails.organization.asnOrg",
+      "type": "string"
+    },
+    {
+      "name": "ServiceDetails.action.portProbeAction.portProbeDetails.[].remoteIpDetails.organization.isp",
+      "type": "string"
+    },
+    {
+      "name": "ServiceDetails.action.portProbeAction.portProbeDetails.[].remoteIpDetails.organization.org",
+      "type": "string"
+    },
+    {
+      "name": "ServiceDetails.additionalInfo",
+      "type": "object"
+    },
+    {
+      "name": "ServiceDetails.additionalInfo.packetsIn",
+      "type": "long"
+    },
+    {
+      "name": "ServiceDetails.additionalInfo.packetsOut",
+      "type": "long"
+    },
+    {
+      "name": "ServiceDetails.additionalInfo.threatListName",
+      "type": "string"
+    },
+    {
+      "name": "ServiceDetails.additionalInfo.type",
+      "type": "string"
+    },
+    {
+      "name": "ServiceDetails.additionalInfo.value",
+      "type": "string"
+    },
+    {
+      "name": "ServiceDetails.archived",
+      "type": "bool"
+    },
+    {
+      "name": "ServiceDetails.count",
+      "type": "long"
+    },
+    {
+      "name": "ServiceDetails.detectorId",
+      "type": "string"
+    },
+    {
+      "name": "ServiceDetails.eventFirstSeen",
+      "type": "datetime"
+    },
+    {
+      "name": "ServiceDetails.eventLastSeen",
+      "type": "datetime"
+    },
+    {
+      "name": "ServiceDetails.evidence",
+      "type": "object"
+    },
+    {
+      "name": "ServiceDetails.evidence.threatIntelligenceDetails",
+      "type": "object"
+    },
+    {
+      "name": "ServiceDetails.evidence.threatIntelligenceDetails.[]",
+      "type": "object"
+    },
+    {
+      "name": "ServiceDetails.evidence.threatIntelligenceDetails.[].threatListName",
+      "type": "string"
+    },
+    {
+      "name": "ServiceDetails.evidence.threatIntelligenceDetails.[].threatNames",
+      "type": "object"
+    },
+    {
+      "name": "ServiceDetails.evidence.threatIntelligenceDetails.[].threatNames.[]",
+      "type": "null"
+    },
+    {
+      "name": "ServiceDetails.featureName",
+      "type": "string"
+    },
+    {
+      "name": "ServiceDetails.resourceRole",
+      "type": "string"
+    },
+    {
+      "name": "ServiceDetails.runtimeDetails",
+      "type": "object"
+    },
+    {
+      "name": "ServiceDetails.runtimeDetails.context",
+      "type": "object"
+    },
+    {
+      "name": "ServiceDetails.runtimeDetails.context.moduleName",
+      "type": "string"
+    },
+    {
+      "name": "ServiceDetails.runtimeDetails.process",
+      "type": "object"
+    },
+    {
+      "name": "ServiceDetails.runtimeDetails.process.euid",
+      "type": "long"
+    },
+    {
+      "name": "ServiceDetails.runtimeDetails.process.executablePath",
+      "type": "string"
+    },
+    {
+      "name": "ServiceDetails.runtimeDetails.process.lineage",
+      "type": "object"
+    },
+    {
+      "name": "ServiceDetails.runtimeDetails.process.lineage.[]",
+      "type": "object"
+    },
+    {
+      "name": "ServiceDetails.runtimeDetails.process.lineage.[].euid",
+      "type": "long"
+    },
+    {
+      "name": "ServiceDetails.runtimeDetails.process.lineage.[].executablePath",
+      "type": "string"
+    },
+    {
+      "name": "ServiceDetails.runtimeDetails.process.lineage.[].name",
+      "type": "string"
+    },
+    {
+      "name": "ServiceDetails.runtimeDetails.process.lineage.[].namespacePid",
+      "type": "long"
+    },
+    {
+      "name": "ServiceDetails.runtimeDetails.process.lineage.[].pid",
+      "type": "long"
+    },
+    {
+      "name": "ServiceDetails.runtimeDetails.process.lineage.[].userId",
+      "type": "long"
+    },
+    {
+      "name": "ServiceDetails.runtimeDetails.process.name",
+      "type": "string"
+    },
+    {
+      "name": "ServiceDetails.runtimeDetails.process.namespacePid",
+      "type": "long"
+    },
+    {
+      "name": "ServiceDetails.runtimeDetails.process.pid",
+      "type": "long"
+    },
+    {
+      "name": "ServiceDetails.runtimeDetails.process.startTime",
+      "type": "double"
+    },
+    {
+      "name": "ServiceDetails.runtimeDetails.process.userId",
+      "type": "long"
+    },
+    {
+      "name": "ServiceDetails.runtimeDetails.process.uuid",
+      "type": "guid"
+    },
+    {
+      "name": "ServiceDetails.serviceName",
+      "type": "string"
+    },
+    {
+      "name": "Severity",
+      "type": "long"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeCreated",
+      "type": "datetime"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Title",
+      "type": "string"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "table": "SecureScores",
+  "fields": [
+    {
+      "name": "AssessedResourceId",
+      "type": "string"
+    },
+    {
+      "name": "CurrentScore",
+      "type": "double"
+    },
+    {
+      "name": "DisplayName",
+      "type": "string"
+    },
+    {
+      "name": "Environment",
+      "type": "string"
+    },
+    {
+      "name": "IsSnapshot",
+      "type": "bool"
+    },
+    {
+      "name": "MaxScore",
+      "type": "long"
+    },
+    {
+      "name": "PercentageScore",
+      "type": "double"
+    },
+    {
+      "name": "Properties",
+      "type": "object"
+    },
+    {
+      "name": "Properties.displayName",
+      "type": "string"
+    },
+    {
+      "name": "Properties.environment",
+      "type": "string"
+    },
+    {
+      "name": "Properties.score",
+      "type": "object"
+    },
+    {
+      "name": "Properties.score.current",
+      "type": "double"
+    },
+    {
+      "name": "Properties.score.max",
+      "type": "long"
+    },
+    {
+      "name": "Properties.score.percentage",
+      "type": "double"
+    },
+    {
+      "name": "Properties.weight",
+      "type": "long"
+    },
+    {
+      "name": "ResourceProviderType",
+      "type": "string"
+    },
+    {
+      "name": "SecureScoresSubscriptionId",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "Weight",
+      "type": "long"
+    }
+  ]
+}

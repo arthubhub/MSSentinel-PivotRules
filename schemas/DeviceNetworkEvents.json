@@ -1,0 +1,773 @@
+{
+  "table": "DeviceNetworkEvents",
+  "fields": [
+    {
+      "name": "ActionType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.AA",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.answers",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.arg",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.auth_attempts",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.auth_success",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.cipher",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.client",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.client_issuer",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.client_subject",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.command",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.conn_state",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.curve",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.cwd",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.data_channel_orig_h",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.data_channel_passive",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.data_channel_resp_h",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.data_channel_resp_p",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Destination Mac",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.direction",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.domainname",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.duration",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.established",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.file_size",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.fuids",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.helo",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.host",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.host_key",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.hostname",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.info_code",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.info_msg",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessCurrentWorkingDirectory",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixAttachedTerminal",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixEffectiveGroup",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixEffectiveGroup.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixEffectiveGroup.PosixGroupId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixEffectiveUser",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixEffectiveUser.AadUserUpn",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixEffectiveUser.DomainName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixEffectiveUser.LogonId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixEffectiveUser.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixEffectiveUser.PosixUserId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixEffectiveUser.PrimaryPosixGroup",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixEffectiveUser.PrimaryPosixGroup.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixEffectiveUser.PrimaryPosixGroup.PosixGroupId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixEffectiveUser.Sid",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixFilePermissions",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixFilePermissions.[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixGroupOwner",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixGroupOwner.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixGroupOwner.PosixGroupId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixProcessGroupId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixRealUser",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixRealUser.AadUserUpn",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixRealUser.DomainName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixRealUser.LogonId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixRealUser.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixRealUser.PosixUserId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixRealUser.PrimaryPosixGroup",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixRealUser.PrimaryPosixGroup.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixRealUser.PrimaryPosixGroup.PosixGroupId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixRealUser.Sid",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixSessionId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixUserOwner",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixUserOwner.DomainName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixUserOwner.LogonId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixUserOwner.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixUserOwner.PosixUserId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixUserOwner.PrimaryPosixGroup",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixUserOwner.PrimaryPosixGroup.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixUserOwner.PrimaryPosixGroup.PosixGroupId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.issuer",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ja3",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ja3s",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ja4",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ja4s",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.last_alert",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.last_reply",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.method",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.mime_type",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.missed_bytes",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.next_protocol",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.orig_bytes",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.orig_ip_bytes",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.orig_pkts",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.origin",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Packet Size",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.path",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.proxied",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.qclass",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.qclass_name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.qtype",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.qtype_name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.query",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.RA",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.rcode",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.rcode_name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.RD",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.referrer",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.rejected",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.reply_code",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.reply_msg",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.request_body_len",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.requestType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.resp_bytes",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.resp_filenames",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.resp_ip_bytes",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.resp_pkts",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.response_body_len",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.resumed",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.rtt",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SamplePacketContent",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.server",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.server_dns_computer_name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.server_dns_domain_name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.server_name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.server_nb_computer_name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.server_nb_domain_name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.server_tree_name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.server_version",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.service",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SignatureMatchedContent",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SignatureName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Source Mac",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.status_code",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.status_msg",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.subject",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.success",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.tags",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TC",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Tcp Flags",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.ticketHash",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.tls",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.trans_depth",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.trans_id",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ts",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TTLs",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.uid",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.uniqueEventsAggregated",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.uri",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.user",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.user_agent",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.username",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.version",
+      "type": "string"
+    },
+    {
+      "name": "AppGuardContainerId",
+      "type": "string"
+    },
+    {
+      "name": "DeviceId",
+      "type": "string"
+    },
+    {
+      "name": "DeviceName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessAccountDomain",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessAccountName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessAccountObjectId",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessAccountSid",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessAccountUpn",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessCommandLine",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessCreationTime",
+      "type": "datetime"
+    },
+    {
+      "name": "InitiatingProcessFileName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessFileSize",
+      "type": "long"
+    },
+    {
+      "name": "InitiatingProcessFolderPath",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessId",
+      "type": "long"
+    },
+    {
+      "name": "InitiatingProcessIntegrityLevel",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessMD5",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessParentCreationTime",
+      "type": "datetime"
+    },
+    {
+      "name": "InitiatingProcessParentFileName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessParentId",
+      "type": "long"
+    },
+    {
+      "name": "InitiatingProcessRemoteSessionDeviceName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessRemoteSessionIP",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessSessionId",
+      "type": "long"
+    },
+    {
+      "name": "InitiatingProcessSHA1",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessSHA256",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessTokenElevation",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessUniqueId",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessVersionInfoCompanyName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessVersionInfoFileDescription",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessVersionInfoInternalFileName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessVersionInfoOriginalFileName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessVersionInfoProductName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessVersionInfoProductVersion",
+      "type": "string"
+    },
+    {
+      "name": "IsInitiatingProcessRemoteSession",
+      "type": "bool"
+    },
+    {
+      "name": "LocalIP",
+      "type": "string"
+    },
+    {
+      "name": "LocalIPType",
+      "type": "string"
+    },
+    {
+      "name": "LocalPort",
+      "type": "long"
+    },
+    {
+      "name": "MachineGroup",
+      "type": "string"
+    },
+    {
+      "name": "Protocol",
+      "type": "string"
+    },
+    {
+      "name": "RemoteIP",
+      "type": "string"
+    },
+    {
+      "name": "RemoteIPType",
+      "type": "string"
+    },
+    {
+      "name": "RemotePort",
+      "type": "long"
+    },
+    {
+      "name": "RemoteUrl",
+      "type": "string"
+    },
+    {
+      "name": "ReportId",
+      "type": "long"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Timestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

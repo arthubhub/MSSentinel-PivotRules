@@ -1,0 +1,213 @@
+{
+  "table": "ThreatIntelIndicators",
+  "fields": [
+    {
+      "name": "AdditionalFields",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.TLPLevel",
+      "type": "string"
+    },
+    {
+      "name": "AzureTenantId",
+      "type": "string"
+    },
+    {
+      "name": "Confidence",
+      "type": "long"
+    },
+    {
+      "name": "Created",
+      "type": "datetime"
+    },
+    {
+      "name": "Data",
+      "type": "object"
+    },
+    {
+      "name": "Data.confidence",
+      "type": "long"
+    },
+    {
+      "name": "Data.created",
+      "type": "datetime"
+    },
+    {
+      "name": "Data.created_by_ref",
+      "type": "string"
+    },
+    {
+      "name": "Data.description",
+      "type": "string"
+    },
+    {
+      "name": "Data.extensions",
+      "type": "object"
+    },
+    {
+      "name": "Data.extensions.IndicatorProvider",
+      "type": "object"
+    },
+    {
+      "name": "Data.extensions.IndicatorProvider.provider_name",
+      "type": "string"
+    },
+    {
+      "name": "Data.extensions.threat-analytics-ext",
+      "type": "object"
+    },
+    {
+      "name": "Data.extensions.threat-analytics-ext.outbreak_ids",
+      "type": "object"
+    },
+    {
+      "name": "Data.extensions.threat-analytics-ext.outbreak_ids.[]",
+      "type": "guid"
+    },
+    {
+      "name": "Data.external_references",
+      "type": "object"
+    },
+    {
+      "name": "Data.external_references.[]",
+      "type": "object"
+    },
+    {
+      "name": "Data.external_references.[].description",
+      "type": "string"
+    },
+    {
+      "name": "Data.external_references.[].external_id",
+      "type": "string"
+    },
+    {
+      "name": "Data.external_references.[].source_name",
+      "type": "string"
+    },
+    {
+      "name": "Data.id",
+      "type": "string"
+    },
+    {
+      "name": "Data.indicator_types",
+      "type": "object"
+    },
+    {
+      "name": "Data.indicator_types.[]",
+      "type": "string"
+    },
+    {
+      "name": "Data.labels",
+      "type": "object"
+    },
+    {
+      "name": "Data.labels.[]",
+      "type": "string"
+    },
+    {
+      "name": "Data.modified",
+      "type": "datetime"
+    },
+    {
+      "name": "Data.name",
+      "type": "string"
+    },
+    {
+      "name": "Data.object_marking_refs",
+      "type": "object"
+    },
+    {
+      "name": "Data.object_marking_refs.[]",
+      "type": "string"
+    },
+    {
+      "name": "Data.pattern",
+      "type": "string"
+    },
+    {
+      "name": "Data.pattern_type",
+      "type": "string"
+    },
+    {
+      "name": "Data.spec_version",
+      "type": "string"
+    },
+    {
+      "name": "Data.type",
+      "type": "string"
+    },
+    {
+      "name": "Data.valid_from",
+      "type": "datetime"
+    },
+    {
+      "name": "Data.valid_until",
+      "type": "datetime"
+    },
+    {
+      "name": "Id",
+      "type": "string"
+    },
+    {
+      "name": "IsActive",
+      "type": "bool"
+    },
+    {
+      "name": "IsDeleted",
+      "type": "bool"
+    },
+    {
+      "name": "LastUpdateMethod",
+      "type": "string"
+    },
+    {
+      "name": "Modified",
+      "type": "datetime"
+    },
+    {
+      "name": "ObservableKey",
+      "type": "string"
+    },
+    {
+      "name": "ObservableValue",
+      "type": "string"
+    },
+    {
+      "name": "Pattern",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "Tags",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "ValidFrom",
+      "type": "datetime"
+    },
+    {
+      "name": "ValidUntil",
+      "type": "datetime"
+    },
+    {
+      "name": "WorkspaceId",
+      "type": "string"
+    }
+  ]
+}

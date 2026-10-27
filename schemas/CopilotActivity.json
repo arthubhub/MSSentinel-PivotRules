@@ -1,0 +1,305 @@
+{
+  "table": "CopilotActivity",
+  "fields": [
+    {
+      "name": "ActorName",
+      "type": "string"
+    },
+    {
+      "name": "ActorUserId",
+      "type": "string"
+    },
+    {
+      "name": "ActorUserType",
+      "type": "string"
+    },
+    {
+      "name": "AgentId",
+      "type": "string"
+    },
+    {
+      "name": "AgentName",
+      "type": "string"
+    },
+    {
+      "name": "AIModelName",
+      "type": "string"
+    },
+    {
+      "name": "AppHost",
+      "type": "string"
+    },
+    {
+      "name": "AppIdentity",
+      "type": "string"
+    },
+    {
+      "name": "ClientRegion",
+      "type": "string"
+    },
+    {
+      "name": "LLMEventData",
+      "type": "object"
+    },
+    {
+      "name": "LLMEventData.AccessedResources",
+      "type": "object"
+    },
+    {
+      "name": "LLMEventData.AccessedResources.[]",
+      "type": "object"
+    },
+    {
+      "name": "LLMEventData.AccessedResources.[].Action",
+      "type": "string"
+    },
+    {
+      "name": "LLMEventData.AccessedResources.[].Id",
+      "type": "string"
+    },
+    {
+      "name": "LLMEventData.AccessedResources.[].listItemUniqueId",
+      "type": "guid"
+    },
+    {
+      "name": "LLMEventData.AccessedResources.[].Name",
+      "type": "string"
+    },
+    {
+      "name": "LLMEventData.AccessedResources.[].PolicyDetails",
+      "type": "string"
+    },
+    {
+      "name": "LLMEventData.AccessedResources.[].SensitivityLabelId",
+      "type": "guid"
+    },
+    {
+      "name": "LLMEventData.AccessedResources.[].SiteUrl",
+      "type": "string"
+    },
+    {
+      "name": "LLMEventData.AccessedResources.[].Type",
+      "type": "string"
+    },
+    {
+      "name": "LLMEventData.AccessedResources.[].XPIADetected",
+      "type": "bool"
+    },
+    {
+      "name": "LLMEventData.AISystemPlugin",
+      "type": "object"
+    },
+    {
+      "name": "LLMEventData.AISystemPlugin.[]",
+      "type": "object"
+    },
+    {
+      "name": "LLMEventData.AISystemPlugin.[].Id",
+      "type": "string"
+    },
+    {
+      "name": "LLMEventData.AISystemPlugin.[].Name",
+      "type": "string"
+    },
+    {
+      "name": "LLMEventData.AppHost",
+      "type": "string"
+    },
+    {
+      "name": "LLMEventData.Contexts",
+      "type": "object"
+    },
+    {
+      "name": "LLMEventData.Contexts.[]",
+      "type": "object"
+    },
+    {
+      "name": "LLMEventData.Contexts.[].Id",
+      "type": "string"
+    },
+    {
+      "name": "LLMEventData.Contexts.[].Type",
+      "type": "string"
+    },
+    {
+      "name": "LLMEventData.ConversationId",
+      "type": "guid"
+    },
+    {
+      "name": "LLMEventData.DLPEvaluationDeferred",
+      "type": "long"
+    },
+    {
+      "name": "LLMEventData.GuardrailDetails",
+      "type": "object"
+    },
+    {
+      "name": "LLMEventData.GuardrailDetails.[]",
+      "type": "object"
+    },
+    {
+      "name": "LLMEventData.GuardrailDetails.[].DecisionReason",
+      "type": "string"
+    },
+    {
+      "name": "LLMEventData.GuardrailDetails.[].DecisionType",
+      "type": "string"
+    },
+    {
+      "name": "LLMEventData.GuardrailDetails.[].Findings",
+      "type": "object"
+    },
+    {
+      "name": "LLMEventData.GuardrailDetails.[].Findings.[]",
+      "type": "object"
+    },
+    {
+      "name": "LLMEventData.GuardrailDetails.[].Findings.[].DecisionType",
+      "type": "string"
+    },
+    {
+      "name": "LLMEventData.GuardrailDetails.[].Findings.[].RiskCategory",
+      "type": "string"
+    },
+    {
+      "name": "LLMEventData.GuardrailDetails.[].Findings.[].RiskSeverity",
+      "type": "string"
+    },
+    {
+      "name": "LLMEventData.GuardrailDetails.[].GuardianId",
+      "type": "string"
+    },
+    {
+      "name": "LLMEventData.GuardrailDetails.[].GuardianName",
+      "type": "string"
+    },
+    {
+      "name": "LLMEventData.GuardrailDetails.[].GuardianProviderName",
+      "type": "string"
+    },
+    {
+      "name": "LLMEventData.GuardrailDetails.[].TargetId",
+      "type": "string"
+    },
+    {
+      "name": "LLMEventData.GuardrailDetails.[].TargetType",
+      "type": "string"
+    },
+    {
+      "name": "LLMEventData.LicenseType",
+      "type": "string"
+    },
+    {
+      "name": "LLMEventData.MemoryUpdated",
+      "type": "bool"
+    },
+    {
+      "name": "LLMEventData.MessageIds",
+      "type": "object"
+    },
+    {
+      "name": "LLMEventData.MessageIds.[]",
+      "type": "null"
+    },
+    {
+      "name": "LLMEventData.Messages",
+      "type": "object"
+    },
+    {
+      "name": "LLMEventData.Messages.[]",
+      "type": "object"
+    },
+    {
+      "name": "LLMEventData.Messages.[].Id",
+      "type": "string"
+    },
+    {
+      "name": "LLMEventData.Messages.[].isPrompt",
+      "type": "bool"
+    },
+    {
+      "name": "LLMEventData.Messages.[].JailbreakDetected",
+      "type": "bool"
+    },
+    {
+      "name": "LLMEventData.ModelTransparencyDetails",
+      "type": "object"
+    },
+    {
+      "name": "LLMEventData.ModelTransparencyDetails.[]",
+      "type": "object"
+    },
+    {
+      "name": "LLMEventData.ModelTransparencyDetails.[].ModelName",
+      "type": "string"
+    },
+    {
+      "name": "LLMEventData.ModelTransparencyDetails.[].ModelProviderName",
+      "type": "string"
+    },
+    {
+      "name": "LLMEventData.SensitivityLabelId",
+      "type": "guid"
+    },
+    {
+      "name": "LLMEventData.TargetAgentName",
+      "type": "string"
+    },
+    {
+      "name": "LLMEventData.TargetPlatformAgentId",
+      "type": "string"
+    },
+    {
+      "name": "LLMEventData.TargetTaskIds",
+      "type": "object"
+    },
+    {
+      "name": "LLMEventData.TargetTaskIds.[]",
+      "type": "null"
+    },
+    {
+      "name": "LLMEventData.ThreadId",
+      "type": "string"
+    },
+    {
+      "name": "LogVersion",
+      "type": "string"
+    },
+    {
+      "name": "OrganizationId",
+      "type": "string"
+    },
+    {
+      "name": "RecordId",
+      "type": "string"
+    },
+    {
+      "name": "RecordType",
+      "type": "string"
+    },
+    {
+      "name": "SrcIpAddr",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "Version",
+      "type": "string"
+    },
+    {
+      "name": "Workload",
+      "type": "string"
+    }
+  ]
+}

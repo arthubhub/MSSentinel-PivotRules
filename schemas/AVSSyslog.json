@@ -1,0 +1,45 @@
+{
+  "table": "AVSSyslog",
+  "fields": [
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "AppName",
+      "type": "string"
+    },
+    {
+      "name": "Facility",
+      "type": "string"
+    },
+    {
+      "name": "HostName",
+      "type": "string"
+    },
+    {
+      "name": "LogCreationTime",
+      "type": "datetime"
+    },
+    {
+      "name": "Message",
+      "type": "string"
+    },
+    {
+      "name": "Severity",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

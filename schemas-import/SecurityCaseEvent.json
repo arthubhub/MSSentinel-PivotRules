@@ -1,0 +1,81 @@
+{
+  "table": "SecurityCaseEvent",
+  "fields": [
+    {
+      "name": "AadTenantId",
+      "type": "string"
+    },
+    {
+      "name": "EntityCreatedTime",
+      "type": "datetime"
+    },
+    {
+      "name": "EntityId",
+      "type": "string"
+    },
+    {
+      "name": "EntityType",
+      "type": "string"
+    },
+    {
+      "name": "EventTime",
+      "type": "datetime"
+    },
+    {
+      "name": "IsDeleted",
+      "type": "bool"
+    },
+    {
+      "name": "ModifiedBy",
+      "type": "string"
+    },
+    {
+      "name": "NewValues",
+      "type": "array"
+    },
+    {
+      "name": "NewValues[].[]",
+      "type": "array"
+    },
+    {
+      "name": "NewValues[].[][].[]",
+      "type": "guid"
+    },
+    {
+      "name": "OperationName",
+      "type": "string"
+    },
+    {
+      "name": "PreviousValues",
+      "type": "array"
+    },
+    {
+      "name": "PreviousValues[].[]",
+      "type": "string"
+    },
+    {
+      "name": "PropertyNames",
+      "type": "array"
+    },
+    {
+      "name": "PropertyNames[].[]",
+      "type": "string"
+    },
+    {
+      "name": "RecordId",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

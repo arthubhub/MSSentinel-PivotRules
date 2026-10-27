@@ -1,0 +1,429 @@
+{
+  "table": "BehaviorAnalytics",
+  "fields": [
+    {
+      "name": "ActionType",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights",
+      "type": "object"
+    },
+    {
+      "name": "ActivityInsights.ActionUncommonlyPerformedAmongPeers",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.ActionUncommonlyPerformedByUser",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.ActionUncommonlyPerformedInTenant",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.App",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.AppIdUncommonlyAccessedInTenant",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.AppUncommonlyUsedAmongPeers",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.AppUncommonlyUsedByUser",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.BrowserUncommonlyUsedAmongPeers",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.BrowserUncommonlyUsedInTenant",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.CommandLine",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.CountryUncommonlyConnectedFromAmongPeers",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.CountryUncommonlyConnectedFromByUser",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.CountryUncommonlyConnectedFromInTenant",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.DeviceUncommonlyUsedAmongPeers",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.DeviceUncommonlyUsedByUser",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.DeviceUncommonlyUsedInTenant",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.EventCount",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.EventMessage",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.EventOriginalType",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.EventResult",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.EventResultDetails",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.EventSubType",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.FirstTimeConnectionViaISPInTenant",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.FirstTimeDeviceObservedInTenant",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.FirstTimeProcessCreatedFromDirectoryByTenant",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.FirstTimeProcessCreatedFromDirectoryByUser",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.FirstTimeUserAccessedResource",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.FirstTimeUserConnectedFromCountry",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.FirstTimeUserConnectedFromDevice",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.FirstTimeUserConnectedViaBrowser",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.FirstTimeUserConnectedViaISP",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.FirstTimeUserLoggedOnToDevice",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.FirstTimeUserPerformedAction",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.FirstTimeUserUsedApp",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.ISPUncommonlyUsedAmongPeers",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.ISPUncommonlyUsedByUser",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.ISPUncommonlyUsedInTenant",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.LastTimeUserPerformedAction",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.LogonMethod",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.MandatoryLabel",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.NewProcessId",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.NewProcessName",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.ParentProcessName",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.Process",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.ProcessId",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.Resource",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.ResourceUncommonlyAccessedAmongPeers",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.ResourceUncommonlyAccessedByUser",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.ResourceUncommonlyAccessedInTenant",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.Role",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.SimilarActionWasNotPerformedInThePast",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.UncommonHighVolumeOfActions",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.UnusualNumberOfAADConditionalAccessFailures",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.UnusualNumberOfDistinctUsersFailedSignInFromIPAddress",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.UnusualNumberOfFailedLogonsByUserToDevice",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.UnusualNumberOfFailedSignInOfThisUser",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.UserCreated",
+      "type": "string"
+    },
+    {
+      "name": "ActivityType",
+      "type": "string"
+    },
+    {
+      "name": "ActorName",
+      "type": "string"
+    },
+    {
+      "name": "DestinationDevice",
+      "type": "string"
+    },
+    {
+      "name": "Device",
+      "type": "string"
+    },
+    {
+      "name": "DevicesInsights",
+      "type": "object"
+    },
+    {
+      "name": "DevicesInsights.DeviceType",
+      "type": "string"
+    },
+    {
+      "name": "DevicesInsights.GeoCity",
+      "type": "string"
+    },
+    {
+      "name": "DevicesInsights.GeoCountry",
+      "type": "string"
+    },
+    {
+      "name": "DevicesInsights.IsLocalAdmin",
+      "type": "string"
+    },
+    {
+      "name": "DevicesInsights.ISP",
+      "type": "string"
+    },
+    {
+      "name": "DevicesInsights.ISPType",
+      "type": "string"
+    },
+    {
+      "name": "DevicesInsights.OperatingSystem",
+      "type": "string"
+    },
+    {
+      "name": "DevicesInsights.SourceComputerId",
+      "type": "guid"
+    },
+    {
+      "name": "DevicesInsights.ThreatIntelIndicatorDescription",
+      "type": "string"
+    },
+    {
+      "name": "DevicesInsights.ThreatIntelIndicatorType",
+      "type": "string"
+    },
+    {
+      "name": "DevicesInsights.UserAgent",
+      "type": "string"
+    },
+    {
+      "name": "DevicesInsights.UserAgentFamily",
+      "type": "string"
+    },
+    {
+      "name": "EventProductVersion",
+      "type": "string"
+    },
+    {
+      "name": "EventSource",
+      "type": "string"
+    },
+    {
+      "name": "EventVendor",
+      "type": "string"
+    },
+    {
+      "name": "InvestigationPriority",
+      "type": "long"
+    },
+    {
+      "name": "NativeTableName",
+      "type": "string"
+    },
+    {
+      "name": "SourceDevice",
+      "type": "string"
+    },
+    {
+      "name": "SourceIPAddress",
+      "type": "string"
+    },
+    {
+      "name": "SourceIPLocation",
+      "type": "string"
+    },
+    {
+      "name": "SourceRecordId",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "TargetName",
+      "type": "string"
+    },
+    {
+      "name": "TargetPrincipalName",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "TimeProcessed",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "UserName",
+      "type": "string"
+    },
+    {
+      "name": "UserPrincipalName",
+      "type": "string"
+    },
+    {
+      "name": "UsersInsights",
+      "type": "object"
+    },
+    {
+      "name": "UsersInsights.AccountDisplayName",
+      "type": "string"
+    },
+    {
+      "name": "UsersInsights.AccountDomain",
+      "type": "string"
+    },
+    {
+      "name": "UsersInsights.AccountObjectID",
+      "type": "guid"
+    },
+    {
+      "name": "UsersInsights.BlastRadius",
+      "type": "string"
+    },
+    {
+      "name": "UsersInsights.IsDormantAccount",
+      "type": "string"
+    },
+    {
+      "name": "UsersInsights.IsNewAccount",
+      "type": "string"
+    },
+    {
+      "name": "UsersInsights.IsVIPUser",
+      "type": "string"
+    },
+    {
+      "name": "UsersInsights.OnPremisesSID",
+      "type": "string"
+    },
+    {
+      "name": "UsersInsights.UserId",
+      "type": "array"
+    },
+    {
+      "name": "UsersInsights.UserState",
+      "type": "string"
+    },
+    {
+      "name": "UsersInsights.UserType",
+      "type": "string"
+    }
+  ]
+}

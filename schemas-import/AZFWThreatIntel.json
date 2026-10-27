@@ -1,0 +1,53 @@
+{
+  "table": "AZFWThreatIntel",
+  "fields": [
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "Action",
+      "type": "string"
+    },
+    {
+      "name": "DestinationIp",
+      "type": "string"
+    },
+    {
+      "name": "DestinationPort",
+      "type": "long"
+    },
+    {
+      "name": "IsTlsInspected",
+      "type": "bool"
+    },
+    {
+      "name": "Protocol",
+      "type": "string"
+    },
+    {
+      "name": "SourceIp",
+      "type": "string"
+    },
+    {
+      "name": "SourcePort",
+      "type": "long"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "ThreatDescription",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

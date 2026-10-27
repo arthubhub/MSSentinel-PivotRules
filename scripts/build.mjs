@@ -33,10 +33,20 @@ const INDICATORS = {
   url: { label: 'URL', header: 'web', patterns: ['^https?://\\S+$'] },
   domain: { label: 'Domaine', header: 'web',
     patterns: ['^(?=.{4,253}$)([a-zA-Z0-9-]{1,63}\\.)+[a-zA-Z]{2,63}\\.?$'] },
+  // Exige au moins une lettre, et exclut les GUID : sans ça le motif acceptait
+  // n'importe quel jeton alphanumérique, donc « 4624 », « 0 » et un GUID de
+  // CorrelationId étaient détectés comme machines (#5/#6). Écarte aussi les IPv4,
+  // qui n'ont pas de lettre — ce qui supprime le double type [ip, device].
+  // Conserve les noms courts légitimes : DC01, SRV1, web-02, srv-prod-01.corp.local.
   device: { label: 'Machine', header: 'device',
-    patterns: ['^[a-zA-Z0-9][a-zA-Z0-9-]{0,62}(\\.[a-zA-Z0-9-]{1,63})*$'] },
+    patterns: ['^(?!(?:[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12})$)(?=[a-zA-Z0-9.-]*[a-zA-Z])[a-zA-Z0-9][a-zA-Z0-9-]{0,62}(?:\\.[a-zA-Z0-9-]{1,63})*$'] },
+  // « com » est la seule extension de la liste qui soit aussi un TLD : « corp.com »
+  // et « user@corp.com » étaient donc détectés comme processus. Elle exige
+  // désormais un séparateur de chemin (C:\\tools\\legacy.com reste un processus),
+  // les autres extensions restent acceptées sans chemin — DeviceProcessEvents
+  // .FileName contient des noms nus (powershell.exe), qu'il ne faut pas perdre.
   process: { label: 'Processus', header: 'process',
-    patterns: ['(?i)^(.*[\\\\/])?[^\\\\/]+\\.(exe|dll|ps1|bat|cmd|vbs|vbe|js|jse|wsf|hta|msi|scr|com|cpl|lnk)$'] },
+    patterns: ['(?i)^(?:(?:.*[\\\\/])?[^\\\\/]+\\.(?:exe|dll|ps1|bat|cmd|vbs|vbe|js|jse|wsf|hta|msi|scr|cpl|lnk)|.*[\\\\/][^\\\\/]+\\.com)$'] },
   application: { label: 'Application', header: 'application',
     patterns: ['^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$'] },
   hash: { label: 'Hash', header: 'hash', patterns: ['^([a-fA-F0-9]{32}|[a-fA-F0-9]{40}|[a-fA-F0-9]{64})$'] },
@@ -634,13 +644,50 @@ const dist = path.join(ROOT, 'dist');
 fs.mkdirSync(dist, { recursive: true });
 const indicatorsOut = Object.fromEntries(Object.entries(INDICATORS).map(([k, v]) => [k, { label: v.label, patterns: v.patterns }]));
 const actionsOut = Object.fromEntries(Object.entries(ACTIONS).map(([k, v]) => [k, { label: v.label }]));
+
+  ////////////////////////////////////////////////////
+ // 2d : formatVersion + locations publiés          //
+////////////////////////////////////////////////////
+
+// `formatVersion` DOIT rester 1. core/catalog-validate.ts (userscript) traite toute autre valeur
+// comme une erreur BLOQUANTE : publier 2 ferait rejeter le catalogue par TOUS les userscripts déjà
+// déployés, qui ne se mettent à jour que via Tampermonkey. Pour passer un jour à 2 : élargir d'abord
+// SUPPORTED_FORMAT_VERSION dans le script, publier le script, attendre son déploiement, et seulement
+// après bumper ici. Jamais l'inverse.
+const FORMAT_VERSION = 1;
+
+// locations : indicators/<type>/locations.yml, deux listes ORDONNÉES (confirmed puis uncertain).
+// L'ordre est significatif (décision du 22/10) : pour une colonne candidate à plusieurs types, le type
+// qui la liste en `confirmed` doit gagner la présélection. On concatène donc confirmed PUIS uncertain,
+// et c'est cet ordre que `core/detection.ts` (3a) lit — INDICATOR_PRIORITY ne sert plus qu'au repli regex.
+function loadLocations() {
+  const out = {};
+  for (const type of Object.keys(INDICATORS)) {
+    const file = path.join(ROOT, 'indicators', type, 'locations.yml');
+    if (!fs.existsSync(file)) continue;
+    const doc = yaml.load(fs.readFileSync(file, 'utf8')) || {};
+    const pairs = [...(doc.confirmed || []), ...(doc.uncertain || [])]
+      .filter((k) => typeof k === 'string')
+      // Garde-fou de dernier recours : une table _CL ne doit jamais sortir du dépôt (règle 2), et une
+      // paire mal formée casserait la détection côté script.
+      .filter((k) => /^[A-Za-z0-9_]+\.[A-Za-z0-9_]+$/.test(k) && !/_CL\./i.test(k));
+    const seen = new Set();
+    const ordered = pairs.filter((k) => !seen.has(k) && seen.add(k)); // dédoublonne en gardant l'ordre
+    if (ordered.length) out[type] = ordered;
+  }
+  return out;
+}
+const locationsOut = loadLocations();
+
 const full = {
   name: pkg.name,
   version: pkg.version,
+  formatVersion: FORMAT_VERSION,
   generatedAt: new Date().toISOString(),
   placeholders: PLACEHOLDERS,
   indicators: indicatorsOut,
   actions: actionsOut,
+  locations: locationsOut,
   sources: Object.fromEntries(Object.entries(SOURCES).map(([k, v]) => [k, { label: v.label, tables: v.tables, hint: v.hint,
     ...(v.optional ? { optional: true } : {}),
     members: v.members.map((m) => ({ source: m.key, table: m.table, ...(m.filter ? { filter: m.filter } : {}), ...(m.hint ? { hint: m.hint } : {}) })) }])),

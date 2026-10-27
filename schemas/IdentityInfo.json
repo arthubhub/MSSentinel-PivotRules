@@ -1,0 +1,181 @@
+{
+  "table": "IdentityInfo",
+  "fields": [
+    {
+      "name": "AccountCreationTime",
+      "type": "datetime"
+    },
+    {
+      "name": "AccountDisplayName",
+      "type": "string"
+    },
+    {
+      "name": "AccountDomain",
+      "type": "string"
+    },
+    {
+      "name": "AccountName",
+      "type": "string"
+    },
+    {
+      "name": "AccountObjectId",
+      "type": "string"
+    },
+    {
+      "name": "AccountSID",
+      "type": "string"
+    },
+    {
+      "name": "AccountTenantId",
+      "type": "string"
+    },
+    {
+      "name": "AccountUPN",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalMailAddresses",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalMailAddresses.[]",
+      "type": "string"
+    },
+    {
+      "name": "AssignedRoles",
+      "type": "object"
+    },
+    {
+      "name": "AssignedRoles.[]",
+      "type": "string"
+    },
+    {
+      "name": "BlastRadius",
+      "type": "string"
+    },
+    {
+      "name": "ChangeSource",
+      "type": "string"
+    },
+    {
+      "name": "City",
+      "type": "string"
+    },
+    {
+      "name": "CompanyName",
+      "type": "string"
+    },
+    {
+      "name": "Country",
+      "type": "string"
+    },
+    {
+      "name": "DeletedDateTime",
+      "type": "datetime"
+    },
+    {
+      "name": "Department",
+      "type": "string"
+    },
+    {
+      "name": "EmployeeId",
+      "type": "string"
+    },
+    {
+      "name": "GivenName",
+      "type": "string"
+    },
+    {
+      "name": "GroupMembership",
+      "type": "object"
+    },
+    {
+      "name": "GroupMembership.[]",
+      "type": "string"
+    },
+    {
+      "name": "IsAccountEnabled",
+      "type": "bool"
+    },
+    {
+      "name": "JobTitle",
+      "type": "string"
+    },
+    {
+      "name": "MailAddress",
+      "type": "string"
+    },
+    {
+      "name": "Manager",
+      "type": "string"
+    },
+    {
+      "name": "OnPremisesAccountObjectId",
+      "type": "string"
+    },
+    {
+      "name": "OnPremisesDistinguishedName",
+      "type": "string"
+    },
+    {
+      "name": "Phone",
+      "type": "string"
+    },
+    {
+      "name": "RiskLevel",
+      "type": "string"
+    },
+    {
+      "name": "RiskState",
+      "type": "string"
+    },
+    {
+      "name": "SAMAccountName",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "State",
+      "type": "string"
+    },
+    {
+      "name": "StreetAddress",
+      "type": "string"
+    },
+    {
+      "name": "Surname",
+      "type": "string"
+    },
+    {
+      "name": "Tags",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "UserAccountControl",
+      "type": "object"
+    },
+    {
+      "name": "UserAccountControl.[]",
+      "type": "string"
+    },
+    {
+      "name": "UserType",
+      "type": "string"
+    }
+  ]
+}

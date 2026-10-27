@@ -1,0 +1,321 @@
+{
+  "table": "AppTraces",
+  "fields": [
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "AppRoleInstance",
+      "type": "string"
+    },
+    {
+      "name": "AppRoleName",
+      "type": "string"
+    },
+    {
+      "name": "ClientBrowser",
+      "type": "string"
+    },
+    {
+      "name": "ClientCity",
+      "type": "string"
+    },
+    {
+      "name": "ClientCountryOrRegion",
+      "type": "string"
+    },
+    {
+      "name": "ClientIP",
+      "type": "string"
+    },
+    {
+      "name": "ClientModel",
+      "type": "string"
+    },
+    {
+      "name": "ClientOS",
+      "type": "string"
+    },
+    {
+      "name": "ClientStateOrProvince",
+      "type": "string"
+    },
+    {
+      "name": "ClientType",
+      "type": "string"
+    },
+    {
+      "name": "IKey",
+      "type": "string"
+    },
+    {
+      "name": "ItemCount",
+      "type": "long"
+    },
+    {
+      "name": "Message",
+      "type": "string"
+    },
+    {
+      "name": "OperationId",
+      "type": "string"
+    },
+    {
+      "name": "OperationName",
+      "type": "string"
+    },
+    {
+      "name": "ParentId",
+      "type": "string"
+    },
+    {
+      "name": "Properties",
+      "type": "object"
+    },
+    {
+      "name": "Properties.Category",
+      "type": "string"
+    },
+    {
+      "name": "Properties.CategoryName",
+      "type": "string"
+    },
+    {
+      "name": "Properties.EventId",
+      "type": "string"
+    },
+    {
+      "name": "Properties.EventName",
+      "type": "string"
+    },
+    {
+      "name": "Properties.HostInstanceId",
+      "type": "guid"
+    },
+    {
+      "name": "Properties.InvocationId",
+      "type": "guid"
+    },
+    {
+      "name": "Properties.logger_name",
+      "type": "string"
+    },
+    {
+      "name": "Properties.LogLevel",
+      "type": "string"
+    },
+    {
+      "name": "Properties.ProcessId",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__aggregateCpuLoad",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__appDomainId",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__attemptCount",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__AuthenticationScheme",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__avgCpuLoad",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__count",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__currentVersion",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__executionDuration",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__extensionVersion",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__formattedCpuLoadHistory",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__functionName",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__hostId",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__hostInitializationSettings",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__id",
+      "type": "guid"
+    },
+    {
+      "name": "Properties.prop__inDebugMode",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__inDiagnosticMode",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__instanceId",
+      "type": "guid"
+    },
+    {
+      "name": "Properties.prop__interval",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__invocationId",
+      "type": "guid"
+    },
+    {
+      "name": "Properties.prop__InvocationId",
+      "type": "guid"
+    },
+    {
+      "name": "Properties.prop__lastInvoke",
+      "type": "datetime"
+    },
+    {
+      "name": "Properties.prop__lastUpdated",
+      "type": "datetime"
+    },
+    {
+      "name": "Properties.prop__listenerName",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__maxCpuLoad",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__ms",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__nextInvoke",
+      "type": "datetime"
+    },
+    {
+      "name": "Properties.prop__occurrences",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__operationId",
+      "type": "guid"
+    },
+    {
+      "name": "Properties.prop__pid",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__processId",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__provider",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__reason",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__schedule",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__ScheduleStatus",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__startCount",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__status",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__StatusCode",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__timeZone",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__version",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__websiteInstanceId",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__workerChannelId",
+      "type": "guid"
+    },
+    {
+      "name": "Properties.prop__workerId",
+      "type": "guid"
+    },
+    {
+      "name": "Properties.prop__workerRuntime",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__{OriginalFormat}",
+      "type": "string"
+    },
+    {
+      "name": "ResourceGUID",
+      "type": "string"
+    },
+    {
+      "name": "SDKVersion",
+      "type": "string"
+    },
+    {
+      "name": "SeverityLevel",
+      "type": "long"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "SyntheticSource",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

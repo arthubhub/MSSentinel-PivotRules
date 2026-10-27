@@ -1,0 +1,105 @@
+{
+  "table": "SecurityBaselineSummary",
+  "fields": [
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "AssessmentId",
+      "type": "string"
+    },
+    {
+      "name": "BaselineId",
+      "type": "string"
+    },
+    {
+      "name": "BaselineType",
+      "type": "string"
+    },
+    {
+      "name": "Computer",
+      "type": "string"
+    },
+    {
+      "name": "ComputerEnvironment",
+      "type": "string"
+    },
+    {
+      "name": "CriticalFailedRules",
+      "type": "long"
+    },
+    {
+      "name": "InformationalFailedRules",
+      "type": "long"
+    },
+    {
+      "name": "ManagementGroupName",
+      "type": "string"
+    },
+    {
+      "name": "MG",
+      "type": "string"
+    },
+    {
+      "name": "OSName",
+      "type": "string"
+    },
+    {
+      "name": "PercentageOfPassedRules",
+      "type": "long"
+    },
+    {
+      "name": "Resource",
+      "type": "string"
+    },
+    {
+      "name": "ResourceGroup",
+      "type": "string"
+    },
+    {
+      "name": "ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "ResourceProvider",
+      "type": "string"
+    },
+    {
+      "name": "ResourceType",
+      "type": "string"
+    },
+    {
+      "name": "SourceComputerId",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "SubscriptionId",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "TotalAssessedRules",
+      "type": "long"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "WarningFailedRules",
+      "type": "long"
+    }
+  ]
+}

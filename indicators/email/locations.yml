@@ -1,0 +1,53 @@
+# locations.yml — email
+# Généré par scripts/generate-locations.mjs (#31). NE PAS ÉDITER À LA MAIN : relancer le script.
+# Paires "Table.Colonne" où ce type d'indicateur peut apparaître.
+#   confirmed : signal fort — comparaison dans une règle existante, ou table Entity Defender.
+#   uncertain : signal faible — motif de nom de colonne. Publié quand même (décision du 23/10) :
+#               aide à la présélection, et l'analyste peut toujours changer de type dans le panneau.
+# L'ORDRE COMPTE : confirmed avant uncertain. Pour une colonne candidate à plusieurs types, le type
+# qui la liste en confirmed gagne la présélection (décision 2 : cet ordre prime sur INDICATOR_PRIORITY).
+# 18 confirmée(s), 24 incertaine(s). Publication dans pivot-rules.json : en 2d.
+confirmed:
+  - AADNonInteractiveUserSignInLogs.UserPrincipalName
+  - AlertEvidence.AccountUpn
+  - DeviceNetworkEvents.InitiatingProcessAccountUpn
+  - DeviceProcessEvents.AccountUpn
+  - EmailAttachmentInfo.RecipientEmailAddress
+  - EmailAttachmentInfo.SenderFromAddress
+  - EmailEvents.RecipientEmailAddress
+  - EmailEvents.SenderFromAddress
+  - EmailEvents.SenderMailFromAddress
+  - EmailPostDeliveryEvents.RecipientEmailAddress
+  - EmailPostDeliveryEvents.SenderFromAddress
+  - IdentityDirectoryEvents.AccountUpn
+  - IdentityLogonEvents.AccountUpn
+  - IdentityQueryEvents.AccountUpn
+  - MessageEvents.SenderEmailAddress
+  - OfficeActivity.UserId
+  - SigninLogs.UserPrincipalName
+  - UrlClickEvents.AccountUpn
+uncertain:
+  - AlertEvidence.EmailSubject
+  - CloudAppEvents.RawEventData
+  - EmailEvents.EmailAction
+  - EmailEvents.EmailActionPolicy
+  - EmailEvents.EmailActionPolicyGuid
+  - EmailEvents.EmailClusterId
+  - EmailEvents.EmailDirection
+  - EmailEvents.EmailLanguage
+  - EmailEvents.EmailSize
+  - GCPAuditLogs.PrincipalEmail
+  - IdentityInfo.MailAddress
+  - LAQueryLogs.AADEmail
+  - MessageEvents.RecipientDetails
+  - MicrosoftPurviewInformationProtection.EmailInfo
+  - OfficeActivity.Members
+  - ThreatIntelligenceIndicator.EmailEncoding
+  - ThreatIntelligenceIndicator.EmailLanguage
+  - ThreatIntelligenceIndicator.EmailRecipient
+  - ThreatIntelligenceIndicator.EmailSenderAddress
+  - ThreatIntelligenceIndicator.EmailSenderName
+  - ThreatIntelligenceIndicator.EmailSourceDomain
+  - ThreatIntelligenceIndicator.EmailSourceIpAddress
+  - ThreatIntelligenceIndicator.EmailSubject
+  - ThreatIntelligenceIndicator.EmailXMailer

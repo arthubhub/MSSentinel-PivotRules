@@ -1,0 +1,49 @@
+{
+  "table": "IntuneAuditLogs",
+  "fields": [
+    {
+      "name": "Category",
+      "type": "string"
+    },
+    {
+      "name": "CorrelationId",
+      "type": "string"
+    },
+    {
+      "name": "Identity",
+      "type": "string"
+    },
+    {
+      "name": "OperationName",
+      "type": "string"
+    },
+    {
+      "name": "Properties",
+      "type": "string"
+    },
+    {
+      "name": "ResultDescription",
+      "type": "string"
+    },
+    {
+      "name": "ResultType",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

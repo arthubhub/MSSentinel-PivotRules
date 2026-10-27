@@ -1,0 +1,93 @@
+{
+  "table": "DeviceFileCertificateInfo",
+  "fields": [
+    {
+      "name": "CertificateCountersignatureTime",
+      "type": "datetime"
+    },
+    {
+      "name": "CertificateCreationTime",
+      "type": "datetime"
+    },
+    {
+      "name": "CertificateExpirationTime",
+      "type": "datetime"
+    },
+    {
+      "name": "CertificateSerialNumber",
+      "type": "string"
+    },
+    {
+      "name": "CrlDistributionPointUrls",
+      "type": "string"
+    },
+    {
+      "name": "DeviceId",
+      "type": "string"
+    },
+    {
+      "name": "DeviceName",
+      "type": "string"
+    },
+    {
+      "name": "IsRootSignerMicrosoft",
+      "type": "bool"
+    },
+    {
+      "name": "IsSigned",
+      "type": "bool"
+    },
+    {
+      "name": "Issuer",
+      "type": "string"
+    },
+    {
+      "name": "IssuerHash",
+      "type": "string"
+    },
+    {
+      "name": "IsTrusted",
+      "type": "bool"
+    },
+    {
+      "name": "MachineGroup",
+      "type": "string"
+    },
+    {
+      "name": "ReportId",
+      "type": "long"
+    },
+    {
+      "name": "SHA1",
+      "type": "string"
+    },
+    {
+      "name": "SignatureType",
+      "type": "string"
+    },
+    {
+      "name": "Signer",
+      "type": "string"
+    },
+    {
+      "name": "SignerHash",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Timestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

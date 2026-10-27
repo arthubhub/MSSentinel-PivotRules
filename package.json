@@ -3,10 +3,12 @@
   "version": "0.2.0",
   "description": "Règles de pivot KQL (Statistics, Pivot, Timeline) pour Microsoft Sentinel et Defender XDR, compilées de YAML vers JSON pour l’userscript.",
   "scripts": {
-    "build": "node scripts/build.mjs",
-    "check": "node scripts/build.mjs --check",
-    "test": "node scripts/build.mjs --strict && node scripts/test.mjs",
+    "build": "node scripts/check-schemas.mjs && node scripts/build.mjs",
+    "check": "node scripts/check-schemas.mjs && node scripts/build.mjs --check",
+    "test": "node scripts/check-schemas.mjs && node scripts/build.mjs --strict && node scripts/test.mjs",
     "update-schemas": "node scripts/update-schemas.mjs",
+    "import-schemas": "node scripts/import-schemas.mjs",
+    "generate-locations": "node scripts/generate-locations.mjs",
     "generate:win-security": "node scripts/generate-win-security.mjs"
   },
   "license": "MIT",

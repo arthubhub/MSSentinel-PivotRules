@@ -1,0 +1,1945 @@
+{
+  "table": "WindowsEvent",
+  "fields": [
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "Channel",
+      "type": "string"
+    },
+    {
+      "name": "Computer",
+      "type": "string"
+    },
+    {
+      "name": "Correlation",
+      "type": "string"
+    },
+    {
+      "name": "EventData",
+      "type": "object"
+    },
+    {
+      "name": "EventData.01",
+      "type": "array"
+    },
+    {
+      "name": "EventData.02",
+      "type": "string"
+    },
+    {
+      "name": "EventData.03",
+      "type": "string"
+    },
+    {
+      "name": "EventData.04",
+      "type": "string"
+    },
+    {
+      "name": "EventData.05",
+      "type": "string"
+    },
+    {
+      "name": "EventData.06",
+      "type": "string"
+    },
+    {
+      "name": "EventData.07",
+      "type": "string"
+    },
+    {
+      "name": "EventData.08",
+      "type": "array"
+    },
+    {
+      "name": "EventData.09",
+      "type": "string"
+    },
+    {
+      "name": "EventData.10",
+      "type": "string"
+    },
+    {
+      "name": "EventData.11",
+      "type": "string"
+    },
+    {
+      "name": "EventData.12",
+      "type": "string"
+    },
+    {
+      "name": "EventData.13",
+      "type": "string"
+    },
+    {
+      "name": "EventData.14",
+      "type": "string"
+    },
+    {
+      "name": "EventData.15",
+      "type": "string"
+    },
+    {
+      "name": "EventData.16",
+      "type": "string"
+    },
+    {
+      "name": "EventData.17",
+      "type": "string"
+    },
+    {
+      "name": "EventData.18",
+      "type": "string"
+    },
+    {
+      "name": "EventData.19",
+      "type": "string"
+    },
+    {
+      "name": "EventData.20",
+      "type": "guid"
+    },
+    {
+      "name": "EventData.21",
+      "type": "string"
+    },
+    {
+      "name": "EventData.22",
+      "type": "string"
+    },
+    {
+      "name": "EventData.23",
+      "type": "string"
+    },
+    {
+      "name": "EventData.24",
+      "type": "string"
+    },
+    {
+      "name": "EventData.25",
+      "type": "string"
+    },
+    {
+      "name": "EventData.26",
+      "type": "string"
+    },
+    {
+      "name": "EventData.27",
+      "type": "string"
+    },
+    {
+      "name": "EventData.28",
+      "type": "string"
+    },
+    {
+      "name": "EventData.29",
+      "type": "string"
+    },
+    {
+      "name": "EventData.30",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AccessList",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AccessMask",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AccessReason",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AccountAvailableKeys",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AccountDomain",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AccountExpires",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AccountName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AccountSessionIdentifier",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AccountSupportedEncryptionTypes",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ActionName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AdapterName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AdapterSerialNumber",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AdapterSerialNumberLength",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AdapterSuffixName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AdditionalInfo",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AdditionalInfo2",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Address",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AlertDesc",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AlgorithmName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AllowedToDelegateTo",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AnalysisSymbol",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AppCorrelationID",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Application",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AppName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AppPath",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AppPoolID",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AppTimeStamp",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AppType",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AppVersion",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AttachedFiles",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AttributeLDAPDisplayName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AttributeSyntaxOID",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AttributeValue",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AuditPolicyChanges",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AuditSourceName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AuthenticationPackageName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AuthenticationProvider",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AuthenticationServer",
+      "type": "string"
+    },
+    {
+      "name": "EventData.AuthenticationType",
+      "type": "string"
+    },
+    {
+      "name": "EventData.BackupPath",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Binary",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Bucket",
+      "type": "string"
+    },
+    {
+      "name": "EventData.BucketType",
+      "type": "string"
+    },
+    {
+      "name": "EventData.BusType",
+      "type": "string"
+    },
+    {
+      "name": "EventData.bytesTotal",
+      "type": "string"
+    },
+    {
+      "name": "EventData.bytesTransferred",
+      "type": "string"
+    },
+    {
+      "name": "EventData.bytesTransferredFromPeer",
+      "type": "string"
+    },
+    {
+      "name": "EventData.CabGuid",
+      "type": "string"
+    },
+    {
+      "name": "EventData.CabId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.CalledStationID",
+      "type": "string"
+    },
+    {
+      "name": "EventData.CallerPID",
+      "type": "string"
+    },
+    {
+      "name": "EventData.CallerProcessId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.CallerProcessImageName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.CallerProcessName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.CallingProcessCreateTime",
+      "type": "datetime"
+    },
+    {
+      "name": "EventData.CallingProcessId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.CallingProcessProtection",
+      "type": "string"
+    },
+    {
+      "name": "EventData.CallingProcessSectionSignatureLevel",
+      "type": "string"
+    },
+    {
+      "name": "EventData.CallingProcessSignatureLevel",
+      "type": "string"
+    },
+    {
+      "name": "EventData.CallingProcessStartKey",
+      "type": "string"
+    },
+    {
+      "name": "EventData.CallingStationID",
+      "type": "string"
+    },
+    {
+      "name": "EventData.CallingThreadCreateTime",
+      "type": "datetime"
+    },
+    {
+      "name": "EventData.CallingThreadId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Caption",
+      "type": "string"
+    },
+    {
+      "name": "EventData.CategoryId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.CertIssuerName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.CertSerialNumber",
+      "type": "string"
+    },
+    {
+      "name": "EventData.CertThumbprint",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Channel",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ChildCommandLine",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ChildCommandLineLength",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ChildImagePathName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ChildImagePathNameLength",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ClientAddress",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ClientAdvertizedEncryptionTypes",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ClientCreationTime",
+      "type": "datetime"
+    },
+    {
+      "name": "EventData.ClientDomainName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ClientIPAddress",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ClientLUID",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ClientName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ClientProcessId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ClientProcessStartKey",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ClientUserName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.CommandLine",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ComputerAccountChange",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Context",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ContextInfo",
+      "type": "string"
+    },
+    {
+      "name": "EventData.CorruptionActionState",
+      "type": "string"
+    },
+    {
+      "name": "EventData.CountOfCredentialsReturned",
+      "type": "string"
+    },
+    {
+      "name": "EventData.CryptoAlgorithms",
+      "type": "string"
+    },
+    {
+      "name": "EventData.CurrentProfile",
+      "type": "string"
+    },
+    {
+      "name": "EventData.DataDescription",
+      "type": "guid"
+    },
+    {
+      "name": "EventData.DCAvailableKeys",
+      "type": "string"
+    },
+    {
+      "name": "EventData.DCName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.DCSupportedEncryptionTypes",
+      "type": "string"
+    },
+    {
+      "name": "EventData.DestAddress",
+      "type": "string"
+    },
+    {
+      "name": "EventData.DestinationDRA",
+      "type": "string"
+    },
+    {
+      "name": "EventData.DestPort",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Detail",
+      "type": "string"
+    },
+    {
+      "name": "EventData.DeviceGuid",
+      "type": "string"
+    },
+    {
+      "name": "EventData.DeviceName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.DeviceNameLength",
+      "type": "string"
+    },
+    {
+      "name": "EventData.DeviceSerialNumber",
+      "type": "string"
+    },
+    {
+      "name": "EventData.DeviceSerialNumberLength",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Direction",
+      "type": "string"
+    },
+    {
+      "name": "EventData.DirtyPages",
+      "type": "string"
+    },
+    {
+      "name": "EventData.DisplayName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.DnsHostName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.DnsServerList",
+      "type": "string"
+    },
+    {
+      "name": "EventData.DomainName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.DriveName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.DSName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.DSType",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Dummy",
+      "type": "string"
+    },
+    {
+      "name": "EventData.EAPType",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ElevatedToken",
+      "type": "string"
+    },
+    {
+      "name": "EventData.EndUSN",
+      "type": "string"
+    },
+    {
+      "name": "EventData.EnginePID",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Error",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ErrorCode",
+      "type": "string"
+    },
+    {
+      "name": "EventData.errorCode",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ErrorDescription",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ErrorMessage",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ErrorState",
+      "type": "string"
+    },
+    {
+      "name": "EventData.EventCountTotal",
+      "type": "string"
+    },
+    {
+      "name": "EventData.EventIdx",
+      "type": "string"
+    },
+    {
+      "name": "EventData.EventName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.EventSourceId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ExceptionCode",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ExtensionId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ExtensionName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.FailureReason",
+      "type": "string"
+    },
+    {
+      "name": "EventData.FaultingOffset",
+      "type": "string"
+    },
+    {
+      "name": "EventData.fileLength",
+      "type": "string"
+    },
+    {
+      "name": "EventData.fileTime",
+      "type": "datetime"
+    },
+    {
+      "name": "EventData.FilterOrigin",
+      "type": "string"
+    },
+    {
+      "name": "EventData.FilterRTID",
+      "type": "string"
+    },
+    {
+      "name": "EventData.FQDN",
+      "type": "string"
+    },
+    {
+      "name": "EventData.FullPath",
+      "type": "string"
+    },
+    {
+      "name": "EventData.FullyQualifiedSubjectMachineName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.FullyQualifiedSubjectUserName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.GroupMembership",
+      "type": "string"
+    },
+    {
+      "name": "EventData.HandleId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.HashedBucket",
+      "type": "string"
+    },
+    {
+      "name": "EventData.HasRemoteDynamicKeywordAddress",
+      "type": "string"
+    },
+    {
+      "name": "EventData.HiveName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.HiveNameLength",
+      "type": "string"
+    },
+    {
+      "name": "EventData.HomeDirectory",
+      "type": "string"
+    },
+    {
+      "name": "EventData.HomePath",
+      "type": "string"
+    },
+    {
+      "name": "EventData.HostName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Id",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ImageName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ImageNameLength",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ImagePath",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ImpersonationLevel",
+      "type": "string"
+    },
+    {
+      "name": "EventData.InstanceId",
+      "type": "guid"
+    },
+    {
+      "name": "EventData.IntegratorReportId",
+      "type": "guid"
+    },
+    {
+      "name": "EventData.InterfaceIndex",
+      "type": "string"
+    },
+    {
+      "name": "EventData.IpAddress",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Ipaddress",
+      "type": "string"
+    },
+    {
+      "name": "EventData.IpPort",
+      "type": "string"
+    },
+    {
+      "name": "EventData.IsLoopback",
+      "type": "string"
+    },
+    {
+      "name": "EventData.jobId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.jobOwner",
+      "type": "string"
+    },
+    {
+      "name": "EventData.jobTitle",
+      "type": "string"
+    },
+    {
+      "name": "EventData.KeyFilePath",
+      "type": "string"
+    },
+    {
+      "name": "EventData.KeyLength",
+      "type": "string"
+    },
+    {
+      "name": "EventData.KeyName",
+      "type": "array"
+    },
+    {
+      "name": "EventData.KeysUpdated",
+      "type": "string"
+    },
+    {
+      "name": "EventData.KeyType",
+      "type": "string"
+    },
+    {
+      "name": "EventData.LayerName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.LayerRTID",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Library",
+      "type": "string"
+    },
+    {
+      "name": "EventData.LmPackageName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.LoggingResult",
+      "type": "string"
+    },
+    {
+      "name": "EventData.LogonGuid",
+      "type": "string"
+    },
+    {
+      "name": "EventData.LogonHours",
+      "type": "string"
+    },
+    {
+      "name": "EventData.LogonID",
+      "type": "string"
+    },
+    {
+      "name": "EventData.LogonProcessName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.LogonType",
+      "type": "string"
+    },
+    {
+      "name": "EventData.MandatoryLabel",
+      "type": "string"
+    },
+    {
+      "name": "EventData.MasterKeyId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.MaxRunspaces",
+      "type": "string"
+    },
+    {
+      "name": "EventData.MechanismOID",
+      "type": "string"
+    },
+    {
+      "name": "EventData.MemberName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.MemberSid",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Message",
+      "type": "string"
+    },
+    {
+      "name": "EventData.MessageNumber",
+      "type": "string"
+    },
+    {
+      "name": "EventData.MessageTotal",
+      "type": "string"
+    },
+    {
+      "name": "EventData.MinRunspaces",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Minutes",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ModuleName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ModulePath",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ModuleTimeStamp",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ModuleVersion",
+      "type": "string"
+    },
+    {
+      "name": "EventData.name",
+      "type": "string"
+    },
+    {
+      "name": "EventData.NamingContext",
+      "type": "string"
+    },
+    {
+      "name": "EventData.NASIdentifier",
+      "type": "string"
+    },
+    {
+      "name": "EventData.NASIPv4Address",
+      "type": "string"
+    },
+    {
+      "name": "EventData.NASIPv6Address",
+      "type": "string"
+    },
+    {
+      "name": "EventData.NASPort",
+      "type": "string"
+    },
+    {
+      "name": "EventData.NASPortType",
+      "type": "string"
+    },
+    {
+      "name": "EventData.NetworkPolicyName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.New Value",
+      "type": "string"
+    },
+    {
+      "name": "EventData.NewMaxUsers",
+      "type": "string"
+    },
+    {
+      "name": "EventData.NewProcessId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.NewProcessName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.NewRemark",
+      "type": "string"
+    },
+    {
+      "name": "EventData.NewSd",
+      "type": "string"
+    },
+    {
+      "name": "EventData.NewSD",
+      "type": "string"
+    },
+    {
+      "name": "EventData.NewShareFlags",
+      "type": "string"
+    },
+    {
+      "name": "EventData.NewState",
+      "type": "string"
+    },
+    {
+      "name": "EventData.NewTime",
+      "type": "datetime"
+    },
+    {
+      "name": "EventData.NewUacValue",
+      "type": "string"
+    },
+    {
+      "name": "EventData.NTSTATUS",
+      "type": "string"
+    },
+    {
+      "name": "EventData.NumberOfGroupPolicyObjects",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ObjectClass",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ObjectDN",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ObjectGUID",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ObjectName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ObjectServer",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ObjectType",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ObjId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Old Value",
+      "type": "string"
+    },
+    {
+      "name": "EventData.OldMaxUsers",
+      "type": "string"
+    },
+    {
+      "name": "EventData.OldRemark",
+      "type": "string"
+    },
+    {
+      "name": "EventData.OldSd",
+      "type": "string"
+    },
+    {
+      "name": "EventData.OldSD",
+      "type": "string"
+    },
+    {
+      "name": "EventData.OldShareFlags",
+      "type": "string"
+    },
+    {
+      "name": "EventData.OldUacValue",
+      "type": "string"
+    },
+    {
+      "name": "EventData.OpCorrelationID",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Operation",
+      "type": "string"
+    },
+    {
+      "name": "EventData.operationName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.OperationType",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Options",
+      "type": "string"
+    },
+    {
+      "name": "EventData.OriginalProfile",
+      "type": "string"
+    },
+    {
+      "name": "EventData.P1",
+      "type": "string"
+    },
+    {
+      "name": "EventData.P10",
+      "type": "string"
+    },
+    {
+      "name": "EventData.P2",
+      "type": "string"
+    },
+    {
+      "name": "EventData.P3",
+      "type": "string"
+    },
+    {
+      "name": "EventData.P4",
+      "type": "string"
+    },
+    {
+      "name": "EventData.P5",
+      "type": "string"
+    },
+    {
+      "name": "EventData.P6",
+      "type": "string"
+    },
+    {
+      "name": "EventData.P7",
+      "type": "string"
+    },
+    {
+      "name": "EventData.P8",
+      "type": "string"
+    },
+    {
+      "name": "EventData.P9",
+      "type": "string"
+    },
+    {
+      "name": "EventData.PackageFullName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.PackageName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.PackageRelativeAppId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.param1",
+      "type": "string"
+    },
+    {
+      "name": "EventData.param10",
+      "type": "string"
+    },
+    {
+      "name": "EventData.param11",
+      "type": "string"
+    },
+    {
+      "name": "EventData.param2",
+      "type": "string"
+    },
+    {
+      "name": "EventData.param3",
+      "type": "string"
+    },
+    {
+      "name": "EventData.param4",
+      "type": "string"
+    },
+    {
+      "name": "EventData.param5",
+      "type": "string"
+    },
+    {
+      "name": "EventData.param6",
+      "type": "string"
+    },
+    {
+      "name": "EventData.param7",
+      "type": "string"
+    },
+    {
+      "name": "EventData.param8",
+      "type": "string"
+    },
+    {
+      "name": "EventData.param9",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ParentProcessId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ParentProcessName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.PasswordLastSet",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Path",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Payload",
+      "type": "string"
+    },
+    {
+      "name": "EventData.peer",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Pid",
+      "type": "string"
+    },
+    {
+      "name": "EventData.PreAuthEncryptionType",
+      "type": "string"
+    },
+    {
+      "name": "EventData.PreAuthType",
+      "type": "string"
+    },
+    {
+      "name": "EventData.PreviousTime",
+      "type": "datetime"
+    },
+    {
+      "name": "EventData.PrimaryGroupId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Priority",
+      "type": "string"
+    },
+    {
+      "name": "EventData.PrivilegeList",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ProcessCommandLine",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ProcessCommandLineLength",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ProcessCreateTime",
+      "type": "datetime"
+    },
+    {
+      "name": "EventData.ProcessCreationTime",
+      "type": "datetime"
+    },
+    {
+      "name": "EventData.ProcessID",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ProcessId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.processId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ProcessingMode",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ProcessingTimeInMilliseconds",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ProcessName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ProcessPath",
+      "type": "string"
+    },
+    {
+      "name": "EventData.processPath",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ProcessPathLength",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ProcessProtection",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ProcessSectionSignatureLevel",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ProcessSignatureLevel",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ProcessStartKey",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Product Name",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Product Version",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ProductId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ProductIdLength",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ProductRevision",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ProductRevisionLength",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ProfilePath",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Properties",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ProtectedDataFlags",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Protocol",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ProviderName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ProvidersInHost",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ProxyPolicyName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.QuotaName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.QuotaThreshold",
+      "type": "string"
+    },
+    {
+      "name": "EventData.QuotaValue",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ReadOperation",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Reason",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ReasonCode",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Rechecking",
+      "type": "string"
+    },
+    {
+      "name": "EventData.RelativeTargetName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.RemoteCredentialGuard",
+      "type": "string"
+    },
+    {
+      "name": "EventData.RemoteMachineID",
+      "type": "string"
+    },
+    {
+      "name": "EventData.RemoteUserID",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ReportId",
+      "type": "guid"
+    },
+    {
+      "name": "EventData.ReportStatus",
+      "type": "string"
+    },
+    {
+      "name": "EventData.RequestTicketHash",
+      "type": "string"
+    },
+    {
+      "name": "EventData.RequiredSignatureLevel",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ResourceAttributes",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ResourceManager",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Response",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ResponseTicket",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ResponseTicketHash",
+      "type": "string"
+    },
+    {
+      "name": "EventData.RestrictedAdminMode",
+      "type": "string"
+    },
+    {
+      "name": "EventData.RestrictedSidCount",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ResultCode",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ReturnCode",
+      "type": "string"
+    },
+    {
+      "name": "EventData.RmSessionId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.RpcCallClientLocality",
+      "type": "string"
+    },
+    {
+      "name": "EventData.RunspaceId",
+      "type": "guid"
+    },
+    {
+      "name": "EventData.SamAccountName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ScriptBlockId",
+      "type": "guid"
+    },
+    {
+      "name": "EventData.ScriptBlockText",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ScriptPath",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Sent UpdateServer",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Service",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ServiceAccount",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ServiceAvailableKeys",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ServiceFileName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ServiceName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ServicePrincipalNames",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ServiceSid",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ServiceStartType",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ServiceSupportedEncryptionTypes",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ServiceType",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Session",
+      "type": "string"
+    },
+    {
+      "name": "EventData.SessionID",
+      "type": "string"
+    },
+    {
+      "name": "EventData.SessionId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.SessionKeyEncryptionType",
+      "type": "string"
+    },
+    {
+      "name": "EventData.SessionName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ShareLocalPath",
+      "type": "string"
+    },
+    {
+      "name": "EventData.ShareName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.SidHistory",
+      "type": "string"
+    },
+    {
+      "name": "EventData.SignatureLevel",
+      "type": "string"
+    },
+    {
+      "name": "EventData.SMBShare",
+      "type": "string"
+    },
+    {
+      "name": "EventData.SourceAddr",
+      "type": "string"
+    },
+    {
+      "name": "EventData.SourceAddress",
+      "type": "string"
+    },
+    {
+      "name": "EventData.SourceDRA",
+      "type": "string"
+    },
+    {
+      "name": "EventData.SourceFileID",
+      "type": "string"
+    },
+    {
+      "name": "EventData.SourceHandleId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.SourceLine",
+      "type": "string"
+    },
+    {
+      "name": "EventData.SourcePort",
+      "type": "string"
+    },
+    {
+      "name": "EventData.SourceProcessId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.SourceTag",
+      "type": "string"
+    },
+    {
+      "name": "EventData.StartType",
+      "type": "string"
+    },
+    {
+      "name": "EventData.StartUSN",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Status",
+      "type": "string"
+    },
+    {
+      "name": "EventData.StatusCode",
+      "type": "string"
+    },
+    {
+      "name": "EventData.StorePath",
+      "type": "string"
+    },
+    {
+      "name": "EventData.SubcategoryGuid",
+      "type": "string"
+    },
+    {
+      "name": "EventData.SubcategoryId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.SubjectDomainName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.SubjectLogonId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.SubjectMachineName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.SubjectMachineSID",
+      "type": "string"
+    },
+    {
+      "name": "EventData.SubjectUserName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.SubjectUserSid",
+      "type": "string"
+    },
+    {
+      "name": "EventData.SubscriptionManagerAddress",
+      "type": "string"
+    },
+    {
+      "name": "EventData.SubStatus",
+      "type": "string"
+    },
+    {
+      "name": "EventData.SupportInfo1",
+      "type": "string"
+    },
+    {
+      "name": "EventData.SupportInfo2",
+      "type": "string"
+    },
+    {
+      "name": "EventData.TargetDomainName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.TargetHandleId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.TargetInfo",
+      "type": "string"
+    },
+    {
+      "name": "EventData.TargetLinkedLogonId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.TargetLogonGuid",
+      "type": "string"
+    },
+    {
+      "name": "EventData.TargetLogonId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.TargetName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.TargetOutboundDomainName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.TargetOutboundUserName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.TargetProcessId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.TargetServerName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.TargetSid",
+      "type": "string"
+    },
+    {
+      "name": "EventData.TargetThreadCreateTime",
+      "type": "datetime"
+    },
+    {
+      "name": "EventData.TargetThreadId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.TargetUserName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.TargetUserSid",
+      "type": "string"
+    },
+    {
+      "name": "EventData.TaskContent",
+      "type": "string"
+    },
+    {
+      "name": "EventData.TaskContentNew",
+      "type": "string"
+    },
+    {
+      "name": "EventData.TaskInstanceId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.TaskName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.TicketEncryptionType",
+      "type": "string"
+    },
+    {
+      "name": "EventData.TicketOptions",
+      "type": "string"
+    },
+    {
+      "name": "EventData.TokenElevationType",
+      "type": "string"
+    },
+    {
+      "name": "EventData.TransactionId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.transferId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.TransmittedServices",
+      "type": "string"
+    },
+    {
+      "name": "EventData.TreeDelete",
+      "type": "string"
+    },
+    {
+      "name": "EventData.TSId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.TSSessionId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Type",
+      "type": "string"
+    },
+    {
+      "name": "EventData.url",
+      "type": "string"
+    },
+    {
+      "name": "EventData.User",
+      "type": "string"
+    },
+    {
+      "name": "EventData.UserAccountControl",
+      "type": "string"
+    },
+    {
+      "name": "EventData.UserContext",
+      "type": "string"
+    },
+    {
+      "name": "EventData.UserData",
+      "type": "string"
+    },
+    {
+      "name": "EventData.UserName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.UserParameters",
+      "type": "string"
+    },
+    {
+      "name": "EventData.UserPrincipalName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.UserSid",
+      "type": "string"
+    },
+    {
+      "name": "EventData.UserWorkstations",
+      "type": "string"
+    },
+    {
+      "name": "EventData.UTCStartTime",
+      "type": "datetime"
+    },
+    {
+      "name": "EventData.VendorId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.VendorIdLength",
+      "type": "string"
+    },
+    {
+      "name": "EventData.VirtualAccount",
+      "type": "string"
+    },
+    {
+      "name": "EventData.VolumeId",
+      "type": "string"
+    },
+    {
+      "name": "EventData.VolumeIdLength",
+      "type": "string"
+    },
+    {
+      "name": "EventData.VolumeName",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Win32Error",
+      "type": "string"
+    },
+    {
+      "name": "EventData.Workstation",
+      "type": "string"
+    },
+    {
+      "name": "EventData.WorkstationName",
+      "type": "string"
+    },
+    {
+      "name": "EventID",
+      "type": "long"
+    },
+    {
+      "name": "EventLevel",
+      "type": "long"
+    },
+    {
+      "name": "EventLevelName",
+      "type": "string"
+    },
+    {
+      "name": "EventOriginId",
+      "type": "string"
+    },
+    {
+      "name": "EventRecordId",
+      "type": "string"
+    },
+    {
+      "name": "Keywords",
+      "type": "string"
+    },
+    {
+      "name": "ManagementGroupName",
+      "type": "string"
+    },
+    {
+      "name": "Opcode",
+      "type": "string"
+    },
+    {
+      "name": "Provider",
+      "type": "string"
+    },
+    {
+      "name": "RawEventData",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "SystemProcessId",
+      "type": "long"
+    },
+    {
+      "name": "SystemThreadId",
+      "type": "long"
+    },
+    {
+      "name": "SystemUserId",
+      "type": "string"
+    },
+    {
+      "name": "Task",
+      "type": "long"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "Version",
+      "type": "long"
+    }
+  ]
+}

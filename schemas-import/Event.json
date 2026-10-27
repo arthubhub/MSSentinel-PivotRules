@@ -1,0 +1,77 @@
+{
+  "table": "Event",
+  "fields": [
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "Computer",
+      "type": "string"
+    },
+    {
+      "name": "EventCategory",
+      "type": "long"
+    },
+    {
+      "name": "EventData",
+      "type": "string"
+    },
+    {
+      "name": "EventID",
+      "type": "long"
+    },
+    {
+      "name": "EventLevel",
+      "type": "long"
+    },
+    {
+      "name": "EventLevelName",
+      "type": "string"
+    },
+    {
+      "name": "EventLog",
+      "type": "string"
+    },
+    {
+      "name": "ManagementGroupName",
+      "type": "string"
+    },
+    {
+      "name": "MG",
+      "type": "string"
+    },
+    {
+      "name": "ParameterXml",
+      "type": "string"
+    },
+    {
+      "name": "RenderedDescription",
+      "type": "string"
+    },
+    {
+      "name": "Source",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "UserName",
+      "type": "string"
+    }
+  ]
+}

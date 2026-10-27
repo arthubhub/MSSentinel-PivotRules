@@ -1,0 +1,153 @@
+{
+  "table": "MDCDetectionDNSEvents",
+  "fields": [
+    {
+      "name": "AdditionalData",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalData.CloudNativeIdentifiers",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalData.CloudNativeIdentifiers.clusterDistribution",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalData.PktType",
+      "type": "string"
+    },
+    {
+      "name": "Addresses",
+      "type": "object"
+    },
+    {
+      "name": "Addresses.[]",
+      "type": "string"
+    },
+    {
+      "name": "AzureResourceId",
+      "type": "string"
+    },
+    {
+      "name": "Comm",
+      "type": "string"
+    },
+    {
+      "name": "ContainerId",
+      "type": "string"
+    },
+    {
+      "name": "ContainerName",
+      "type": "string"
+    },
+    {
+      "name": "DataPipelineMetadata",
+      "type": "object"
+    },
+    {
+      "name": "DataPipelineMetadata.OdsReceiveTimeUtc",
+      "type": "datetime"
+    },
+    {
+      "name": "DataPipelineMetadata.WorkspaceAzureResourceId",
+      "type": "string"
+    },
+    {
+      "name": "DataPipelineMetadata.WorkspaceId",
+      "type": "guid"
+    },
+    {
+      "name": "Digest",
+      "type": "string"
+    },
+    {
+      "name": "Domain",
+      "type": "string"
+    },
+    {
+      "name": "EventGuid",
+      "type": "string"
+    },
+    {
+      "name": "Gid",
+      "type": "string"
+    },
+    {
+      "name": "ImageName",
+      "type": "string"
+    },
+    {
+      "name": "Latency",
+      "type": "string"
+    },
+    {
+      "name": "NameServer",
+      "type": "string"
+    },
+    {
+      "name": "Namespace",
+      "type": "string"
+    },
+    {
+      "name": "NodeName",
+      "type": "string"
+    },
+    {
+      "name": "PacketId",
+      "type": "string"
+    },
+    {
+      "name": "Pcomm",
+      "type": "string"
+    },
+    {
+      "name": "PID",
+      "type": "string"
+    },
+    {
+      "name": "PodName",
+      "type": "string"
+    },
+    {
+      "name": "Ppid",
+      "type": "string"
+    },
+    {
+      "name": "QR",
+      "type": "string"
+    },
+    {
+      "name": "Qtype",
+      "type": "string"
+    },
+    {
+      "name": "Rcode",
+      "type": "string"
+    },
+    {
+      "name": "Region",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "Tid",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "Uid",
+      "type": "string"
+    }
+  ]
+}

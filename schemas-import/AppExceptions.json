@@ -1,0 +1,297 @@
+{
+  "table": "AppExceptions",
+  "fields": [
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "AppRoleInstance",
+      "type": "string"
+    },
+    {
+      "name": "AppRoleName",
+      "type": "string"
+    },
+    {
+      "name": "Assembly",
+      "type": "string"
+    },
+    {
+      "name": "ClientBrowser",
+      "type": "string"
+    },
+    {
+      "name": "ClientCity",
+      "type": "string"
+    },
+    {
+      "name": "ClientCountryOrRegion",
+      "type": "string"
+    },
+    {
+      "name": "ClientIP",
+      "type": "string"
+    },
+    {
+      "name": "ClientModel",
+      "type": "string"
+    },
+    {
+      "name": "ClientOS",
+      "type": "string"
+    },
+    {
+      "name": "ClientStateOrProvince",
+      "type": "string"
+    },
+    {
+      "name": "ClientType",
+      "type": "string"
+    },
+    {
+      "name": "Details",
+      "type": "object"
+    },
+    {
+      "name": "Details.[]",
+      "type": "object"
+    },
+    {
+      "name": "Details.[].id",
+      "type": "string"
+    },
+    {
+      "name": "Details.[].message",
+      "type": "string"
+    },
+    {
+      "name": "Details.[].outerId",
+      "type": "string"
+    },
+    {
+      "name": "Details.[].parsedStack",
+      "type": "object"
+    },
+    {
+      "name": "Details.[].parsedStack.[]",
+      "type": "object"
+    },
+    {
+      "name": "Details.[].parsedStack.[].assembly",
+      "type": "string"
+    },
+    {
+      "name": "Details.[].parsedStack.[].fileName",
+      "type": "string"
+    },
+    {
+      "name": "Details.[].parsedStack.[].level",
+      "type": "long"
+    },
+    {
+      "name": "Details.[].parsedStack.[].line",
+      "type": "long"
+    },
+    {
+      "name": "Details.[].parsedStack.[].method",
+      "type": "string"
+    },
+    {
+      "name": "Details.[].rawStack",
+      "type": "string"
+    },
+    {
+      "name": "Details.[].severityLevel",
+      "type": "string"
+    },
+    {
+      "name": "Details.[].type",
+      "type": "string"
+    },
+    {
+      "name": "ExceptionType",
+      "type": "string"
+    },
+    {
+      "name": "IKey",
+      "type": "string"
+    },
+    {
+      "name": "InnermostAssembly",
+      "type": "string"
+    },
+    {
+      "name": "InnermostMessage",
+      "type": "string"
+    },
+    {
+      "name": "InnermostMethod",
+      "type": "string"
+    },
+    {
+      "name": "InnermostType",
+      "type": "string"
+    },
+    {
+      "name": "ItemCount",
+      "type": "long"
+    },
+    {
+      "name": "Method",
+      "type": "string"
+    },
+    {
+      "name": "OperationId",
+      "type": "string"
+    },
+    {
+      "name": "OperationName",
+      "type": "string"
+    },
+    {
+      "name": "OuterAssembly",
+      "type": "string"
+    },
+    {
+      "name": "OuterMessage",
+      "type": "string"
+    },
+    {
+      "name": "OuterMethod",
+      "type": "string"
+    },
+    {
+      "name": "OuterType",
+      "type": "string"
+    },
+    {
+      "name": "ParentId",
+      "type": "string"
+    },
+    {
+      "name": "ProblemId",
+      "type": "string"
+    },
+    {
+      "name": "Properties",
+      "type": "object"
+    },
+    {
+      "name": "Properties._MS.ResourceAttributeId",
+      "type": "guid"
+    },
+    {
+      "name": "Properties.Category",
+      "type": "string"
+    },
+    {
+      "name": "Properties.EventId",
+      "type": "string"
+    },
+    {
+      "name": "Properties.EventName",
+      "type": "string"
+    },
+    {
+      "name": "Properties.FormattedMessage",
+      "type": "string"
+    },
+    {
+      "name": "Properties.HostInstanceId",
+      "type": "guid"
+    },
+    {
+      "name": "Properties.InvocationId",
+      "type": "guid"
+    },
+    {
+      "name": "Properties.LogLevel",
+      "type": "string"
+    },
+    {
+      "name": "Properties.ProcessId",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__Duration",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__EndTime",
+      "type": "datetime"
+    },
+    {
+      "name": "Properties.prop__executionDuration",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__FullName",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__functionName",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__InvocationId",
+      "type": "guid"
+    },
+    {
+      "name": "Properties.prop__invocationId",
+      "type": "guid"
+    },
+    {
+      "name": "Properties.prop__Name",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__StartTime",
+      "type": "datetime"
+    },
+    {
+      "name": "Properties.prop__status",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__Succeeded",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__TriggerReason",
+      "type": "string"
+    },
+    {
+      "name": "Properties.prop__{OriginalFormat}",
+      "type": "string"
+    },
+    {
+      "name": "ResourceGUID",
+      "type": "string"
+    },
+    {
+      "name": "SDKVersion",
+      "type": "string"
+    },
+    {
+      "name": "SeverityLevel",
+      "type": "long"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

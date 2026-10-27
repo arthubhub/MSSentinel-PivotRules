@@ -1,0 +1,585 @@
+{
+  "table": "DeviceProcessEvents",
+  "fields": [
+    {
+      "name": "AccountDomain",
+      "type": "string"
+    },
+    {
+      "name": "AccountName",
+      "type": "string"
+    },
+    {
+      "name": "AccountObjectId",
+      "type": "string"
+    },
+    {
+      "name": "AccountSid",
+      "type": "string"
+    },
+    {
+      "name": "AccountUpn",
+      "type": "string"
+    },
+    {
+      "name": "ActionType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.CloudPlatform",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DesktopName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessCurrentWorkingDirectory",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixAttachedTerminal",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixEffectiveGroup",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixEffectiveGroup.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixEffectiveGroup.PosixGroupId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixEffectiveUser",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixEffectiveUser.AadUserUpn",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixEffectiveUser.DomainName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixEffectiveUser.LogonId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixEffectiveUser.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixEffectiveUser.PosixUserId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixEffectiveUser.PrimaryPosixGroup",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixEffectiveUser.PrimaryPosixGroup.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixEffectiveUser.PrimaryPosixGroup.PosixGroupId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixEffectiveUser.Sid",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixFilePermissions",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixFilePermissions.[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixGroupOwner",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixGroupOwner.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixGroupOwner.PosixGroupId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixProcessGroupId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixRealUser",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixRealUser.AadUserUpn",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixRealUser.DomainName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixRealUser.LogonId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixRealUser.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixRealUser.PosixUserId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixRealUser.PrimaryPosixGroup",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixRealUser.PrimaryPosixGroup.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixRealUser.PrimaryPosixGroup.PosixGroupId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixRealUser.Sid",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixSessionId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixUserOwner",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixUserOwner.DomainName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixUserOwner.LogonId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixUserOwner.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixUserOwner.PosixUserId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixUserOwner.PrimaryPosixGroup",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixUserOwner.PrimaryPosixGroup.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingProcessPosixUserOwner.PrimaryPosixGroup.PosixGroupId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.ProcessCurrentWorkingDirectory",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixAttachedTerminal",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixEffectiveGroup",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixEffectiveGroup.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixEffectiveGroup.PosixGroupId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixEffectiveUser",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixEffectiveUser.AadUserUpn",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixEffectiveUser.DomainName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixEffectiveUser.LogonId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixEffectiveUser.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixEffectiveUser.PosixUserId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixEffectiveUser.PrimaryPosixGroup",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixEffectiveUser.PrimaryPosixGroup.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixEffectiveUser.PrimaryPosixGroup.PosixGroupId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixEffectiveUser.Sid",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixFileGroupOwner",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixFileGroupOwner.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixFileGroupOwner.PosixGroupId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixFilePermissions",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixFilePermissions.[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixFileUserOwner",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixFileUserOwner.DomainName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixFileUserOwner.LogonId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixFileUserOwner.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixFileUserOwner.PosixUserId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixFileUserOwner.PrimaryPosixGroup",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixFileUserOwner.PrimaryPosixGroup.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixFileUserOwner.PrimaryPosixGroup.PosixGroupId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixProcessGroupId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.ProcessPosixSessionId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.uniqueEventsAggregated",
+      "type": "long"
+    },
+    {
+      "name": "AppGuardContainerId",
+      "type": "string"
+    },
+    {
+      "name": "CreatedProcessSessionId",
+      "type": "long"
+    },
+    {
+      "name": "DeviceId",
+      "type": "string"
+    },
+    {
+      "name": "DeviceName",
+      "type": "string"
+    },
+    {
+      "name": "FileName",
+      "type": "string"
+    },
+    {
+      "name": "FileSize",
+      "type": "long"
+    },
+    {
+      "name": "FolderPath",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessAccountDomain",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessAccountName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessAccountObjectId",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessAccountSid",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessAccountUpn",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessCommandLine",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessCreationTime",
+      "type": "datetime"
+    },
+    {
+      "name": "InitiatingProcessFileName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessFileSize",
+      "type": "long"
+    },
+    {
+      "name": "InitiatingProcessFolderPath",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessId",
+      "type": "long"
+    },
+    {
+      "name": "InitiatingProcessIntegrityLevel",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessLogonId",
+      "type": "long"
+    },
+    {
+      "name": "InitiatingProcessMD5",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessParentCreationTime",
+      "type": "datetime"
+    },
+    {
+      "name": "InitiatingProcessParentFileName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessParentId",
+      "type": "long"
+    },
+    {
+      "name": "InitiatingProcessRemoteSessionDeviceName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessRemoteSessionIP",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessSessionId",
+      "type": "long"
+    },
+    {
+      "name": "InitiatingProcessSHA1",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessSHA256",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessSignatureStatus",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessSignerType",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessTokenElevation",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessUniqueId",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessVersionInfoCompanyName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessVersionInfoFileDescription",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessVersionInfoInternalFileName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessVersionInfoOriginalFileName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessVersionInfoProductName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessVersionInfoProductVersion",
+      "type": "string"
+    },
+    {
+      "name": "IsInitiatingProcessRemoteSession",
+      "type": "bool"
+    },
+    {
+      "name": "IsProcessRemoteSession",
+      "type": "bool"
+    },
+    {
+      "name": "LogonId",
+      "type": "long"
+    },
+    {
+      "name": "MachineGroup",
+      "type": "string"
+    },
+    {
+      "name": "MD5",
+      "type": "string"
+    },
+    {
+      "name": "ProcessCommandLine",
+      "type": "string"
+    },
+    {
+      "name": "ProcessCreationTime",
+      "type": "datetime"
+    },
+    {
+      "name": "ProcessId",
+      "type": "long"
+    },
+    {
+      "name": "ProcessIntegrityLevel",
+      "type": "string"
+    },
+    {
+      "name": "ProcessRemoteSessionDeviceName",
+      "type": "string"
+    },
+    {
+      "name": "ProcessRemoteSessionIP",
+      "type": "string"
+    },
+    {
+      "name": "ProcessTokenElevation",
+      "type": "string"
+    },
+    {
+      "name": "ProcessUniqueId",
+      "type": "string"
+    },
+    {
+      "name": "ProcessVersionInfoCompanyName",
+      "type": "string"
+    },
+    {
+      "name": "ProcessVersionInfoFileDescription",
+      "type": "string"
+    },
+    {
+      "name": "ProcessVersionInfoInternalFileName",
+      "type": "string"
+    },
+    {
+      "name": "ProcessVersionInfoOriginalFileName",
+      "type": "string"
+    },
+    {
+      "name": "ProcessVersionInfoProductName",
+      "type": "string"
+    },
+    {
+      "name": "ProcessVersionInfoProductVersion",
+      "type": "string"
+    },
+    {
+      "name": "ReportId",
+      "type": "long"
+    },
+    {
+      "name": "SHA1",
+      "type": "string"
+    },
+    {
+      "name": "SHA256",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Timestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

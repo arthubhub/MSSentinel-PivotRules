@@ -1,0 +1,49 @@
+{
+  "table": "AlertInfo",
+  "fields": [
+    {
+      "name": "AlertId",
+      "type": "string"
+    },
+    {
+      "name": "AttackTechniques",
+      "type": "string"
+    },
+    {
+      "name": "Category",
+      "type": "string"
+    },
+    {
+      "name": "DetectionSource",
+      "type": "string"
+    },
+    {
+      "name": "ServiceSource",
+      "type": "string"
+    },
+    {
+      "name": "Severity",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Timestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "Title",
+      "type": "string"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

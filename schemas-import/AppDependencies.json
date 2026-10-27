@@ -1,0 +1,161 @@
+{
+  "table": "AppDependencies",
+  "fields": [
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "AppRoleInstance",
+      "type": "string"
+    },
+    {
+      "name": "AppRoleName",
+      "type": "string"
+    },
+    {
+      "name": "ClientBrowser",
+      "type": "string"
+    },
+    {
+      "name": "ClientCity",
+      "type": "string"
+    },
+    {
+      "name": "ClientCountryOrRegion",
+      "type": "string"
+    },
+    {
+      "name": "ClientIP",
+      "type": "string"
+    },
+    {
+      "name": "ClientModel",
+      "type": "string"
+    },
+    {
+      "name": "ClientOS",
+      "type": "string"
+    },
+    {
+      "name": "ClientStateOrProvince",
+      "type": "string"
+    },
+    {
+      "name": "ClientType",
+      "type": "string"
+    },
+    {
+      "name": "Data",
+      "type": "string"
+    },
+    {
+      "name": "DependencyType",
+      "type": "string"
+    },
+    {
+      "name": "DurationMs",
+      "type": "double"
+    },
+    {
+      "name": "Id",
+      "type": "string"
+    },
+    {
+      "name": "IKey",
+      "type": "string"
+    },
+    {
+      "name": "ItemCount",
+      "type": "long"
+    },
+    {
+      "name": "Name",
+      "type": "string"
+    },
+    {
+      "name": "OperationId",
+      "type": "string"
+    },
+    {
+      "name": "OperationName",
+      "type": "string"
+    },
+    {
+      "name": "ParentId",
+      "type": "string"
+    },
+    {
+      "name": "PerformanceBucket",
+      "type": "string"
+    },
+    {
+      "name": "Properties",
+      "type": "object"
+    },
+    {
+      "name": "Properties._MS.ProcessedByMetricExtractors",
+      "type": "string"
+    },
+    {
+      "name": "Properties._MS.ResourceAttributeId",
+      "type": "guid"
+    },
+    {
+      "name": "Properties.fastmcp.component.key",
+      "type": "string"
+    },
+    {
+      "name": "Properties.gen_ai.tool.name",
+      "type": "string"
+    },
+    {
+      "name": "Properties.mcp.method.name",
+      "type": "string"
+    },
+    {
+      "name": "Properties.mcp.resource.uri",
+      "type": "string"
+    },
+    {
+      "name": "Properties.mcp.session.id",
+      "type": "string"
+    },
+    {
+      "name": "ResourceGUID",
+      "type": "string"
+    },
+    {
+      "name": "ResultCode",
+      "type": "string"
+    },
+    {
+      "name": "SDKVersion",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "Success",
+      "type": "bool"
+    },
+    {
+      "name": "Target",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

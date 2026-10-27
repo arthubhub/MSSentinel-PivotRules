@@ -1,0 +1,133 @@
+{
+  "table": "VMConnection",
+  "fields": [
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "AgentId",
+      "type": "string"
+    },
+    {
+      "name": "BytesReceived",
+      "type": "long"
+    },
+    {
+      "name": "BytesSent",
+      "type": "long"
+    },
+    {
+      "name": "Computer",
+      "type": "string"
+    },
+    {
+      "name": "ConnectionId",
+      "type": "string"
+    },
+    {
+      "name": "DestinationIp",
+      "type": "string"
+    },
+    {
+      "name": "DestinationPort",
+      "type": "long"
+    },
+    {
+      "name": "Direction",
+      "type": "string"
+    },
+    {
+      "name": "LinksEstablished",
+      "type": "long"
+    },
+    {
+      "name": "LinksFailed",
+      "type": "long"
+    },
+    {
+      "name": "LinksLive",
+      "type": "long"
+    },
+    {
+      "name": "LinksTerminated",
+      "type": "long"
+    },
+    {
+      "name": "Machine",
+      "type": "string"
+    },
+    {
+      "name": "Process",
+      "type": "string"
+    },
+    {
+      "name": "ProcessName",
+      "type": "string"
+    },
+    {
+      "name": "Protocol",
+      "type": "string"
+    },
+    {
+      "name": "RemoteCountry",
+      "type": "string"
+    },
+    {
+      "name": "RemoteDnsCanonicalNames",
+      "type": "string"
+    },
+    {
+      "name": "RemoteDnsQuestions",
+      "type": "string"
+    },
+    {
+      "name": "RemoteIp",
+      "type": "string"
+    },
+    {
+      "name": "RemoteLatitude",
+      "type": "double"
+    },
+    {
+      "name": "RemoteLongitude",
+      "type": "double"
+    },
+    {
+      "name": "Responses",
+      "type": "long"
+    },
+    {
+      "name": "ResponseTimeMax",
+      "type": "long"
+    },
+    {
+      "name": "ResponseTimeMin",
+      "type": "long"
+    },
+    {
+      "name": "ResponseTimeSum",
+      "type": "long"
+    },
+    {
+      "name": "SourceIp",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

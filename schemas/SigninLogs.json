@@ -1,0 +1,469 @@
+{
+  "table": "SigninLogs",
+  "fields": [
+    {
+      "name": "AADTenantId",
+      "type": "string"
+    },
+    {
+      "name": "Agent",
+      "type": "object"
+    },
+    {
+      "name": "Agent.agentSubjectType",
+      "type": "string"
+    },
+    {
+      "name": "Agent.agentType",
+      "type": "string"
+    },
+    {
+      "name": "AlternateSignInName",
+      "type": "string"
+    },
+    {
+      "name": "AppDisplayName",
+      "type": "string"
+    },
+    {
+      "name": "AppId",
+      "type": "string"
+    },
+    {
+      "name": "AppOwnerTenantId",
+      "type": "string"
+    },
+    {
+      "name": "AuthenticationAppDeviceDetails",
+      "type": "string"
+    },
+    {
+      "name": "AuthenticationAppPolicyEvaluationDetails",
+      "type": "string"
+    },
+    {
+      "name": "AuthenticationContextClassReferences",
+      "type": "string"
+    },
+    {
+      "name": "AuthenticationDetails",
+      "type": "string"
+    },
+    {
+      "name": "AuthenticationProcessingDetails",
+      "type": "string"
+    },
+    {
+      "name": "AuthenticationProtocol",
+      "type": "string"
+    },
+    {
+      "name": "AuthenticationRequirement",
+      "type": "string"
+    },
+    {
+      "name": "AuthenticationRequirementPolicies",
+      "type": "string"
+    },
+    {
+      "name": "AutonomousSystemNumber",
+      "type": "string"
+    },
+    {
+      "name": "Category",
+      "type": "string"
+    },
+    {
+      "name": "ClientAppUsed",
+      "type": "string"
+    },
+    {
+      "name": "ClientCredentialType",
+      "type": "string"
+    },
+    {
+      "name": "ConditionalAccessAudiences",
+      "type": "string"
+    },
+    {
+      "name": "ConditionalAccessPolicies",
+      "type": "object"
+    },
+    {
+      "name": "ConditionalAccessPolicies.[]",
+      "type": "object"
+    },
+    {
+      "name": "ConditionalAccessPolicies.[].conditionsNotSatisfied",
+      "type": "long"
+    },
+    {
+      "name": "ConditionalAccessPolicies.[].conditionsSatisfied",
+      "type": "long"
+    },
+    {
+      "name": "ConditionalAccessPolicies.[].displayName",
+      "type": "string"
+    },
+    {
+      "name": "ConditionalAccessPolicies.[].enforcedGrantControls",
+      "type": "object"
+    },
+    {
+      "name": "ConditionalAccessPolicies.[].enforcedGrantControls.[]",
+      "type": "string"
+    },
+    {
+      "name": "ConditionalAccessPolicies.[].enforcedSessionControls",
+      "type": "object"
+    },
+    {
+      "name": "ConditionalAccessPolicies.[].enforcedSessionControls.[]",
+      "type": "string"
+    },
+    {
+      "name": "ConditionalAccessPolicies.[].id",
+      "type": "guid"
+    },
+    {
+      "name": "ConditionalAccessPolicies.[].result",
+      "type": "string"
+    },
+    {
+      "name": "ConditionalAccessPolicies.[].sessionControlsNotSatisfied",
+      "type": "object"
+    },
+    {
+      "name": "ConditionalAccessPolicies.[].sessionControlsNotSatisfied.[]",
+      "type": "string"
+    },
+    {
+      "name": "ConditionalAccessStatus",
+      "type": "string"
+    },
+    {
+      "name": "CorrelationId",
+      "type": "string"
+    },
+    {
+      "name": "CreatedDateTime",
+      "type": "datetime"
+    },
+    {
+      "name": "CrossTenantAccessType",
+      "type": "string"
+    },
+    {
+      "name": "DeviceDetail",
+      "type": "object"
+    },
+    {
+      "name": "DeviceDetail.browser",
+      "type": "string"
+    },
+    {
+      "name": "DeviceDetail.deviceId",
+      "type": "array"
+    },
+    {
+      "name": "DeviceDetail.displayName",
+      "type": "string"
+    },
+    {
+      "name": "DeviceDetail.isCompliant",
+      "type": "bool"
+    },
+    {
+      "name": "DeviceDetail.isManaged",
+      "type": "bool"
+    },
+    {
+      "name": "DeviceDetail.operatingSystem",
+      "type": "string"
+    },
+    {
+      "name": "DeviceDetail.trustType",
+      "type": "string"
+    },
+    {
+      "name": "DurationMs",
+      "type": "long"
+    },
+    {
+      "name": "GlobalSecureAccessIpAddress",
+      "type": "string"
+    },
+    {
+      "name": "HomeTenantId",
+      "type": "string"
+    },
+    {
+      "name": "HomeTenantName",
+      "type": "string"
+    },
+    {
+      "name": "Id",
+      "type": "string"
+    },
+    {
+      "name": "Identity",
+      "type": "string"
+    },
+    {
+      "name": "IncomingTokenType",
+      "type": "string"
+    },
+    {
+      "name": "IPAddress",
+      "type": "string"
+    },
+    {
+      "name": "IPAddressFromResourceProvider",
+      "type": "string"
+    },
+    {
+      "name": "IsInteractive",
+      "type": "bool"
+    },
+    {
+      "name": "IsTenantRestricted",
+      "type": "bool"
+    },
+    {
+      "name": "IsThroughGlobalSecureAccess",
+      "type": "bool"
+    },
+    {
+      "name": "Location",
+      "type": "string"
+    },
+    {
+      "name": "LocationDetails",
+      "type": "object"
+    },
+    {
+      "name": "LocationDetails.city",
+      "type": "string"
+    },
+    {
+      "name": "LocationDetails.countryOrRegion",
+      "type": "string"
+    },
+    {
+      "name": "LocationDetails.geoCoordinates",
+      "type": "object"
+    },
+    {
+      "name": "LocationDetails.geoCoordinates.latitude",
+      "type": "double"
+    },
+    {
+      "name": "LocationDetails.geoCoordinates.longitude",
+      "type": "double"
+    },
+    {
+      "name": "LocationDetails.state",
+      "type": "string"
+    },
+    {
+      "name": "MfaDetail",
+      "type": "object"
+    },
+    {
+      "name": "MfaDetail.authDetail",
+      "type": "string"
+    },
+    {
+      "name": "MfaDetail.authMethod",
+      "type": "string"
+    },
+    {
+      "name": "NetworkLocationDetails",
+      "type": "string"
+    },
+    {
+      "name": "OperationName",
+      "type": "string"
+    },
+    {
+      "name": "OperationVersion",
+      "type": "string"
+    },
+    {
+      "name": "OriginalRequestId",
+      "type": "string"
+    },
+    {
+      "name": "OriginalTransferMethod",
+      "type": "string"
+    },
+    {
+      "name": "ProcessingTimeInMilliseconds",
+      "type": "string"
+    },
+    {
+      "name": "Resource",
+      "type": "string"
+    },
+    {
+      "name": "ResourceDisplayName",
+      "type": "string"
+    },
+    {
+      "name": "ResourceGroup",
+      "type": "string"
+    },
+    {
+      "name": "ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "ResourceIdentity",
+      "type": "string"
+    },
+    {
+      "name": "ResourceOwnerTenantId",
+      "type": "string"
+    },
+    {
+      "name": "ResourceServicePrincipalId",
+      "type": "string"
+    },
+    {
+      "name": "ResourceTenantId",
+      "type": "string"
+    },
+    {
+      "name": "ResultDescription",
+      "type": "string"
+    },
+    {
+      "name": "ResultSignature",
+      "type": "string"
+    },
+    {
+      "name": "ResultType",
+      "type": "string"
+    },
+    {
+      "name": "RiskDetail",
+      "type": "string"
+    },
+    {
+      "name": "RiskEventTypes",
+      "type": "string"
+    },
+    {
+      "name": "RiskEventTypes_V2",
+      "type": "string"
+    },
+    {
+      "name": "RiskLevelAggregated",
+      "type": "string"
+    },
+    {
+      "name": "RiskLevelDuringSignIn",
+      "type": "string"
+    },
+    {
+      "name": "RiskState",
+      "type": "string"
+    },
+    {
+      "name": "ServicePrincipalId",
+      "type": "string"
+    },
+    {
+      "name": "ServicePrincipalName",
+      "type": "string"
+    },
+    {
+      "name": "SessionId",
+      "type": "string"
+    },
+    {
+      "name": "SessionLifetimePolicies",
+      "type": "string"
+    },
+    {
+      "name": "SignInIdentifier",
+      "type": "string"
+    },
+    {
+      "name": "SignInIdentifierType",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "Status",
+      "type": "object"
+    },
+    {
+      "name": "Status.additionalDetails",
+      "type": "string"
+    },
+    {
+      "name": "Status.errorCode",
+      "type": "long"
+    },
+    {
+      "name": "Status.failureReason",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "TokenIssuerType",
+      "type": "string"
+    },
+    {
+      "name": "TokenProtectionStatusDetails",
+      "type": "object"
+    },
+    {
+      "name": "TokenProtectionStatusDetails.signInSessionStatus",
+      "type": "string"
+    },
+    {
+      "name": "TokenProtectionStatusDetails.signInSessionStatusCode",
+      "type": "long"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "UniqueTokenIdentifier",
+      "type": "string"
+    },
+    {
+      "name": "UserAgent",
+      "type": "string"
+    },
+    {
+      "name": "UserDisplayName",
+      "type": "string"
+    },
+    {
+      "name": "UserId",
+      "type": "string"
+    },
+    {
+      "name": "UserPrincipalName",
+      "type": "string"
+    },
+    {
+      "name": "UserType",
+      "type": "string"
+    }
+  ]
+}

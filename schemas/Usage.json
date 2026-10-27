@@ -1,0 +1,89 @@
+{
+  "table": "Usage",
+  "fields": [
+    {
+      "name": "AvgLatencyInSeconds",
+      "type": "double"
+    },
+    {
+      "name": "BatchesCapped",
+      "type": "long"
+    },
+    {
+      "name": "BatchesOutsideSla",
+      "type": "long"
+    },
+    {
+      "name": "BatchesWithinSla",
+      "type": "long"
+    },
+    {
+      "name": "Computer",
+      "type": "string"
+    },
+    {
+      "name": "DataType",
+      "type": "string"
+    },
+    {
+      "name": "EndTime",
+      "type": "datetime"
+    },
+    {
+      "name": "IsBillable",
+      "type": "bool"
+    },
+    {
+      "name": "LinkedMeterId",
+      "type": "string"
+    },
+    {
+      "name": "MeterId",
+      "type": "string"
+    },
+    {
+      "name": "Plan",
+      "type": "string"
+    },
+    {
+      "name": "Quantity",
+      "type": "double"
+    },
+    {
+      "name": "QuantityUnit",
+      "type": "string"
+    },
+    {
+      "name": "ResourceUri",
+      "type": "string"
+    },
+    {
+      "name": "Solution",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "StartTime",
+      "type": "datetime"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "TotalBatches",
+      "type": "long"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

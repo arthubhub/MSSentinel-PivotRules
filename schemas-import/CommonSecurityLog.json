@@ -1,0 +1,445 @@
+{
+  "table": "CommonSecurityLog",
+  "fields": [
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "Activity",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalExtensions",
+      "type": "string"
+    },
+    {
+      "name": "ApplicationProtocol",
+      "type": "string"
+    },
+    {
+      "name": "CollectorHostName",
+      "type": "string"
+    },
+    {
+      "name": "CommunicationDirection",
+      "type": "string"
+    },
+    {
+      "name": "Computer",
+      "type": "string"
+    },
+    {
+      "name": "DestinationHostName",
+      "type": "string"
+    },
+    {
+      "name": "DestinationIP",
+      "type": "string"
+    },
+    {
+      "name": "DestinationNTDomain",
+      "type": "string"
+    },
+    {
+      "name": "DestinationPort",
+      "type": "long"
+    },
+    {
+      "name": "DestinationServiceName",
+      "type": "string"
+    },
+    {
+      "name": "DestinationTranslatedAddress",
+      "type": "string"
+    },
+    {
+      "name": "DestinationTranslatedPort",
+      "type": "long"
+    },
+    {
+      "name": "DestinationUserName",
+      "type": "string"
+    },
+    {
+      "name": "DeviceAction",
+      "type": "string"
+    },
+    {
+      "name": "DeviceAddress",
+      "type": "string"
+    },
+    {
+      "name": "DeviceCustomFloatingPoint1",
+      "type": "double"
+    },
+    {
+      "name": "DeviceCustomFloatingPoint1Label",
+      "type": "string"
+    },
+    {
+      "name": "DeviceCustomIPv6Address2",
+      "type": "string"
+    },
+    {
+      "name": "DeviceCustomIPv6Address3",
+      "type": "string"
+    },
+    {
+      "name": "DeviceCustomNumber1Label",
+      "type": "string"
+    },
+    {
+      "name": "DeviceCustomNumber2Label",
+      "type": "string"
+    },
+    {
+      "name": "DeviceCustomNumber3Label",
+      "type": "string"
+    },
+    {
+      "name": "DeviceCustomString1",
+      "type": "string"
+    },
+    {
+      "name": "DeviceCustomString1Label",
+      "type": "string"
+    },
+    {
+      "name": "DeviceCustomString2",
+      "type": "string"
+    },
+    {
+      "name": "DeviceCustomString2Label",
+      "type": "string"
+    },
+    {
+      "name": "DeviceCustomString3",
+      "type": "string"
+    },
+    {
+      "name": "DeviceCustomString3Label",
+      "type": "string"
+    },
+    {
+      "name": "DeviceCustomString4",
+      "type": "string"
+    },
+    {
+      "name": "DeviceCustomString4Label",
+      "type": "string"
+    },
+    {
+      "name": "DeviceCustomString5",
+      "type": "string"
+    },
+    {
+      "name": "DeviceCustomString5Label",
+      "type": "string"
+    },
+    {
+      "name": "DeviceCustomString6",
+      "type": "string"
+    },
+    {
+      "name": "DeviceCustomString6Label",
+      "type": "string"
+    },
+    {
+      "name": "DeviceEventCategory",
+      "type": "string"
+    },
+    {
+      "name": "DeviceEventClassID",
+      "type": "string"
+    },
+    {
+      "name": "DeviceExternalID",
+      "type": "string"
+    },
+    {
+      "name": "DeviceFacility",
+      "type": "string"
+    },
+    {
+      "name": "DeviceInboundInterface",
+      "type": "string"
+    },
+    {
+      "name": "DeviceMacAddress",
+      "type": "string"
+    },
+    {
+      "name": "DeviceName",
+      "type": "string"
+    },
+    {
+      "name": "DeviceNtDomain",
+      "type": "string"
+    },
+    {
+      "name": "DeviceOutboundInterface",
+      "type": "string"
+    },
+    {
+      "name": "DeviceProduct",
+      "type": "string"
+    },
+    {
+      "name": "DeviceTimeZone",
+      "type": "string"
+    },
+    {
+      "name": "DeviceTranslatedAddress",
+      "type": "string"
+    },
+    {
+      "name": "DeviceVendor",
+      "type": "string"
+    },
+    {
+      "name": "DeviceVersion",
+      "type": "string"
+    },
+    {
+      "name": "EventCount",
+      "type": "long"
+    },
+    {
+      "name": "EventOutcome",
+      "type": "string"
+    },
+    {
+      "name": "EventType",
+      "type": "long"
+    },
+    {
+      "name": "ExtID",
+      "type": "string"
+    },
+    {
+      "name": "FieldDeviceCustomNumber1",
+      "type": "long"
+    },
+    {
+      "name": "FieldDeviceCustomNumber2",
+      "type": "long"
+    },
+    {
+      "name": "FieldDeviceCustomNumber3",
+      "type": "long"
+    },
+    {
+      "name": "FileHash",
+      "type": "string"
+    },
+    {
+      "name": "FileID",
+      "type": "string"
+    },
+    {
+      "name": "FileName",
+      "type": "string"
+    },
+    {
+      "name": "FilePath",
+      "type": "string"
+    },
+    {
+      "name": "FileSize",
+      "type": "long"
+    },
+    {
+      "name": "FileType",
+      "type": "string"
+    },
+    {
+      "name": "FlexNumber1",
+      "type": "long"
+    },
+    {
+      "name": "FlexNumber1Label",
+      "type": "string"
+    },
+    {
+      "name": "FlexNumber2",
+      "type": "long"
+    },
+    {
+      "name": "FlexNumber2Label",
+      "type": "string"
+    },
+    {
+      "name": "FlexString1",
+      "type": "string"
+    },
+    {
+      "name": "FlexString1Label",
+      "type": "string"
+    },
+    {
+      "name": "FlexString2",
+      "type": "string"
+    },
+    {
+      "name": "FlexString2Label",
+      "type": "string"
+    },
+    {
+      "name": "IndicatorThreatType",
+      "type": "string"
+    },
+    {
+      "name": "LogSeverity",
+      "type": "string"
+    },
+    {
+      "name": "MaliciousIP",
+      "type": "string"
+    },
+    {
+      "name": "MaliciousIPCountry",
+      "type": "string"
+    },
+    {
+      "name": "MaliciousIPLatitude",
+      "type": "double"
+    },
+    {
+      "name": "MaliciousIPLongitude",
+      "type": "double"
+    },
+    {
+      "name": "Message",
+      "type": "string"
+    },
+    {
+      "name": "OriginalLogSeverity",
+      "type": "string"
+    },
+    {
+      "name": "ProcessName",
+      "type": "string"
+    },
+    {
+      "name": "Protocol",
+      "type": "string"
+    },
+    {
+      "name": "Reason",
+      "type": "string"
+    },
+    {
+      "name": "ReceiptTime",
+      "type": "string"
+    },
+    {
+      "name": "ReceivedBytes",
+      "type": "long"
+    },
+    {
+      "name": "RemoteIP",
+      "type": "string"
+    },
+    {
+      "name": "ReportReferenceLink",
+      "type": "string"
+    },
+    {
+      "name": "RequestClientApplication",
+      "type": "string"
+    },
+    {
+      "name": "RequestContext",
+      "type": "string"
+    },
+    {
+      "name": "RequestCookies",
+      "type": "string"
+    },
+    {
+      "name": "RequestMethod",
+      "type": "string"
+    },
+    {
+      "name": "RequestURL",
+      "type": "string"
+    },
+    {
+      "name": "SentBytes",
+      "type": "long"
+    },
+    {
+      "name": "SimplifiedDeviceAction",
+      "type": "string"
+    },
+    {
+      "name": "SourceHostName",
+      "type": "string"
+    },
+    {
+      "name": "SourceIP",
+      "type": "string"
+    },
+    {
+      "name": "SourceMACAddress",
+      "type": "string"
+    },
+    {
+      "name": "SourceNTDomain",
+      "type": "string"
+    },
+    {
+      "name": "SourcePort",
+      "type": "long"
+    },
+    {
+      "name": "SourceProcessName",
+      "type": "string"
+    },
+    {
+      "name": "SourceServiceName",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "SourceTranslatedAddress",
+      "type": "string"
+    },
+    {
+      "name": "SourceTranslatedPort",
+      "type": "long"
+    },
+    {
+      "name": "SourceUserName",
+      "type": "string"
+    },
+    {
+      "name": "SourceUserPrivileges",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "ThreatConfidence",
+      "type": "string"
+    },
+    {
+      "name": "ThreatSeverity",
+      "type": "long"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

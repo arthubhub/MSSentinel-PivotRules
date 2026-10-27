@@ -1,0 +1,129 @@
+{
+  "table": "Update",
+  "fields": [
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "ApprovalSource",
+      "type": "string"
+    },
+    {
+      "name": "Approved",
+      "type": "bool"
+    },
+    {
+      "name": "Classification",
+      "type": "string"
+    },
+    {
+      "name": "Computer",
+      "type": "string"
+    },
+    {
+      "name": "ComputerEnvironment",
+      "type": "string"
+    },
+    {
+      "name": "KBID",
+      "type": "string"
+    },
+    {
+      "name": "ManagementGroupName",
+      "type": "string"
+    },
+    {
+      "name": "MG",
+      "type": "string"
+    },
+    {
+      "name": "MSRCBulletinID",
+      "type": "string"
+    },
+    {
+      "name": "MSRCSeverity",
+      "type": "string"
+    },
+    {
+      "name": "Optional",
+      "type": "bool"
+    },
+    {
+      "name": "Product",
+      "type": "string"
+    },
+    {
+      "name": "PublishedDate",
+      "type": "datetime"
+    },
+    {
+      "name": "RebootBehavior",
+      "type": "string"
+    },
+    {
+      "name": "Resource",
+      "type": "string"
+    },
+    {
+      "name": "ResourceGroup",
+      "type": "string"
+    },
+    {
+      "name": "ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "ResourceProvider",
+      "type": "string"
+    },
+    {
+      "name": "ResourceType",
+      "type": "string"
+    },
+    {
+      "name": "RevisionNumber",
+      "type": "string"
+    },
+    {
+      "name": "SourceComputerId",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "SubscriptionId",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Title",
+      "type": "string"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "UpdateID",
+      "type": "string"
+    },
+    {
+      "name": "UpdateState",
+      "type": "string"
+    },
+    {
+      "name": "VMUUID",
+      "type": "string"
+    }
+  ]
+}
