@@ -1,0 +1,197 @@
+{
+  "table": "SecurityIncident",
+  "fields": [
+    {
+      "name": "AdditionalData",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalData.alertProductNames",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalData.alertProductNames.[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalData.alertsCount",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalData.bookmarksCount",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalData.commentsCount",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalData.providerIncidentUrl",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalData.tactics",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalData.tactics.[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalData.techniques",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalData.techniques.[]",
+      "type": "null"
+    },
+    {
+      "name": "AlertIds",
+      "type": "object"
+    },
+    {
+      "name": "AlertIds.[]",
+      "type": "guid"
+    },
+    {
+      "name": "BookmarkIds",
+      "type": "object"
+    },
+    {
+      "name": "BookmarkIds.[]",
+      "type": "null"
+    },
+    {
+      "name": "Classification",
+      "type": "string"
+    },
+    {
+      "name": "ClassificationComment",
+      "type": "string"
+    },
+    {
+      "name": "ClassificationReason",
+      "type": "string"
+    },
+    {
+      "name": "ClosedTime",
+      "type": "datetime"
+    },
+    {
+      "name": "Comments",
+      "type": "object"
+    },
+    {
+      "name": "Comments.[]",
+      "type": "null"
+    },
+    {
+      "name": "CreatedTime",
+      "type": "datetime"
+    },
+    {
+      "name": "Description",
+      "type": "string"
+    },
+    {
+      "name": "FirstActivityTime",
+      "type": "datetime"
+    },
+    {
+      "name": "FirstModifiedTime",
+      "type": "datetime"
+    },
+    {
+      "name": "IncidentName",
+      "type": "string"
+    },
+    {
+      "name": "IncidentNumber",
+      "type": "long"
+    },
+    {
+      "name": "IncidentUrl",
+      "type": "string"
+    },
+    {
+      "name": "Labels",
+      "type": "object"
+    },
+    {
+      "name": "Labels.[]",
+      "type": "object"
+    },
+    {
+      "name": "Labels.[].labelName",
+      "type": "string"
+    },
+    {
+      "name": "Labels.[].labelType",
+      "type": "string"
+    },
+    {
+      "name": "LastActivityTime",
+      "type": "datetime"
+    },
+    {
+      "name": "LastModifiedTime",
+      "type": "datetime"
+    },
+    {
+      "name": "ModifiedBy",
+      "type": "string"
+    },
+    {
+      "name": "ProviderIncidentId",
+      "type": "string"
+    },
+    {
+      "name": "ProviderName",
+      "type": "string"
+    },
+    {
+      "name": "RelatedAnalyticRuleIds",
+      "type": "object"
+    },
+    {
+      "name": "RelatedAnalyticRuleIds.[]",
+      "type": "guid"
+    },
+    {
+      "name": "Severity",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "Status",
+      "type": "string"
+    },
+    {
+      "name": "Tasks",
+      "type": "object"
+    },
+    {
+      "name": "Tasks.[]",
+      "type": "null"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Title",
+      "type": "string"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

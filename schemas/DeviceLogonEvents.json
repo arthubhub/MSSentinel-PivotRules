@@ -1,0 +1,309 @@
+{
+  "table": "DeviceLogonEvents",
+  "fields": [
+    {
+      "name": "AccountDomain",
+      "type": "string"
+    },
+    {
+      "name": "AccountName",
+      "type": "string"
+    },
+    {
+      "name": "AccountSid",
+      "type": "string"
+    },
+    {
+      "name": "ActionType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.InitiatingAccountDomain",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingAccountName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingAccountPosixGroupId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.InitiatingAccountPosixGroupName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InitiatingAccountPosixUserId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.IsLocalLogon",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.NumberOfSidsInDomainAdminToken",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.PosixPrimaryGroupId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.PosixPrimaryGroupName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.PosixSecondaryGroups",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.PosixUserId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.Terminal",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TokenHasCertificatePublisherSid",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.TokenHasDomainAdminSid",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.TokenHasDomainControllerSid",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.TokenHasEnterpriseAdminSid",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.TokenHasGroupPolicyCreatorSid",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.TokenHasLocalAccountSid",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.TokenHasNtlmAuthSid",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.TokenHasSchemaAdminSid",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.TokenHasThisOrgCertificateSid",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.uniqueEventsAggregated",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.Upn",
+      "type": "string"
+    },
+    {
+      "name": "AppGuardContainerId",
+      "type": "string"
+    },
+    {
+      "name": "DeviceId",
+      "type": "string"
+    },
+    {
+      "name": "DeviceName",
+      "type": "string"
+    },
+    {
+      "name": "FailureReason",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessAccountDomain",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessAccountName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessAccountObjectId",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessAccountSid",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessAccountUpn",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessCommandLine",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessCreationTime",
+      "type": "datetime"
+    },
+    {
+      "name": "InitiatingProcessFileName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessFileSize",
+      "type": "long"
+    },
+    {
+      "name": "InitiatingProcessFolderPath",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessId",
+      "type": "long"
+    },
+    {
+      "name": "InitiatingProcessIntegrityLevel",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessMD5",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessParentCreationTime",
+      "type": "datetime"
+    },
+    {
+      "name": "InitiatingProcessParentFileName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessParentId",
+      "type": "long"
+    },
+    {
+      "name": "InitiatingProcessRemoteSessionDeviceName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessRemoteSessionIP",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessSessionId",
+      "type": "long"
+    },
+    {
+      "name": "InitiatingProcessSHA1",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessSHA256",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessTokenElevation",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessUniqueId",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessVersionInfoCompanyName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessVersionInfoFileDescription",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessVersionInfoInternalFileName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessVersionInfoOriginalFileName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessVersionInfoProductName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessVersionInfoProductVersion",
+      "type": "string"
+    },
+    {
+      "name": "IsInitiatingProcessRemoteSession",
+      "type": "bool"
+    },
+    {
+      "name": "IsLocalAdmin",
+      "type": "bool"
+    },
+    {
+      "name": "LogonId",
+      "type": "long"
+    },
+    {
+      "name": "LogonType",
+      "type": "string"
+    },
+    {
+      "name": "MachineGroup",
+      "type": "string"
+    },
+    {
+      "name": "Protocol",
+      "type": "string"
+    },
+    {
+      "name": "RemoteDeviceName",
+      "type": "string"
+    },
+    {
+      "name": "RemoteIP",
+      "type": "string"
+    },
+    {
+      "name": "RemoteIPType",
+      "type": "string"
+    },
+    {
+      "name": "RemotePort",
+      "type": "long"
+    },
+    {
+      "name": "ReportId",
+      "type": "long"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Timestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

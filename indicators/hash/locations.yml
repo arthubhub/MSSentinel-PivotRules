@@ -1,0 +1,81 @@
+# locations.yml — hash
+# Généré par scripts/generate-locations.mjs (#31). NE PAS ÉDITER À LA MAIN : relancer le script.
+# Paires "Table.Colonne" où ce type d'indicateur peut apparaître.
+#   confirmed : signal fort — comparaison dans une règle existante, ou table Entity Defender.
+#   uncertain : signal faible — motif de nom de colonne. Publié quand même (décision du 23/10) :
+#               aide à la présélection, et l'analyste peut toujours changer de type dans le panneau.
+# L'ORDRE COMPTE : confirmed avant uncertain. Pour une colonne candidate à plusieurs types, le type
+# qui la liste en confirmed gagne la présélection (décision 2 : cet ordre prime sur INDICATOR_PRIORITY).
+# 30 confirmée(s), 40 incertaine(s). Publication dans pivot-rules.json : en 2d.
+confirmed:
+  - ASimFileEventLogs.TargetFileMD5
+  - ASimFileEventLogs.TargetFileSHA1
+  - ASimFileEventLogs.TargetFileSHA256
+  - ASimProcessEventLogs.TargetProcessMD5
+  - ASimProcessEventLogs.TargetProcessSHA1
+  - ASimProcessEventLogs.TargetProcessSHA256
+  - AlertEvidence.SHA1
+  - AlertEvidence.SHA256
+  - CommonSecurityLog.FileHash
+  - DeviceEvents.InitiatingProcessSHA256
+  - DeviceEvents.MD5
+  - DeviceEvents.SHA1
+  - DeviceEvents.SHA256
+  - DeviceFileCertificateInfo.SHA1
+  - DeviceFileEvents.InitiatingProcessSHA256
+  - DeviceFileEvents.MD5
+  - DeviceFileEvents.SHA1
+  - DeviceFileEvents.SHA256
+  - DeviceImageLoadEvents.InitiatingProcessSHA256
+  - DeviceImageLoadEvents.MD5
+  - DeviceImageLoadEvents.SHA1
+  - DeviceImageLoadEvents.SHA256
+  - DeviceLogonEvents.InitiatingProcessSHA256
+  - DeviceNetworkEvents.InitiatingProcessSHA256
+  - DeviceProcessEvents.InitiatingProcessSHA256
+  - DeviceProcessEvents.MD5
+  - DeviceProcessEvents.SHA1
+  - DeviceProcessEvents.SHA256
+  - DeviceRegistryEvents.InitiatingProcessSHA256
+  - EmailAttachmentInfo.SHA256
+uncertain:
+  - ASimFileEventLogs.HashType
+  - ASimFileEventLogs.SrcFileMD5
+  - ASimFileEventLogs.SrcFileSHA1
+  - ASimFileEventLogs.SrcFileSHA256
+  - ASimFileEventLogs.SrcFileSHA512
+  - ASimFileEventLogs.TargetFileSHA512
+  - ASimProcessEventLogs.ActingProcessMD5
+  - ASimProcessEventLogs.ActingProcessSHA1
+  - ASimProcessEventLogs.ActingProcessSHA256
+  - ASimProcessEventLogs.ActingProcessSHA512
+  - ASimProcessEventLogs.ParentProcessMD5
+  - ASimProcessEventLogs.ParentProcessSHA1
+  - ASimProcessEventLogs.ParentProcessSHA256
+  - ASimProcessEventLogs.ParentProcessSHA512
+  - ASimProcessEventLogs.TargetProcessSHA512
+  - AzureDiagnostics.query_hash_s
+  - AzureDiagnostics.query_plan_hash_s
+  - AzureDiagnostics.statement_key_hash_s
+  - DeviceEvents.InitiatingProcessMD5
+  - DeviceEvents.InitiatingProcessSHA1
+  - DeviceFileCertificateInfo.IssuerHash
+  - DeviceFileCertificateInfo.SignerHash
+  - DeviceFileEvents.InitiatingProcessMD5
+  - DeviceFileEvents.InitiatingProcessSHA1
+  - DeviceImageLoadEvents.InitiatingProcessMD5
+  - DeviceImageLoadEvents.InitiatingProcessSHA1
+  - DeviceLogonEvents.InitiatingProcessMD5
+  - DeviceLogonEvents.InitiatingProcessSHA1
+  - DeviceNetworkEvents.InitiatingProcessMD5
+  - DeviceNetworkEvents.InitiatingProcessSHA1
+  - DeviceProcessEvents.InitiatingProcessMD5
+  - DeviceProcessEvents.InitiatingProcessSHA1
+  - DeviceRegistryEvents.InitiatingProcessMD5
+  - DeviceRegistryEvents.InitiatingProcessSHA1
+  - SecurityEvent.FileHash
+  - StorageBlobLogs.AuthenticationHash
+  - StorageBlobLogs.RequestMd5
+  - StorageBlobLogs.ResponseMd5
+  - ThreatIntelligenceIndicator.FileHashType
+  - ThreatIntelligenceIndicator.FileHashValue

@@ -1,0 +1,61 @@
+{
+  "table": "AADRiskyUsers",
+  "fields": [
+    {
+      "name": "CorrelationId",
+      "type": "string"
+    },
+    {
+      "name": "Id",
+      "type": "string"
+    },
+    {
+      "name": "IsDeleted",
+      "type": "bool"
+    },
+    {
+      "name": "IsProcessing",
+      "type": "bool"
+    },
+    {
+      "name": "OperationName",
+      "type": "string"
+    },
+    {
+      "name": "RiskDetail",
+      "type": "string"
+    },
+    {
+      "name": "RiskLastUpdatedDateTime",
+      "type": "datetime"
+    },
+    {
+      "name": "RiskLevel",
+      "type": "string"
+    },
+    {
+      "name": "RiskState",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "UserDisplayName",
+      "type": "string"
+    },
+    {
+      "name": "UserPrincipalName",
+      "type": "string"
+    }
+  ]
+}

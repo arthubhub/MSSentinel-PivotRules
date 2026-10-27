@@ -1,0 +1,89 @@
+{
+  "table": "ASimAuditEventLogs",
+  "fields": [
+    {
+      "name": "ActorUserId",
+      "type": "string"
+    },
+    {
+      "name": "ActorUserIdType",
+      "type": "string"
+    },
+    {
+      "name": "ActorUsername",
+      "type": "string"
+    },
+    {
+      "name": "ActorUsernameType",
+      "type": "string"
+    },
+    {
+      "name": "ActorUserType",
+      "type": "string"
+    },
+    {
+      "name": "EventCount",
+      "type": "long"
+    },
+    {
+      "name": "EventProduct",
+      "type": "string"
+    },
+    {
+      "name": "EventResult",
+      "type": "string"
+    },
+    {
+      "name": "EventSchemaVersion",
+      "type": "string"
+    },
+    {
+      "name": "EventSeverity",
+      "type": "string"
+    },
+    {
+      "name": "EventType",
+      "type": "string"
+    },
+    {
+      "name": "EventVendor",
+      "type": "string"
+    },
+    {
+      "name": "NewValue",
+      "type": "string"
+    },
+    {
+      "name": "Object",
+      "type": "string"
+    },
+    {
+      "name": "ObjectId",
+      "type": "string"
+    },
+    {
+      "name": "ObjectType",
+      "type": "string"
+    },
+    {
+      "name": "OldValue",
+      "type": "string"
+    },
+    {
+      "name": "Operation",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

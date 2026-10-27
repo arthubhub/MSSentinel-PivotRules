@@ -1,0 +1,153 @@
+{
+  "table": "MessageEvents",
+  "fields": [
+    {
+      "name": "_BilledSize",
+      "type": "real"
+    },
+    {
+      "name": "ConfidenceLevel",
+      "type": "dynamic"
+    },
+    {
+      "name": "DeliveryAction",
+      "type": "string"
+    },
+    {
+      "name": "DeliveryLocation",
+      "type": "string"
+    },
+    {
+      "name": "DetectionMethods",
+      "type": "dynamic"
+    },
+    {
+      "name": "GroupId",
+      "type": "string"
+    },
+    {
+      "name": "GroupName",
+      "type": "string"
+    },
+    {
+      "name": "_IsBillable",
+      "type": "string"
+    },
+    {
+      "name": "IsExternalThread",
+      "type": "bool"
+    },
+    {
+      "name": "IsOwnedThread",
+      "type": "bool"
+    },
+    {
+      "name": "LastEditedTime",
+      "type": "string"
+    },
+    {
+      "name": "MessageFormatSubtype",
+      "type": "string"
+    },
+    {
+      "name": "MessageFormatType",
+      "type": "string"
+    },
+    {
+      "name": "MessageId",
+      "type": "string"
+    },
+    {
+      "name": "MessageSubject",
+      "type": "string"
+    },
+    {
+      "name": "MessageSubtype",
+      "type": "string"
+    },
+    {
+      "name": "MessageType",
+      "type": "string"
+    },
+    {
+      "name": "MessageVersion",
+      "type": "string"
+    },
+    {
+      "name": "ParentMessageId",
+      "type": "string"
+    },
+    {
+      "name": "RecipientDetails",
+      "type": "dynamic"
+    },
+    {
+      "name": "ReportId",
+      "type": "string"
+    },
+    {
+      "name": "SafetyTip",
+      "type": "string"
+    },
+    {
+      "name": "SenderDisplayName",
+      "type": "string"
+    },
+    {
+      "name": "SenderEmailAddress",
+      "type": "string"
+    },
+    {
+      "name": "SenderObjectId",
+      "type": "string"
+    },
+    {
+      "name": "SenderType",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "Subject",
+      "type": "string"
+    },
+    {
+      "name": "TeamsMessageId",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "ThreadId",
+      "type": "string"
+    },
+    {
+      "name": "ThreadName",
+      "type": "string"
+    },
+    {
+      "name": "ThreadSubType",
+      "type": "string"
+    },
+    {
+      "name": "ThreadType",
+      "type": "string"
+    },
+    {
+      "name": "ThreatTypes",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

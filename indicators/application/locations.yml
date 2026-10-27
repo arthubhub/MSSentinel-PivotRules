@@ -1,0 +1,57 @@
+# locations.yml — application
+# Généré par scripts/generate-locations.mjs (#31). NE PAS ÉDITER À LA MAIN : relancer le script.
+# Paires "Table.Colonne" où ce type d'indicateur peut apparaître.
+#   confirmed : signal fort — comparaison dans une règle existante, ou table Entity Defender.
+#   uncertain : signal faible — motif de nom de colonne. Publié quand même (décision du 23/10) :
+#               aide à la présélection, et l'analyste peut toujours changer de type dans le panneau.
+# L'ORDRE COMPTE : confirmed avant uncertain. Pour une colonne candidate à plusieurs types, le type
+# qui la liste en confirmed gagne la présélection (décision 2 : cet ordre prime sur INDICATOR_PRIORITY).
+# 8 confirmée(s), 38 incertaine(s). Publication dans pivot-rules.json : en 2d.
+confirmed:
+  - AADManagedIdentitySignInLogs.AppId
+  - AADManagedIdentitySignInLogs.ServicePrincipalId
+  - AADManagedIdentitySignInLogs.ServicePrincipalName
+  - AADServicePrincipalSignInLogs.AppId
+  - AADServicePrincipalSignInLogs.ServicePrincipalId
+  - AADServicePrincipalSignInLogs.ServicePrincipalName
+  - MicrosoftGraphActivityLogs.AppId
+  - MicrosoftGraphActivityLogs.ServicePrincipalId
+uncertain:
+  - AADGraphActivityLogs.AppId
+  - AADNonInteractiveUserSignInLogs.AppDisplayName
+  - AADNonInteractiveUserSignInLogs.AppId
+  - ADFSSignInLogs.AppDisplayName
+  - ADFSSignInLogs.AppId
+  - ASimAuthenticationEventLogs.ActingAppId
+  - ASimAuthenticationEventLogs.ActingAppName
+  - ASimAuthenticationEventLogs.TargetAppId
+  - ASimAuthenticationEventLogs.TargetAppName
+  - ASimFileEventLogs.TargetAppId
+  - ASimFileEventLogs.TargetAppName
+  - ASimNetworkSessionLogs.DstAppId
+  - ASimNetworkSessionLogs.DstAppName
+  - ASimNetworkSessionLogs.SrcAppId
+  - ASimNetworkSessionLogs.SrcAppName
+  - AVSSyslog.AppName
+  - AuditLogs.AdditionalDetails
+  - AzureDiagnostics.application_name_s
+  - CloudAppEvents.ApplicationId
+  - CloudAppEvents.OAuthAppId
+  - CloudAppEvents.RawEventData
+  - DeviceEvents.AppGuardContainerId
+  - DeviceFileEvents.AppGuardContainerId
+  - DeviceLogonEvents.AppGuardContainerId
+  - DeviceNetworkEvents.AppGuardContainerId
+  - DeviceProcessEvents.AppGuardContainerId
+  - McasShadowItReporting.AppId
+  - McasShadowItReporting.AppName
+  - MicrosoftServicePrincipalSignInLogs.AppId
+  - OfficeActivity.AppId
+  - OfficeActivity.AppPoolName
+  - OfficeActivity.ApplicationId
+  - OfficeActivity.AzureADAppId
+  - OfficeActivity.ClientAppId
+  - SigninLogs.AppDisplayName
+  - SigninLogs.AppId
+  - StorageBlobLogs.RequesterAppId
+  - UrlClickEvents.AppName

@@ -1,0 +1,401 @@
+{
+  "table": "IdentityDirectoryEvents",
+  "fields": [
+    {
+      "name": "AccountDisplayName",
+      "type": "string"
+    },
+    {
+      "name": "AccountDomain",
+      "type": "string"
+    },
+    {
+      "name": "AccountName",
+      "type": "string"
+    },
+    {
+      "name": "AccountObjectId",
+      "type": "string"
+    },
+    {
+      "name": "AccountSid",
+      "type": "string"
+    },
+    {
+      "name": "AccountUpn",
+      "type": "string"
+    },
+    {
+      "name": "ActionType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.AccountExpiryTime",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ActionTypeInner",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ACTOR.ACCOUNT",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ACTOR.DEVICE",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ACTOR.ENTITY_USER",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.AdfsObjectId",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.ARG.TASK",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.AttackTechniques",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Category",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Count",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DestinationComputerObjectGuid",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.DestinationComputerOperatingSystem",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DestinationComputerOperatingSystemType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DestinationComputerOperatingSystemVersion",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DnsHostName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.FROM Account Display Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.FROM Account Expiry Time",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.FROM Account Password Never Expires",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.FROM Account Password Not Required",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.FROM Account Path",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.FROM Account Unlock",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.FROM Account UPN Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.FROM AccountSupportedEncryptionTypes",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.FROM Device Operating System",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.FROM User Mail",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.FROM User Manager",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.FROM User Title",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.FROM.DEVICE",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.FROM.GROUP",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.FROM.GROUP_ID",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.FROM.GROUP_SID",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.IsSuccess",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.MembershipChange",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.NewValue",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.OldValue",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ReplicatedObjectCount",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ReplicatedObjectList",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ReturnCode",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ServiceCommand",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ServiceName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SourceAccountId",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.SourceAccountSid",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SourceComputerDisplayName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SourceComputerId",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.SourceComputerObjectGuid",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.SourceComputerOperatingSystem",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SourceComputerOperatingSystemType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SourceComputerOperatingSystemVersion",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SourceComputerSid",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TARGET.DEVICE",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TARGET.ENTITY_USER",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TARGET.USER",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TargetAccountId",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.TargetAccountSid",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TargetComputerObjectGuid",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.TargetComputerOperatingSystem",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TargetComputerOperatingSystemType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TargetComputerOperatingSystemVersion",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TO Account Display Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TO Account Expiry Time",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TO Account Password Never Expires",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TO Account Password Not Required",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TO Account Path",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TO Account Unlock",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TO Account UPN Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TO AccountSupportedEncryptionTypes",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TO Device Operating System",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TO User Mail",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TO User Manager",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TO User Title",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TO.DEVICE",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TO.GROUP",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TO.GROUP_ID",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.TO.GROUP_SID",
+      "type": "string"
+    },
+    {
+      "name": "Application",
+      "type": "string"
+    },
+    {
+      "name": "DestinationDeviceName",
+      "type": "string"
+    },
+    {
+      "name": "DestinationIPAddress",
+      "type": "string"
+    },
+    {
+      "name": "DestinationPort",
+      "type": "string"
+    },
+    {
+      "name": "DeviceName",
+      "type": "string"
+    },
+    {
+      "name": "IPAddress",
+      "type": "string"
+    },
+    {
+      "name": "ISP",
+      "type": "string"
+    },
+    {
+      "name": "Port",
+      "type": "string"
+    },
+    {
+      "name": "Protocol",
+      "type": "string"
+    },
+    {
+      "name": "ReportId",
+      "type": "string"
+    },
+    {
+      "name": "TargetAccountDisplayName",
+      "type": "string"
+    },
+    {
+      "name": "TargetAccountUpn",
+      "type": "string"
+    },
+    {
+      "name": "TargetDeviceName",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Timestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

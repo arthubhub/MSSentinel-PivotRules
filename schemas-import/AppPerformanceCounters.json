@@ -1,0 +1,109 @@
+{
+  "table": "AppPerformanceCounters",
+  "fields": [
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "AppRoleInstance",
+      "type": "string"
+    },
+    {
+      "name": "AppRoleName",
+      "type": "string"
+    },
+    {
+      "name": "Category",
+      "type": "string"
+    },
+    {
+      "name": "ClientBrowser",
+      "type": "string"
+    },
+    {
+      "name": "ClientCity",
+      "type": "string"
+    },
+    {
+      "name": "ClientCountryOrRegion",
+      "type": "string"
+    },
+    {
+      "name": "ClientIP",
+      "type": "string"
+    },
+    {
+      "name": "ClientModel",
+      "type": "string"
+    },
+    {
+      "name": "ClientOS",
+      "type": "string"
+    },
+    {
+      "name": "ClientStateOrProvince",
+      "type": "string"
+    },
+    {
+      "name": "ClientType",
+      "type": "string"
+    },
+    {
+      "name": "Counter",
+      "type": "string"
+    },
+    {
+      "name": "IKey",
+      "type": "string"
+    },
+    {
+      "name": "Instance",
+      "type": "string"
+    },
+    {
+      "name": "Name",
+      "type": "string"
+    },
+    {
+      "name": "Properties",
+      "type": "object"
+    },
+    {
+      "name": "Properties.HostInstanceId",
+      "type": "guid"
+    },
+    {
+      "name": "Properties.ProcessId",
+      "type": "string"
+    },
+    {
+      "name": "ResourceGUID",
+      "type": "string"
+    },
+    {
+      "name": "SDKVersion",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "Value",
+      "type": "double"
+    }
+  ]
+}

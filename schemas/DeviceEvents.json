@@ -1,0 +1,1273 @@
+{
+  "table": "DeviceEvents",
+  "fields": [
+    {
+      "name": "AccountDomain",
+      "type": "string"
+    },
+    {
+      "name": "AccountName",
+      "type": "string"
+    },
+    {
+      "name": "AccountSid",
+      "type": "string"
+    },
+    {
+      "name": "ActionType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.Accepted",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ActivityId",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.ApplicationName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.AppPackageFamilyName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.AssemblyId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.AttributeList",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.AttributeList.[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.AuditEnabled",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.AuditPolicyChanges",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.AuthenticodeHash",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.BackgroundCallCount",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.BaseAddress",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.BluetoothMacAddress",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.BuildId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.BusType",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.CallerProcessID",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.CategoryId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ChildCommandLine",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ClassGuid",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.ClassId",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.ClassName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ClientMachine",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ClientProcessId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ClientProcessName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ClientProcessPosixGroupId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ClientProcessPosixUserId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ClrInstanceId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.Command",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Consumer",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Container",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ContainerReason",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.CurrentTokenIntegrityLevel",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.CurrentTokenPointer",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.CurrentTokenPrivEnabled",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.CurrentTokenSource",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.CurrentTokenUserSid",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DataDescription",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DefenderTrust",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Description",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DesiredAccess",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.DeviceDescription",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DeviceId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DeviceInstanceId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DeviceUpdated",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.DisplayName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DistinguishedName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DnsQueryResult",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.DnsQueryResult.[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DnsQueryString",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Domain",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DriveLetter",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DriverDate",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DriverInbox",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.DriverName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DriverProvider",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DriverSection",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DriverVersion",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DSName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Ess",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.EtwActivityId",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.Experience",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.FileDescription",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.FileOperation",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.FilePosixGroupOwner",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.FilePosixGroupOwner.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.FilePosixGroupOwner.PosixGroupId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.FilePosixPermissions",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.FilePosixPermissions.[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.FilePosixUserOwner",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.FilePosixUserOwner.DomainName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.FilePosixUserOwner.LogonId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.FilePosixUserOwner.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.FilePosixUserOwner.PosixUserId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.FilePosixUserOwner.PrimaryPosixGroup",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.FilePosixUserOwner.PrimaryPosixGroup.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.FilePosixUserOwner.PrimaryPosixGroup.PosixGroupId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.FileSizeInBytes",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.FileType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.FileVersion",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Flags",
+      "type": "array"
+    },
+    {
+      "name": "AdditionalFields.Fqbn",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.GroupDomainName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.GroupName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.GroupSid",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Hash",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.HomeDirectory",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.HomePath",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageBase",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageMD5",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageSHA1",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ImageSHA256",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InfoAsJson",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.IntegrityLevel",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.InternalName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.IsAudit",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.IsOnRemovableMedia",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.IsRemoteMachine",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.IssuerName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.IssuerTBSHash",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.LastAccessTimeUtc",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.LastWriteTimeUtc",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.LoggedOnUsers",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.LoggedOnUsers.[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ManagedInstallerEnabled",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.ManagedPdbAge",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.ManagedPdbBuildPath",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ManagedPdbSignature",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.Manufacturer",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.MarkOfTheWeb",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.MasterKeyGUID",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.MatchingDeviceId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ModuleFlags",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.ModuleId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.ModuleILPathOrName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Name",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.NamedPipeEnd",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Namespace",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.NativePdbAge",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.NativePdbSignature",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.NewUacValue",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.NotValidAfter",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.NotValidBefore",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.ObjectClass",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ObjectDN",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.OldUacValue",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.OperationDetails",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.OperationType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Options",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.OriginalFileName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.OriginalTokenIntegrityLevel",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.OriginalTokenPointer",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.OriginalTokenPrivEnabled",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.OriginalTokenPrivPresent",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.OriginalTokenSource",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.OriginalTokenUserSid",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.OriginalValue",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.OutrankedDrivers",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.PackageFamilyName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ParentDeviceInstanceId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.PassesManagedInstaller",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.PassesSmartlocker",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.PasswordLastSet",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.PipeName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.PlistProperty",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.PolicyBits",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.PolicyGuid",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.PolicyHash",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.PolicyID",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.PolicyName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.PolicyPath",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.PossibleCause",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.PreviousValue",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.PrimaryGroupId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ProcessId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.ProcessName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ProductName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ProductRevision",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ProfilePath",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Profiles",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ProtectionFlags",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ProtectionMask",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.Protocol",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.PublisherName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.PublisherTBSHash",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.QueryTypeId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.RegionSize",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.RemoteClientsAccess",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Requested Signing Level",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ResolutionTimeNs",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ResponseCategory",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ResponseCode",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ReturnValue",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.RpcAuthenticationLevel",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.RpcAuthenticationService",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.RpcEndpoint",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.RpcInterfaceName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.RpcInterfaceUuid",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.RpcOperationName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.RpcOpNum",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.RpcProtocolSequence",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.RuleId",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.SafeLinksMessageId",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.SafeLinksRecipient",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SafeLinksUrl",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SamAccountName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ScanId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ScanParametersIndex",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ScanTypeIndex",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ScopeOfSearch",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ScriptContent",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ScriptPath",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SearchFilter",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SerialNumber",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ServiceAccount",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ServiceGuid",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.ServiceName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ServiceStartType",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.ServiceType",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.SessionId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.Sha1CatalogHash",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Sha1FlatHash",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Sha256CatalogHash",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Sha256FlatHash",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ShareName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ShellLinkCommandLine",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ShellLinkIconPath",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ShellLinkRunAsAdmin",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.ShellLinkShowCommand",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ShellLinkWorkingDirectory",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Signature",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.SignatureType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Signer",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SiSigningScenario",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.SmartlockerEnabled",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.State",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Status",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.StatusCode",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SubcategoryGuid",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.SubcategoryId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SubjectUserName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SystemTokenPointer",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TamperingAction",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TamperingAttemptedValue",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Target",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TaskContent",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TaskName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ThreadId",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.Timestamp",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.TokenModificationProperties",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TotalBytesCopied",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.TotalSignatureCount",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.TransactionId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.User",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.UserAccountControl",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.UserParameters",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.UserSid",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.UserWriteable",
+      "type": "bool"
+    },
+    {
+      "name": "AdditionalFields.USN",
+      "type": "long"
+    },
+    {
+      "name": "AdditionalFields.Validated Signing Level",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ValidatedSigningLevel",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Value",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.VendorIds",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.VendorIds.[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.VerificationError",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.VerificationResult",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Volume",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.VolumeGuidPath",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.WasExecutingWhileDetected",
+      "type": "bool"
+    },
+    {
+      "name": "AppGuardContainerId",
+      "type": "string"
+    },
+    {
+      "name": "CreatedProcessSessionId",
+      "type": "long"
+    },
+    {
+      "name": "DeviceId",
+      "type": "string"
+    },
+    {
+      "name": "DeviceName",
+      "type": "string"
+    },
+    {
+      "name": "FileName",
+      "type": "string"
+    },
+    {
+      "name": "FileOriginIP",
+      "type": "string"
+    },
+    {
+      "name": "FileOriginUrl",
+      "type": "string"
+    },
+    {
+      "name": "FileSize",
+      "type": "long"
+    },
+    {
+      "name": "FolderPath",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessAccountDomain",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessAccountName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessAccountObjectId",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessAccountSid",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessAccountUpn",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessCommandLine",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessCreationTime",
+      "type": "datetime"
+    },
+    {
+      "name": "InitiatingProcessFileName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessFileSize",
+      "type": "long"
+    },
+    {
+      "name": "InitiatingProcessFolderPath",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessId",
+      "type": "long"
+    },
+    {
+      "name": "InitiatingProcessLogonId",
+      "type": "long"
+    },
+    {
+      "name": "InitiatingProcessMD5",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessParentCreationTime",
+      "type": "datetime"
+    },
+    {
+      "name": "InitiatingProcessParentFileName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessParentId",
+      "type": "long"
+    },
+    {
+      "name": "InitiatingProcessRemoteSessionDeviceName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessRemoteSessionIP",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessSessionId",
+      "type": "long"
+    },
+    {
+      "name": "InitiatingProcessSHA1",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessSHA256",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessUniqueId",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessVersionInfoCompanyName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessVersionInfoFileDescription",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessVersionInfoInternalFileName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessVersionInfoOriginalFileName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessVersionInfoProductName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatingProcessVersionInfoProductVersion",
+      "type": "string"
+    },
+    {
+      "name": "IsInitiatingProcessRemoteSession",
+      "type": "bool"
+    },
+    {
+      "name": "IsProcessRemoteSession",
+      "type": "bool"
+    },
+    {
+      "name": "LocalIP",
+      "type": "string"
+    },
+    {
+      "name": "LocalPort",
+      "type": "long"
+    },
+    {
+      "name": "LogonId",
+      "type": "long"
+    },
+    {
+      "name": "MachineGroup",
+      "type": "string"
+    },
+    {
+      "name": "MD5",
+      "type": "string"
+    },
+    {
+      "name": "ProcessCommandLine",
+      "type": "string"
+    },
+    {
+      "name": "ProcessCreationTime",
+      "type": "datetime"
+    },
+    {
+      "name": "ProcessId",
+      "type": "long"
+    },
+    {
+      "name": "ProcessRemoteSessionDeviceName",
+      "type": "string"
+    },
+    {
+      "name": "ProcessRemoteSessionIP",
+      "type": "string"
+    },
+    {
+      "name": "ProcessTokenElevation",
+      "type": "string"
+    },
+    {
+      "name": "RegistryKey",
+      "type": "string"
+    },
+    {
+      "name": "RegistryValueData",
+      "type": "string"
+    },
+    {
+      "name": "RegistryValueName",
+      "type": "string"
+    },
+    {
+      "name": "RemoteIP",
+      "type": "string"
+    },
+    {
+      "name": "RemotePort",
+      "type": "long"
+    },
+    {
+      "name": "RemoteUrl",
+      "type": "string"
+    },
+    {
+      "name": "ReportId",
+      "type": "long"
+    },
+    {
+      "name": "SHA1",
+      "type": "string"
+    },
+    {
+      "name": "SHA256",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Timestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

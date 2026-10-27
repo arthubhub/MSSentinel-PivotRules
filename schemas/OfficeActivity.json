@@ -1,0 +1,665 @@
+{
+  "table": "OfficeActivity",
+  "fields": [
+    {
+      "name": "AADGroupId",
+      "type": "string"
+    },
+    {
+      "name": "AddOnGuid",
+      "type": "string"
+    },
+    {
+      "name": "AddonName",
+      "type": "string"
+    },
+    {
+      "name": "AddOnType",
+      "type": "string"
+    },
+    {
+      "name": "AffectedItems",
+      "type": "string"
+    },
+    {
+      "name": "AppAccessContext",
+      "type": "object"
+    },
+    {
+      "name": "AppAccessContext.AADSessionId",
+      "type": "guid"
+    },
+    {
+      "name": "AppAccessContext.APIId",
+      "type": "array"
+    },
+    {
+      "name": "AppAccessContext.AuthTime",
+      "type": "datetime"
+    },
+    {
+      "name": "AppAccessContext.ClientAppId",
+      "type": "guid"
+    },
+    {
+      "name": "AppAccessContext.ClientAppName",
+      "type": "string"
+    },
+    {
+      "name": "AppAccessContext.CorrelationId",
+      "type": "guid"
+    },
+    {
+      "name": "AppAccessContext.DeviceId",
+      "type": "array"
+    },
+    {
+      "name": "AppAccessContext.IssuedAtTime",
+      "type": "datetime"
+    },
+    {
+      "name": "AppAccessContext.PFTTokenAppId",
+      "type": "guid"
+    },
+    {
+      "name": "AppAccessContext.RequestMethod",
+      "type": "string"
+    },
+    {
+      "name": "AppAccessContext.TokenIssuedAtTime",
+      "type": "datetime"
+    },
+    {
+      "name": "AppAccessContext.UniqueTokenId",
+      "type": "array"
+    },
+    {
+      "name": "AppAccessContext.UserObjectId",
+      "type": "guid"
+    },
+    {
+      "name": "AppDistributionMode",
+      "type": "string"
+    },
+    {
+      "name": "AppId",
+      "type": "string"
+    },
+    {
+      "name": "ApplicationId",
+      "type": "string"
+    },
+    {
+      "name": "AppPoolName",
+      "type": "string"
+    },
+    {
+      "name": "ArtifactsShared",
+      "type": "object"
+    },
+    {
+      "name": "ArtifactsShared.[]",
+      "type": "object"
+    },
+    {
+      "name": "ArtifactsShared.[].ArtifactSharedName",
+      "type": "string"
+    },
+    {
+      "name": "ArtifactsShared.[].ArtifactShareSessions",
+      "type": "object"
+    },
+    {
+      "name": "ArtifactsShared.[].ArtifactShareSessions.[]",
+      "type": "object"
+    },
+    {
+      "name": "ArtifactsShared.[].ArtifactShareSessions.[].EndTimestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "ArtifactsShared.[].ArtifactShareSessions.[].ScreenShareId",
+      "type": "string"
+    },
+    {
+      "name": "ArtifactsShared.[].ArtifactShareSessions.[].StartTimestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "Attendees",
+      "type": "object"
+    },
+    {
+      "name": "Attendees.[]",
+      "type": "object"
+    },
+    {
+      "name": "Attendees.[].DisplayName",
+      "type": "array"
+    },
+    {
+      "name": "Attendees.[].ExplicitConsentInfo",
+      "type": "object"
+    },
+    {
+      "name": "Attendees.[].ExplicitConsentInfo.ClientType",
+      "type": "string"
+    },
+    {
+      "name": "Attendees.[].ExplicitConsentInfo.ExplicitConsentLog",
+      "type": "object"
+    },
+    {
+      "name": "Attendees.[].ExplicitConsentInfo.ExplicitConsentLog.[]",
+      "type": "object"
+    },
+    {
+      "name": "Attendees.[].ExplicitConsentInfo.ExplicitConsentLog.[].ConsentStatus",
+      "type": "string"
+    },
+    {
+      "name": "Attendees.[].ExplicitConsentInfo.ExplicitConsentLog.[].ConsentTime",
+      "type": "datetime"
+    },
+    {
+      "name": "Attendees.[].InviterInfo",
+      "type": "object"
+    },
+    {
+      "name": "Attendees.[].InviterInfo.DisplayName",
+      "type": "string"
+    },
+    {
+      "name": "Attendees.[].InviterInfo.InviteTime",
+      "type": "datetime"
+    },
+    {
+      "name": "Attendees.[].InviterInfo.OrganizationId",
+      "type": "guid"
+    },
+    {
+      "name": "Attendees.[].InviterInfo.UPN",
+      "type": "string"
+    },
+    {
+      "name": "Attendees.[].InviterInfo.UserIdentifier",
+      "type": "string"
+    },
+    {
+      "name": "Attendees.[].InviterInfo.UserType",
+      "type": "string"
+    },
+    {
+      "name": "Attendees.[].IsAADGuest",
+      "type": "bool"
+    },
+    {
+      "name": "Attendees.[].IsOrganizer",
+      "type": "bool"
+    },
+    {
+      "name": "Attendees.[].OrganizationId",
+      "type": "guid"
+    },
+    {
+      "name": "Attendees.[].ProviderType",
+      "type": "string"
+    },
+    {
+      "name": "Attendees.[].RecipientType",
+      "type": "string"
+    },
+    {
+      "name": "Attendees.[].Role",
+      "type": "long"
+    },
+    {
+      "name": "Attendees.[].UPN",
+      "type": "string"
+    },
+    {
+      "name": "Attendees.[].UserIdType",
+      "type": "string"
+    },
+    {
+      "name": "Attendees.[].UserObjectId",
+      "type": "guid"
+    },
+    {
+      "name": "AzureADAppId",
+      "type": "string"
+    },
+    {
+      "name": "ChannelGuid",
+      "type": "string"
+    },
+    {
+      "name": "ChannelName",
+      "type": "string"
+    },
+    {
+      "name": "ChannelType",
+      "type": "string"
+    },
+    {
+      "name": "ChatName",
+      "type": "string"
+    },
+    {
+      "name": "ChatThreadId",
+      "type": "string"
+    },
+    {
+      "name": "Client_IPAddress",
+      "type": "string"
+    },
+    {
+      "name": "ClientAppId",
+      "type": "string"
+    },
+    {
+      "name": "ClientInfoString",
+      "type": "string"
+    },
+    {
+      "name": "ClientIP",
+      "type": "string"
+    },
+    {
+      "name": "ClientIP_",
+      "type": "string"
+    },
+    {
+      "name": "ClientProcessName",
+      "type": "string"
+    },
+    {
+      "name": "ClientVersion",
+      "type": "string"
+    },
+    {
+      "name": "CommunicationType",
+      "type": "string"
+    },
+    {
+      "name": "DestFolder",
+      "type": "string"
+    },
+    {
+      "name": "DestinationFileExtension",
+      "type": "string"
+    },
+    {
+      "name": "DestinationFileName",
+      "type": "string"
+    },
+    {
+      "name": "DestinationRelativeUrl",
+      "type": "string"
+    },
+    {
+      "name": "DeviceInformation",
+      "type": "string"
+    },
+    {
+      "name": "ElevationTime",
+      "type": "datetime"
+    },
+    {
+      "name": "Event_Data",
+      "type": "string"
+    },
+    {
+      "name": "EventSource",
+      "type": "string"
+    },
+    {
+      "name": "ExternalAccess",
+      "type": "string"
+    },
+    {
+      "name": "ExtraProperties",
+      "type": "object"
+    },
+    {
+      "name": "ExtraProperties.[]",
+      "type": "object"
+    },
+    {
+      "name": "ExtraProperties.[].Key",
+      "type": "string"
+    },
+    {
+      "name": "ExtraProperties.[].Value",
+      "type": "string"
+    },
+    {
+      "name": "Folder",
+      "type": "string"
+    },
+    {
+      "name": "Folders",
+      "type": "string"
+    },
+    {
+      "name": "InternalLogonType",
+      "type": "long"
+    },
+    {
+      "name": "IsJoinedFromLobby",
+      "type": "bool"
+    },
+    {
+      "name": "IsManagedDevice",
+      "type": "bool"
+    },
+    {
+      "name": "Item",
+      "type": "string"
+    },
+    {
+      "name": "ItemName",
+      "type": "string"
+    },
+    {
+      "name": "ItemType",
+      "type": "string"
+    },
+    {
+      "name": "JoinTime",
+      "type": "datetime"
+    },
+    {
+      "name": "LeaveTime",
+      "type": "datetime"
+    },
+    {
+      "name": "ListItemUniqueId",
+      "type": "string"
+    },
+    {
+      "name": "Logon_Type",
+      "type": "string"
+    },
+    {
+      "name": "LogonUserDisplayName",
+      "type": "string"
+    },
+    {
+      "name": "LogonUserSid",
+      "type": "string"
+    },
+    {
+      "name": "MachineDomainInfo",
+      "type": "string"
+    },
+    {
+      "name": "MachineId",
+      "type": "string"
+    },
+    {
+      "name": "MailboxGuid",
+      "type": "string"
+    },
+    {
+      "name": "MailboxOwnerMasterAccountSid",
+      "type": "string"
+    },
+    {
+      "name": "MailboxOwnerSid",
+      "type": "string"
+    },
+    {
+      "name": "MailboxOwnerUPN",
+      "type": "string"
+    },
+    {
+      "name": "MeetingDetailId",
+      "type": "string"
+    },
+    {
+      "name": "Members",
+      "type": "object"
+    },
+    {
+      "name": "Members.[]",
+      "type": "object"
+    },
+    {
+      "name": "Members.[].DisplayName",
+      "type": "string"
+    },
+    {
+      "name": "Members.[].MRI",
+      "type": "string"
+    },
+    {
+      "name": "Members.[].OrganizationId",
+      "type": "guid"
+    },
+    {
+      "name": "Members.[].Role",
+      "type": "long"
+    },
+    {
+      "name": "Members.[].UPN",
+      "type": "string"
+    },
+    {
+      "name": "Members.[].UserObjectId",
+      "type": "guid"
+    },
+    {
+      "name": "MessageId",
+      "type": "string"
+    },
+    {
+      "name": "ModifiedProperties",
+      "type": "string"
+    },
+    {
+      "name": "Name",
+      "type": "string"
+    },
+    {
+      "name": "NewValue",
+      "type": "string"
+    },
+    {
+      "name": "OfficeId",
+      "type": "string"
+    },
+    {
+      "name": "OfficeObjectId",
+      "type": "string"
+    },
+    {
+      "name": "OfficeTenantId",
+      "type": "string"
+    },
+    {
+      "name": "OfficeTenantId_",
+      "type": "string"
+    },
+    {
+      "name": "OfficeWorkload",
+      "type": "string"
+    },
+    {
+      "name": "OldValue",
+      "type": "string"
+    },
+    {
+      "name": "Operation",
+      "type": "string"
+    },
+    {
+      "name": "OperationProperties",
+      "type": "object"
+    },
+    {
+      "name": "OperationProperties.[]",
+      "type": "object"
+    },
+    {
+      "name": "OperationProperties.[].Name",
+      "type": "string"
+    },
+    {
+      "name": "OperationProperties.[].Value",
+      "type": "string"
+    },
+    {
+      "name": "OperationScope",
+      "type": "string"
+    },
+    {
+      "name": "OrganizationId",
+      "type": "string"
+    },
+    {
+      "name": "OrganizationId_",
+      "type": "string"
+    },
+    {
+      "name": "OrganizationName",
+      "type": "string"
+    },
+    {
+      "name": "OriginatingServer",
+      "type": "string"
+    },
+    {
+      "name": "Parameters",
+      "type": "string"
+    },
+    {
+      "name": "RecordType",
+      "type": "string"
+    },
+    {
+      "name": "ResultReasonType",
+      "type": "string"
+    },
+    {
+      "name": "ResultStatus",
+      "type": "string"
+    },
+    {
+      "name": "SendAsUserMailboxGuid",
+      "type": "string"
+    },
+    {
+      "name": "SendAsUserSmtp",
+      "type": "string"
+    },
+    {
+      "name": "SendOnBehalfOfUserSmtp",
+      "type": "string"
+    },
+    {
+      "name": "SensitivityLabelId",
+      "type": "string"
+    },
+    {
+      "name": "Site_",
+      "type": "string"
+    },
+    {
+      "name": "Site_Url",
+      "type": "string"
+    },
+    {
+      "name": "Site_Url_",
+      "type": "string"
+    },
+    {
+      "name": "SourceFileExtension",
+      "type": "string"
+    },
+    {
+      "name": "SourceFileName",
+      "type": "string"
+    },
+    {
+      "name": "SourceFileName_",
+      "type": "string"
+    },
+    {
+      "name": "SourceRecordId",
+      "type": "string"
+    },
+    {
+      "name": "SourceRelativeUrl",
+      "type": "string"
+    },
+    {
+      "name": "SourceRelativeUrl_",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "Start_Time",
+      "type": "datetime"
+    },
+    {
+      "name": "TargetUserId",
+      "type": "string"
+    },
+    {
+      "name": "TargetUserOrGroupName",
+      "type": "string"
+    },
+    {
+      "name": "TargetUserOrGroupType",
+      "type": "string"
+    },
+    {
+      "name": "TeamGuid",
+      "type": "string"
+    },
+    {
+      "name": "TeamName",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "UniqueSharingId",
+      "type": "string"
+    },
+    {
+      "name": "UserAgent",
+      "type": "string"
+    },
+    {
+      "name": "UserId",
+      "type": "string"
+    },
+    {
+      "name": "UserId_",
+      "type": "string"
+    },
+    {
+      "name": "UserKey",
+      "type": "string"
+    },
+    {
+      "name": "UserType",
+      "type": "string"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "table": "MessageUrlInfo",
+  "fields": [
+    {
+      "name": "_BilledSize",
+      "type": "real"
+    },
+    {
+      "name": "_IsBillable",
+      "type": "string"
+    },
+    {
+      "name": "ReportId",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "TeamsMessageId",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "ThreatTypes",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "Url",
+      "type": "string"
+    },
+    {
+      "name": "UrlDomain",
+      "type": "string"
+    }
+  ]
+}

@@ -1,0 +1,237 @@
+{
+  "table": "AuditLogs",
+  "fields": [
+    {
+      "name": "AADOperationType",
+      "type": "string"
+    },
+    {
+      "name": "AADTenantId",
+      "type": "string"
+    },
+    {
+      "name": "ActivityDateTime",
+      "type": "datetime"
+    },
+    {
+      "name": "ActivityDisplayName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalDetails",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalDetails.[]",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalDetails.[].key",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalDetails.[].value",
+      "type": "array"
+    },
+    {
+      "name": "Category",
+      "type": "string"
+    },
+    {
+      "name": "CorrelationId",
+      "type": "string"
+    },
+    {
+      "name": "DurationMs",
+      "type": "long"
+    },
+    {
+      "name": "Id",
+      "type": "string"
+    },
+    {
+      "name": "Identity",
+      "type": "string"
+    },
+    {
+      "name": "InitiatedBy",
+      "type": "object"
+    },
+    {
+      "name": "InitiatedBy.app",
+      "type": "object"
+    },
+    {
+      "name": "InitiatedBy.app.agentType",
+      "type": "string"
+    },
+    {
+      "name": "InitiatedBy.app.appId",
+      "type": "guid"
+    },
+    {
+      "name": "InitiatedBy.app.displayName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatedBy.app.servicePrincipalId",
+      "type": "guid"
+    },
+    {
+      "name": "InitiatedBy.app.servicePrincipalName",
+      "type": "guid"
+    },
+    {
+      "name": "InitiatedBy.user",
+      "type": "object"
+    },
+    {
+      "name": "InitiatedBy.user.agentType",
+      "type": "string"
+    },
+    {
+      "name": "InitiatedBy.user.displayName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatedBy.user.id",
+      "type": "guid"
+    },
+    {
+      "name": "InitiatedBy.user.ipAddress",
+      "type": "string"
+    },
+    {
+      "name": "InitiatedBy.user.roles",
+      "type": "object"
+    },
+    {
+      "name": "InitiatedBy.user.roles.[]",
+      "type": "null"
+    },
+    {
+      "name": "InitiatedBy.user.userPrincipalName",
+      "type": "string"
+    },
+    {
+      "name": "InitiatedBy.user.userType",
+      "type": "string"
+    },
+    {
+      "name": "LoggedByService",
+      "type": "string"
+    },
+    {
+      "name": "OperationName",
+      "type": "string"
+    },
+    {
+      "name": "OperationVersion",
+      "type": "string"
+    },
+    {
+      "name": "Resource",
+      "type": "string"
+    },
+    {
+      "name": "ResourceGroup",
+      "type": "string"
+    },
+    {
+      "name": "ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "Result",
+      "type": "string"
+    },
+    {
+      "name": "ResultDescription",
+      "type": "string"
+    },
+    {
+      "name": "ResultReason",
+      "type": "string"
+    },
+    {
+      "name": "ResultSignature",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "TargetResources",
+      "type": "object"
+    },
+    {
+      "name": "TargetResources.[]",
+      "type": "object"
+    },
+    {
+      "name": "TargetResources.[].administrativeUnits",
+      "type": "object"
+    },
+    {
+      "name": "TargetResources.[].administrativeUnits.[]",
+      "type": "null"
+    },
+    {
+      "name": "TargetResources.[].agentType",
+      "type": "string"
+    },
+    {
+      "name": "TargetResources.[].displayName",
+      "type": "string"
+    },
+    {
+      "name": "TargetResources.[].groupType",
+      "type": "string"
+    },
+    {
+      "name": "TargetResources.[].id",
+      "type": "guid"
+    },
+    {
+      "name": "TargetResources.[].modifiedProperties",
+      "type": "object"
+    },
+    {
+      "name": "TargetResources.[].modifiedProperties.[]",
+      "type": "object"
+    },
+    {
+      "name": "TargetResources.[].modifiedProperties.[].displayName",
+      "type": "string"
+    },
+    {
+      "name": "TargetResources.[].modifiedProperties.[].newValue",
+      "type": "string"
+    },
+    {
+      "name": "TargetResources.[].modifiedProperties.[].oldValue",
+      "type": "string"
+    },
+    {
+      "name": "TargetResources.[].type",
+      "type": "string"
+    },
+    {
+      "name": "TargetResources.[].userPrincipalName",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

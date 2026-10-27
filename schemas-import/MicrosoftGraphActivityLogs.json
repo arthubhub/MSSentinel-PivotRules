@@ -1,0 +1,117 @@
+{
+  "table": "MicrosoftGraphActivityLogs",
+  "fields": [
+    {
+      "name": "AadTenantId",
+      "type": "string"
+    },
+    {
+      "name": "ApiVersion",
+      "type": "string"
+    },
+    {
+      "name": "AppId",
+      "type": "string"
+    },
+    {
+      "name": "ClientAuthMethod",
+      "type": "long"
+    },
+    {
+      "name": "ClientRequestId",
+      "type": "string"
+    },
+    {
+      "name": "DeviceId",
+      "type": "string"
+    },
+    {
+      "name": "DurationMs",
+      "type": "long"
+    },
+    {
+      "name": "IdentityProvider",
+      "type": "string"
+    },
+    {
+      "name": "IPAddress",
+      "type": "string"
+    },
+    {
+      "name": "Location",
+      "type": "string"
+    },
+    {
+      "name": "OperationId",
+      "type": "string"
+    },
+    {
+      "name": "RequestId",
+      "type": "string"
+    },
+    {
+      "name": "RequestMethod",
+      "type": "string"
+    },
+    {
+      "name": "RequestUri",
+      "type": "string"
+    },
+    {
+      "name": "ResponseSizeBytes",
+      "type": "long"
+    },
+    {
+      "name": "ResponseStatusCode",
+      "type": "long"
+    },
+    {
+      "name": "Roles",
+      "type": "string"
+    },
+    {
+      "name": "Scopes",
+      "type": "string"
+    },
+    {
+      "name": "ServicePrincipalId",
+      "type": "string"
+    },
+    {
+      "name": "SessionId",
+      "type": "string"
+    },
+    {
+      "name": "SignInActivityId",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "TokenIssuedAt",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "UserAgent",
+      "type": "string"
+    },
+    {
+      "name": "UserId",
+      "type": "string"
+    },
+    {
+      "name": "Wids",
+      "type": "string"
+    }
+  ]
+}

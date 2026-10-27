@@ -1,0 +1,129 @@
+{
+  "table": "SecurityBaseline",
+  "fields": [
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "ActualResult",
+      "type": "string"
+    },
+    {
+      "name": "AnalyzeOperation",
+      "type": "string"
+    },
+    {
+      "name": "AnalyzeResult",
+      "type": "string"
+    },
+    {
+      "name": "AssessmentId",
+      "type": "string"
+    },
+    {
+      "name": "BaselineId",
+      "type": "string"
+    },
+    {
+      "name": "BaselineRuleId",
+      "type": "string"
+    },
+    {
+      "name": "BaselineRuleType",
+      "type": "string"
+    },
+    {
+      "name": "BaselineType",
+      "type": "string"
+    },
+    {
+      "name": "CceId",
+      "type": "string"
+    },
+    {
+      "name": "Computer",
+      "type": "string"
+    },
+    {
+      "name": "ComputerEnvironment",
+      "type": "string"
+    },
+    {
+      "name": "Description",
+      "type": "string"
+    },
+    {
+      "name": "ExpectedResult",
+      "type": "string"
+    },
+    {
+      "name": "ManagementGroupName",
+      "type": "string"
+    },
+    {
+      "name": "MG",
+      "type": "string"
+    },
+    {
+      "name": "OSName",
+      "type": "string"
+    },
+    {
+      "name": "Resource",
+      "type": "string"
+    },
+    {
+      "name": "ResourceGroup",
+      "type": "string"
+    },
+    {
+      "name": "ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "ResourceProvider",
+      "type": "string"
+    },
+    {
+      "name": "ResourceType",
+      "type": "string"
+    },
+    {
+      "name": "RuleSetting",
+      "type": "string"
+    },
+    {
+      "name": "RuleSeverity",
+      "type": "string"
+    },
+    {
+      "name": "SourceComputerId",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "SubscriptionId",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeAnalyzed",
+      "type": "datetime"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

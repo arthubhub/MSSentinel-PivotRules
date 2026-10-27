@@ -1,0 +1,55 @@
+# locations.yml — url
+# Généré par scripts/generate-locations.mjs (#31). NE PAS ÉDITER À LA MAIN : relancer le script.
+# Paires "Table.Colonne" où ce type d'indicateur peut apparaître.
+#   confirmed : signal fort — comparaison dans une règle existante, ou table Entity Defender.
+#   uncertain : signal faible — motif de nom de colonne. Publié quand même (décision du 23/10) :
+#               aide à la présélection, et l'analyste peut toujours changer de type dans le panneau.
+# L'ORDRE COMPTE : confirmed avant uncertain. Pour une colonne candidate à plusieurs types, le type
+# qui la liste en confirmed gagne la présélection (décision 2 : cet ordre prime sur INDICATOR_PRIORITY).
+# 11 confirmée(s), 33 incertaine(s). Publication dans pivot-rules.json : en 2d.
+confirmed:
+  - AlertEvidence.RemoteUrl
+  - AppRequests.Url
+  - DeviceEvents.FileOriginUrl
+  - DeviceEvents.RemoteUrl
+  - DeviceFileEvents.FileOriginReferrerUrl
+  - DeviceFileEvents.FileOriginUrl
+  - DeviceNetworkEvents.RemoteUrl
+  - EmailUrlInfo.Url
+  - MessageUrlInfo.Url
+  - ThreatIntelligenceIndicator.Url
+  - UrlClickEvents.Url
+uncertain:
+  - AADGraphActivityLogs.RequestUri
+  - ASimAuthenticationEventLogs.EventReportUrl
+  - ASimAuthenticationEventLogs.TargetUrl
+  - ASimDnsActivityLogs.EventReportUrl
+  - ASimFileEventLogs.EventReportUrl
+  - ASimFileEventLogs.TargetUrl
+  - ASimNetworkSessionLogs.EventReportUrl
+  - ASimProcessEventLogs.EventReportUrl
+  - ASimWebSessionLogs.UrlOriginal
+  - AZFWApplicationRule.TargetUrl
+  - AZKVAuditLogs.RequestUri
+  - AzureDiagnostics.TargetUrl_s
+  - AzureDiagnostics.originUrl_s
+  - AzureDiagnostics.originalRequestUriWithArgs_s
+  - AzureDiagnostics.probeUrl_s
+  - AzureDiagnostics.requestUri_s
+  - CommonSecurityLog.RequestURL
+  - DataverseActivity.InstanceUrl
+  - DataverseActivity.ItemUrl
+  - Dynamics365Activity.InstanceUrl
+  - Dynamics365Activity.ItemUrl
+  - EmailUrlInfo.UrlLocation
+  - MicrosoftGraphActivityLogs.RequestUri
+  - OfficeActivity.DestinationRelativeUrl
+  - OfficeActivity.Site_Url
+  - OfficeActivity.Site_Url_
+  - OfficeActivity.SourceRelativeUrl
+  - OfficeActivity.SourceRelativeUrl_
+  - SecurityIncident.IncidentUrl
+  - StorageBlobLogs.DestinationUri
+  - StorageBlobLogs.SourceUri
+  - StorageBlobLogs.Uri
+  - Usage.ResourceUri

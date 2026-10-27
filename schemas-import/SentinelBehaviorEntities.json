@@ -1,0 +1,61 @@
+{
+  "table": "SentinelBehaviorEntities",
+  "fields": [
+    {
+      "name": "ActionType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields",
+      "type": "string"
+    },
+    {
+      "name": "BehaviorId",
+      "type": "string"
+    },
+    {
+      "name": "Categories",
+      "type": "string"
+    },
+    {
+      "name": "DataSources",
+      "type": "string"
+    },
+    {
+      "name": "DetectionSource",
+      "type": "string"
+    },
+    {
+      "name": "DeviceName",
+      "type": "string"
+    },
+    {
+      "name": "EntityRole",
+      "type": "string"
+    },
+    {
+      "name": "EntityType",
+      "type": "string"
+    },
+    {
+      "name": "RemoteIP",
+      "type": "string"
+    },
+    {
+      "name": "ServiceSource",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

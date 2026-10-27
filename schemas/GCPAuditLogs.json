@@ -1,0 +1,857 @@
+{
+  "table": "GCPAuditLogs",
+  "fields": [
+    {
+      "name": "AuthenticationInfo",
+      "type": "object"
+    },
+    {
+      "name": "AuthenticationInfo.loggableShortLivedCredential",
+      "type": "object"
+    },
+    {
+      "name": "AuthenticationInfo.loggableShortLivedCredential.@type",
+      "type": "string"
+    },
+    {
+      "name": "AuthenticationInfo.loggableShortLivedCredential.oauthToken",
+      "type": "object"
+    },
+    {
+      "name": "AuthenticationInfo.loggableShortLivedCredential.oauthToken.tokenPrefix",
+      "type": "string"
+    },
+    {
+      "name": "AuthenticationInfo.loggableShortLivedCredential.signedJwt",
+      "type": "object"
+    },
+    {
+      "name": "AuthenticationInfo.loggableShortLivedCredential.signedJwt.expirationTime",
+      "type": "datetime"
+    },
+    {
+      "name": "AuthenticationInfo.loggableShortLivedCredential.signedJwt.issuer",
+      "type": "string"
+    },
+    {
+      "name": "AuthenticationInfo.loggableShortLivedCredential.signedJwt.subject",
+      "type": "string"
+    },
+    {
+      "name": "AuthenticationInfo.oauthInfo",
+      "type": "object"
+    },
+    {
+      "name": "AuthenticationInfo.oauthInfo.oauthClientId",
+      "type": "string"
+    },
+    {
+      "name": "AuthenticationInfo.principalEmail",
+      "type": "string"
+    },
+    {
+      "name": "AuthenticationInfo.principalEmployingEntity",
+      "type": "string"
+    },
+    {
+      "name": "AuthenticationInfo.principalJobTitle",
+      "type": "string"
+    },
+    {
+      "name": "AuthenticationInfo.principalOfficeCountry",
+      "type": "string"
+    },
+    {
+      "name": "AuthenticationInfo.principalPhysicalLocationCountry",
+      "type": "string"
+    },
+    {
+      "name": "AuthenticationInfo.principalSubject",
+      "type": "string"
+    },
+    {
+      "name": "AuthenticationInfo.serviceAccountDelegationInfo",
+      "type": "object"
+    },
+    {
+      "name": "AuthenticationInfo.serviceAccountDelegationInfo.[]",
+      "type": "object"
+    },
+    {
+      "name": "AuthenticationInfo.serviceAccountDelegationInfo.[].principalSubject",
+      "type": "string"
+    },
+    {
+      "name": "AuthorizationInfo",
+      "type": "object"
+    },
+    {
+      "name": "AuthorizationInfo.[]",
+      "type": "object"
+    },
+    {
+      "name": "AuthorizationInfo.[].granted",
+      "type": "bool"
+    },
+    {
+      "name": "AuthorizationInfo.[].permission",
+      "type": "string"
+    },
+    {
+      "name": "AuthorizationInfo.[].permissionType",
+      "type": "string"
+    },
+    {
+      "name": "AuthorizationInfo.[].reasonType",
+      "type": "string"
+    },
+    {
+      "name": "AuthorizationInfo.[].resource",
+      "type": "string"
+    },
+    {
+      "name": "AuthorizationInfo.[].resourceAttributes",
+      "type": "object"
+    },
+    {
+      "name": "AuthorizationInfo.[].resourceAttributes.name",
+      "type": "string"
+    },
+    {
+      "name": "AuthorizationInfo.[].resourceAttributes.service",
+      "type": "string"
+    },
+    {
+      "name": "AuthorizationInfo.[].resourceAttributes.type",
+      "type": "string"
+    },
+    {
+      "name": "GCPResourceName",
+      "type": "string"
+    },
+    {
+      "name": "GCPResourceType",
+      "type": "string"
+    },
+    {
+      "name": "InsertId",
+      "type": "string"
+    },
+    {
+      "name": "LogName",
+      "type": "string"
+    },
+    {
+      "name": "Metadata",
+      "type": "object"
+    },
+    {
+      "name": "Metadata.@type",
+      "type": "string"
+    },
+    {
+      "name": "Metadata.activityId",
+      "type": "object"
+    },
+    {
+      "name": "Metadata.activityId.timeUsec",
+      "type": "string"
+    },
+    {
+      "name": "Metadata.activityId.uniqQualifier",
+      "type": "string"
+    },
+    {
+      "name": "Metadata.backupCompletionTime",
+      "type": "datetime"
+    },
+    {
+      "name": "Metadata.backupStartTime",
+      "type": "datetime"
+    },
+    {
+      "name": "Metadata.currentMasterVersion",
+      "type": "string"
+    },
+    {
+      "name": "Metadata.event",
+      "type": "object"
+    },
+    {
+      "name": "Metadata.event.[]",
+      "type": "object"
+    },
+    {
+      "name": "Metadata.event.[].eventId",
+      "type": "string"
+    },
+    {
+      "name": "Metadata.event.[].eventName",
+      "type": "string"
+    },
+    {
+      "name": "Metadata.event.[].eventType",
+      "type": "string"
+    },
+    {
+      "name": "Metadata.event.[].parameter",
+      "type": "object"
+    },
+    {
+      "name": "Metadata.event.[].parameter.[]",
+      "type": "object"
+    },
+    {
+      "name": "Metadata.event.[].parameter.[].boolValue",
+      "type": "bool"
+    },
+    {
+      "name": "Metadata.event.[].parameter.[].label",
+      "type": "string"
+    },
+    {
+      "name": "Metadata.event.[].parameter.[].multiStrValue",
+      "type": "object"
+    },
+    {
+      "name": "Metadata.event.[].parameter.[].multiStrValue.[]",
+      "type": "string"
+    },
+    {
+      "name": "Metadata.event.[].parameter.[].name",
+      "type": "string"
+    },
+    {
+      "name": "Metadata.event.[].parameter.[].type",
+      "type": "string"
+    },
+    {
+      "name": "Metadata.event.[].parameter.[].value",
+      "type": "string"
+    },
+    {
+      "name": "Metadata.event.[].status",
+      "type": "object"
+    },
+    {
+      "name": "Metadata.event.[].status.errorCode",
+      "type": "string"
+    },
+    {
+      "name": "Metadata.event.[].status.eventStatus",
+      "type": "string"
+    },
+    {
+      "name": "Metadata.event.[].status.success",
+      "type": "bool"
+    },
+    {
+      "name": "Metadata.location",
+      "type": "string"
+    },
+    {
+      "name": "Metadata.logMode",
+      "type": "string"
+    },
+    {
+      "name": "Metadata.message",
+      "type": "string"
+    },
+    {
+      "name": "Metadata.operationType",
+      "type": "string"
+    },
+    {
+      "name": "Metadata.previousMasterVersion",
+      "type": "string"
+    },
+    {
+      "name": "Metadata.reason",
+      "type": "string"
+    },
+    {
+      "name": "Metadata.requestID",
+      "type": "string"
+    },
+    {
+      "name": "Metadata.windowEndTime",
+      "type": "datetime"
+    },
+    {
+      "name": "Metadata.windowStartTime",
+      "type": "datetime"
+    },
+    {
+      "name": "Metadata.windowStatus",
+      "type": "string"
+    },
+    {
+      "name": "MethodName",
+      "type": "string"
+    },
+    {
+      "name": "PrincipalEmail",
+      "type": "string"
+    },
+    {
+      "name": "ProjectId",
+      "type": "string"
+    },
+    {
+      "name": "Request",
+      "type": "object"
+    },
+    {
+      "name": "Request.@type",
+      "type": "string"
+    },
+    {
+      "name": "Request.audience",
+      "type": "string"
+    },
+    {
+      "name": "Request.change",
+      "type": "object"
+    },
+    {
+      "name": "Request.change.additions",
+      "type": "object"
+    },
+    {
+      "name": "Request.change.additions.[]",
+      "type": "object"
+    },
+    {
+      "name": "Request.change.additions.[].name",
+      "type": "string"
+    },
+    {
+      "name": "Request.change.additions.[].rrdatas",
+      "type": "object"
+    },
+    {
+      "name": "Request.change.additions.[].rrdatas.[]",
+      "type": "string"
+    },
+    {
+      "name": "Request.change.additions.[].ttl",
+      "type": "long"
+    },
+    {
+      "name": "Request.change.additions.[].type",
+      "type": "string"
+    },
+    {
+      "name": "Request.change.deletions",
+      "type": "object"
+    },
+    {
+      "name": "Request.change.deletions.[]",
+      "type": "object"
+    },
+    {
+      "name": "Request.change.deletions.[].kind",
+      "type": "string"
+    },
+    {
+      "name": "Request.change.deletions.[].name",
+      "type": "string"
+    },
+    {
+      "name": "Request.change.deletions.[].rrdatas",
+      "type": "object"
+    },
+    {
+      "name": "Request.change.deletions.[].rrdatas.[]",
+      "type": "string"
+    },
+    {
+      "name": "Request.change.deletions.[].ttl",
+      "type": "long"
+    },
+    {
+      "name": "Request.change.deletions.[].type",
+      "type": "string"
+    },
+    {
+      "name": "Request.eventId",
+      "type": "string"
+    },
+    {
+      "name": "Request.includeEmail",
+      "type": "bool"
+    },
+    {
+      "name": "Request.location",
+      "type": "string"
+    },
+    {
+      "name": "Request.logMode",
+      "type": "string"
+    },
+    {
+      "name": "Request.managedZone",
+      "type": "string"
+    },
+    {
+      "name": "Request.name",
+      "type": "string"
+    },
+    {
+      "name": "Request.nodePool",
+      "type": "object"
+    },
+    {
+      "name": "Request.nodePool.autoscaling",
+      "type": "object"
+    },
+    {
+      "name": "Request.nodePool.autoscaling.autoprovisioned",
+      "type": "bool"
+    },
+    {
+      "name": "Request.nodePool.autoscaling.enabled",
+      "type": "bool"
+    },
+    {
+      "name": "Request.nodePool.autoscaling.maxNodeCount",
+      "type": "long"
+    },
+    {
+      "name": "Request.nodePool.config",
+      "type": "object"
+    },
+    {
+      "name": "Request.nodePool.config.diskSizeGb",
+      "type": "long"
+    },
+    {
+      "name": "Request.nodePool.config.imageType",
+      "type": "string"
+    },
+    {
+      "name": "Request.nodePool.config.machineType",
+      "type": "string"
+    },
+    {
+      "name": "Request.nodePool.config.oauthScopes",
+      "type": "object"
+    },
+    {
+      "name": "Request.nodePool.config.oauthScopes.[]",
+      "type": "string"
+    },
+    {
+      "name": "Request.nodePool.config.reservationAffinity",
+      "type": "object"
+    },
+    {
+      "name": "Request.nodePool.config.reservationAffinity.consumeReservationType",
+      "type": "string"
+    },
+    {
+      "name": "Request.nodePool.config.serviceAccount",
+      "type": "string"
+    },
+    {
+      "name": "Request.nodePool.locations",
+      "type": "object"
+    },
+    {
+      "name": "Request.nodePool.locations.[]",
+      "type": "string"
+    },
+    {
+      "name": "Request.nodePool.management",
+      "type": "object"
+    },
+    {
+      "name": "Request.nodePool.management.autoRepair",
+      "type": "bool"
+    },
+    {
+      "name": "Request.nodePool.management.autoUpgrade",
+      "type": "bool"
+    },
+    {
+      "name": "Request.nodePool.maxPodsConstraint",
+      "type": "object"
+    },
+    {
+      "name": "Request.nodePool.maxPodsConstraint.maxPodsPerNode",
+      "type": "string"
+    },
+    {
+      "name": "Request.nodePool.name",
+      "type": "string"
+    },
+    {
+      "name": "Request.nodePool.upgradeSettings",
+      "type": "object"
+    },
+    {
+      "name": "Request.nodePool.upgradeSettings.maxSurge",
+      "type": "long"
+    },
+    {
+      "name": "Request.nodePool.upgradeSettings.strategy",
+      "type": "string"
+    },
+    {
+      "name": "Request.parent",
+      "type": "string"
+    },
+    {
+      "name": "Request.project",
+      "type": "string"
+    },
+    {
+      "name": "Request.project_number",
+      "type": "string"
+    },
+    {
+      "name": "Request.query",
+      "type": "string"
+    },
+    {
+      "name": "Request.responsePolicy",
+      "type": "string"
+    },
+    {
+      "name": "Request.responsePolicyResource",
+      "type": "object"
+    },
+    {
+      "name": "Request.responsePolicyResource.description",
+      "type": "string"
+    },
+    {
+      "name": "Request.responsePolicyResource.gkeClusters",
+      "type": "object"
+    },
+    {
+      "name": "Request.responsePolicyResource.gkeClusters.[]",
+      "type": "object"
+    },
+    {
+      "name": "Request.responsePolicyResource.gkeClusters.[].gkeClusterName",
+      "type": "string"
+    },
+    {
+      "name": "Request.responsePolicyResource.labels",
+      "type": "object"
+    },
+    {
+      "name": "Request.responsePolicyResource.labels.goog-gke-node",
+      "type": "string"
+    },
+    {
+      "name": "Request.responsePolicyResource.responsePolicyName",
+      "type": "string"
+    },
+    {
+      "name": "Request.scope",
+      "type": "object"
+    },
+    {
+      "name": "Request.scope.[]",
+      "type": "string"
+    },
+    {
+      "name": "Request.uid",
+      "type": "string"
+    },
+    {
+      "name": "Request.update",
+      "type": "object"
+    },
+    {
+      "name": "Request.update.desiredMasterVersion",
+      "type": "string"
+    },
+    {
+      "name": "Request.update.desiredNodePoolId",
+      "type": "string"
+    },
+    {
+      "name": "Request.update.desiredNodeVersion",
+      "type": "string"
+    },
+    {
+      "name": "Request.username",
+      "type": "string"
+    },
+    {
+      "name": "RequestMetadata",
+      "type": "object"
+    },
+    {
+      "name": "RequestMetadata.callerIp",
+      "type": "string"
+    },
+    {
+      "name": "RequestMetadata.callerNetwork",
+      "type": "string"
+    },
+    {
+      "name": "RequestMetadata.callerSuppliedUserAgent",
+      "type": "string"
+    },
+    {
+      "name": "RequestMetadata.requestAttributes",
+      "type": "object"
+    },
+    {
+      "name": "RequestMetadata.requestAttributes.eventId",
+      "type": "string"
+    },
+    {
+      "name": "RequestMetadata.requestAttributes.reason",
+      "type": "string"
+    },
+    {
+      "name": "RequestMetadata.requestAttributes.time",
+      "type": "datetime"
+    },
+    {
+      "name": "ResourceLocation",
+      "type": "array"
+    },
+    {
+      "name": "ResourceLocation[].currentLocations",
+      "type": "object"
+    },
+    {
+      "name": "ResourceLocation[].currentLocations.[]",
+      "type": "string"
+    },
+    {
+      "name": "Response",
+      "type": "object"
+    },
+    {
+      "name": "Response.@type",
+      "type": "string"
+    },
+    {
+      "name": "Response.change",
+      "type": "object"
+    },
+    {
+      "name": "Response.change.additions",
+      "type": "object"
+    },
+    {
+      "name": "Response.change.additions.[]",
+      "type": "object"
+    },
+    {
+      "name": "Response.change.additions.[].name",
+      "type": "string"
+    },
+    {
+      "name": "Response.change.additions.[].rrdatas",
+      "type": "object"
+    },
+    {
+      "name": "Response.change.additions.[].rrdatas.[]",
+      "type": "string"
+    },
+    {
+      "name": "Response.change.additions.[].ttl",
+      "type": "long"
+    },
+    {
+      "name": "Response.change.additions.[].type",
+      "type": "string"
+    },
+    {
+      "name": "Response.change.deletions",
+      "type": "object"
+    },
+    {
+      "name": "Response.change.deletions.[]",
+      "type": "object"
+    },
+    {
+      "name": "Response.change.deletions.[].name",
+      "type": "string"
+    },
+    {
+      "name": "Response.change.deletions.[].rrdatas",
+      "type": "object"
+    },
+    {
+      "name": "Response.change.deletions.[].rrdatas.[]",
+      "type": "string"
+    },
+    {
+      "name": "Response.change.deletions.[].ttl",
+      "type": "long"
+    },
+    {
+      "name": "Response.change.deletions.[].type",
+      "type": "string"
+    },
+    {
+      "name": "Response.change.id",
+      "type": "string"
+    },
+    {
+      "name": "Response.change.startTime",
+      "type": "datetime"
+    },
+    {
+      "name": "Response.change.status",
+      "type": "string"
+    },
+    {
+      "name": "Response.createTime",
+      "type": "datetime"
+    },
+    {
+      "name": "Response.name",
+      "type": "string"
+    },
+    {
+      "name": "Response.operationType",
+      "type": "string"
+    },
+    {
+      "name": "Response.responsePolicy",
+      "type": "object"
+    },
+    {
+      "name": "Response.responsePolicy.description",
+      "type": "string"
+    },
+    {
+      "name": "Response.responsePolicy.gkeClusters",
+      "type": "object"
+    },
+    {
+      "name": "Response.responsePolicy.gkeClusters.[]",
+      "type": "object"
+    },
+    {
+      "name": "Response.responsePolicy.gkeClusters.[].gkeClusterName",
+      "type": "string"
+    },
+    {
+      "name": "Response.responsePolicy.id",
+      "type": "string"
+    },
+    {
+      "name": "Response.responsePolicy.labels",
+      "type": "object"
+    },
+    {
+      "name": "Response.responsePolicy.labels.goog-gke-node",
+      "type": "string"
+    },
+    {
+      "name": "Response.responsePolicy.responsePolicyName",
+      "type": "string"
+    },
+    {
+      "name": "Response.selfLink",
+      "type": "string"
+    },
+    {
+      "name": "Response.startTime",
+      "type": "datetime"
+    },
+    {
+      "name": "Response.state",
+      "type": "string"
+    },
+    {
+      "name": "Response.status",
+      "type": "string"
+    },
+    {
+      "name": "Response.success",
+      "type": "bool"
+    },
+    {
+      "name": "Response.targetLink",
+      "type": "string"
+    },
+    {
+      "name": "ServiceData",
+      "type": "object"
+    },
+    {
+      "name": "ServiceData.@type",
+      "type": "string"
+    },
+    {
+      "name": "ServiceData.eventId",
+      "type": "string"
+    },
+    {
+      "name": "ServiceData.logMode",
+      "type": "string"
+    },
+    {
+      "name": "ServiceName",
+      "type": "string"
+    },
+    {
+      "name": "Severity",
+      "type": "string"
+    },
+    {
+      "name": "Status",
+      "type": "object"
+    },
+    {
+      "name": "Status.code",
+      "type": "long"
+    },
+    {
+      "name": "Status.details",
+      "type": "object"
+    },
+    {
+      "name": "Status.details.[]",
+      "type": "object"
+    },
+    {
+      "name": "Status.details.[].@type",
+      "type": "string"
+    },
+    {
+      "name": "Status.details.[].domain",
+      "type": "string"
+    },
+    {
+      "name": "Status.details.[].reason",
+      "type": "string"
+    },
+    {
+      "name": "Status.message",
+      "type": "string"
+    },
+    {
+      "name": "StatusMessage",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Timestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

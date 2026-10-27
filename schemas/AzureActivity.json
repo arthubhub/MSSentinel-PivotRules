@@ -1,0 +1,637 @@
+{
+  "table": "AzureActivity",
+  "fields": [
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "ActivityStatus",
+      "type": "string"
+    },
+    {
+      "name": "ActivityStatusValue",
+      "type": "string"
+    },
+    {
+      "name": "ActivitySubstatus",
+      "type": "string"
+    },
+    {
+      "name": "ActivitySubstatusValue",
+      "type": "string"
+    },
+    {
+      "name": "Authorization",
+      "type": "string"
+    },
+    {
+      "name": "Authorization_d",
+      "type": "object"
+    },
+    {
+      "name": "Authorization_d.action",
+      "type": "string"
+    },
+    {
+      "name": "Authorization_d.evidence",
+      "type": "object"
+    },
+    {
+      "name": "Authorization_d.evidence.auditDenyAssignmentIds",
+      "type": "object"
+    },
+    {
+      "name": "Authorization_d.evidence.auditDenyAssignmentIds.[]",
+      "type": "null"
+    },
+    {
+      "name": "Authorization_d.evidence.auditDenyAssignmentsCount",
+      "type": "long"
+    },
+    {
+      "name": "Authorization_d.evidence.auditDenyAssignmentsResultKind",
+      "type": "string"
+    },
+    {
+      "name": "Authorization_d.evidence.principalId",
+      "type": "string"
+    },
+    {
+      "name": "Authorization_d.evidence.principalType",
+      "type": "string"
+    },
+    {
+      "name": "Authorization_d.evidence.role",
+      "type": "string"
+    },
+    {
+      "name": "Authorization_d.evidence.roleAssignmentId",
+      "type": "string"
+    },
+    {
+      "name": "Authorization_d.evidence.roleAssignmentScope",
+      "type": "string"
+    },
+    {
+      "name": "Authorization_d.evidence.roleDefinitionId",
+      "type": "string"
+    },
+    {
+      "name": "Authorization_d.scope",
+      "type": "string"
+    },
+    {
+      "name": "Caller",
+      "type": "string"
+    },
+    {
+      "name": "CallerIpAddress",
+      "type": "string"
+    },
+    {
+      "name": "Category",
+      "type": "string"
+    },
+    {
+      "name": "CategoryValue",
+      "type": "string"
+    },
+    {
+      "name": "Claims",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d",
+      "type": "object"
+    },
+    {
+      "name": "Claims_d.acrs",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.aio",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.appid",
+      "type": "guid"
+    },
+    {
+      "name": "Claims_d.appidacr",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.aud",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.correlationid",
+      "type": "guid"
+    },
+    {
+      "name": "Claims_d.exp",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.groups",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.http://schemas.microsoft.com/2012/01/devicecontext/claims/identifier",
+      "type": "guid"
+    },
+    {
+      "name": "Claims_d.http://schemas.microsoft.com/claims/authnclassreference",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.http://schemas.microsoft.com/claims/authnmethodsreferences",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.http://schemas.microsoft.com/identity/claims/identityprovider",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.http://schemas.microsoft.com/identity/claims/objectidentifier",
+      "type": "guid"
+    },
+    {
+      "name": "Claims_d.http://schemas.microsoft.com/identity/claims/scope",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.http://schemas.microsoft.com/identity/claims/tenantid",
+      "type": "guid"
+    },
+    {
+      "name": "Claims_d.http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
+      "type": "guid"
+    },
+    {
+      "name": "Claims_d.http://schemas.xmlsoap.org/ws/2005/05/identity/claims/spn",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.iat",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.idtyp",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.ipaddr",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.iss",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.name",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.nbf",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.onprem_sid",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.puid",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.rh",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.sid",
+      "type": "guid"
+    },
+    {
+      "name": "Claims_d.uti",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.ver",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.wids",
+      "type": "guid"
+    },
+    {
+      "name": "Claims_d.xms_act_fct",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.xms_aud",
+      "type": "guid"
+    },
+    {
+      "name": "Claims_d.xms_az_rid",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.xms_ftd",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.xms_idrel",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.xms_mirid",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.xms_rd",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.xms_sub_fct",
+      "type": "string"
+    },
+    {
+      "name": "Claims_d.xms_tcdt",
+      "type": "string"
+    },
+    {
+      "name": "CorrelationId",
+      "type": "string"
+    },
+    {
+      "name": "EventDataId",
+      "type": "string"
+    },
+    {
+      "name": "EventSubmissionTimestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "Hierarchy",
+      "type": "string"
+    },
+    {
+      "name": "HTTPRequest",
+      "type": "string"
+    },
+    {
+      "name": "Level",
+      "type": "string"
+    },
+    {
+      "name": "OperationId",
+      "type": "string"
+    },
+    {
+      "name": "OperationName",
+      "type": "string"
+    },
+    {
+      "name": "OperationNameValue",
+      "type": "string"
+    },
+    {
+      "name": "Properties",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d",
+      "type": "object"
+    },
+    {
+      "name": "Properties_d.activityStatusValue",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.activitySubstatusValue",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.ancestors",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.Caller",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.caller",
+      "type": "guid"
+    },
+    {
+      "name": "Properties_d.CallerCredentialType",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.cause",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.conflictingFields",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.CorrelationId",
+      "type": "guid"
+    },
+    {
+      "name": "Properties_d.createdResources",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.currentHealthStatus",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.deploymentId",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.deplymentProvisioningState",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.Description_scrubbed",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.details",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.endTime",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.entity",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.Entity Name",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.errorMessage",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.eventCategory",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.EventChannel",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.eventDataId",
+      "type": "guid"
+    },
+    {
+      "name": "Properties_d.EventId",
+      "type": "guid"
+    },
+    {
+      "name": "Properties_d.EventName",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.EventProperties",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.EventSource",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.eventSubmissionTimestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "Properties_d.eventTimestamp",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.fields",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.hierarchy",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.httpRequest",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.IpAddress",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.isComplianceCheck",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.Job Id",
+      "type": "guid"
+    },
+    {
+      "name": "Properties_d.Message",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.message",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.OperationName",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.operationName",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.originalEventTimestamp",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.policies",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.previousHealthStatus",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.recommendationCategory",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.recommendationImpact",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.recommendationName",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.recommendationResourceLink",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.recommendationSchemaVersion",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.recommendationType",
+      "type": "guid"
+    },
+    {
+      "name": "Properties_d.requestbody",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.resource",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.resourceGroup",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.resourceId",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.resourceLocation",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.resourceProviderValue",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.responseBody",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.serviceRequestId",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.skippedFields",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.Start Time",
+      "type": "datetime"
+    },
+    {
+      "name": "Properties_d.startTime",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.Status",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.status",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.statusCode",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.statusMessage",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.subscriptionId",
+      "type": "guid"
+    },
+    {
+      "name": "Properties_d.tenantId",
+      "type": "guid"
+    },
+    {
+      "name": "Properties_d.title",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.type",
+      "type": "string"
+    },
+    {
+      "name": "Properties_d.updatedResources",
+      "type": "string"
+    },
+    {
+      "name": "Resource",
+      "type": "string"
+    },
+    {
+      "name": "ResourceGroup",
+      "type": "string"
+    },
+    {
+      "name": "ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "ResourceProvider",
+      "type": "string"
+    },
+    {
+      "name": "ResourceProviderValue",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "SubscriptionId",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

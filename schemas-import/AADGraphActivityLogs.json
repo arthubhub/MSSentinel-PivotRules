@@ -1,0 +1,121 @@
+{
+  "table": "AADGraphActivityLogs",
+  "fields": [
+    {
+      "name": "AADTenantId",
+      "type": "string"
+    },
+    {
+      "name": "ActorType",
+      "type": "string"
+    },
+    {
+      "name": "ApiVersion",
+      "type": "string"
+    },
+    {
+      "name": "AppId",
+      "type": "string"
+    },
+    {
+      "name": "CallerIpAddress",
+      "type": "string"
+    },
+    {
+      "name": "Category",
+      "type": "string"
+    },
+    {
+      "name": "ClientAuthMethod",
+      "type": "string"
+    },
+    {
+      "name": "DurationMs",
+      "type": "long"
+    },
+    {
+      "name": "IdentityProvider",
+      "type": "string"
+    },
+    {
+      "name": "Location",
+      "type": "string"
+    },
+    {
+      "name": "OperationName",
+      "type": "string"
+    },
+    {
+      "name": "RequestId",
+      "type": "string"
+    },
+    {
+      "name": "RequestMethod",
+      "type": "string"
+    },
+    {
+      "name": "RequestUri",
+      "type": "string"
+    },
+    {
+      "name": "ResponseSizeBytes",
+      "type": "long"
+    },
+    {
+      "name": "ResponseStatusCode",
+      "type": "long"
+    },
+    {
+      "name": "Roles",
+      "type": "string"
+    },
+    {
+      "name": "Scopes",
+      "type": "string"
+    },
+    {
+      "name": "ServicePrincipalId",
+      "type": "string"
+    },
+    {
+      "name": "SessionId",
+      "type": "string"
+    },
+    {
+      "name": "SignInActivityId",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "TimeRequested",
+      "type": "datetime"
+    },
+    {
+      "name": "TokenIssuedAt",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "UserAgent",
+      "type": "string"
+    },
+    {
+      "name": "UserId",
+      "type": "string"
+    },
+    {
+      "name": "Wids",
+      "type": "string"
+    }
+  ]
+}

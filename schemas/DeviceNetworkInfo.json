@@ -1,0 +1,125 @@
+{
+  "table": "DeviceNetworkInfo",
+  "fields": [
+    {
+      "name": "ConnectedNetworks",
+      "type": "object"
+    },
+    {
+      "name": "ConnectedNetworks.[]",
+      "type": "object"
+    },
+    {
+      "name": "ConnectedNetworks.[].Category",
+      "type": "string"
+    },
+    {
+      "name": "ConnectedNetworks.[].Description",
+      "type": "string"
+    },
+    {
+      "name": "ConnectedNetworks.[].IsConnectedToInternet",
+      "type": "bool"
+    },
+    {
+      "name": "ConnectedNetworks.[].Name",
+      "type": "string"
+    },
+    {
+      "name": "DefaultGateways",
+      "type": "object"
+    },
+    {
+      "name": "DefaultGateways.[]",
+      "type": "string"
+    },
+    {
+      "name": "DeviceId",
+      "type": "string"
+    },
+    {
+      "name": "DeviceName",
+      "type": "string"
+    },
+    {
+      "name": "DnsAddresses",
+      "type": "object"
+    },
+    {
+      "name": "DnsAddresses.[]",
+      "type": "string"
+    },
+    {
+      "name": "IPAddresses",
+      "type": "object"
+    },
+    {
+      "name": "IPAddresses.[]",
+      "type": "object"
+    },
+    {
+      "name": "IPAddresses.[].AddressType",
+      "type": "string"
+    },
+    {
+      "name": "IPAddresses.[].IPAddress",
+      "type": "string"
+    },
+    {
+      "name": "IPAddresses.[].SubnetPrefix",
+      "type": "long"
+    },
+    {
+      "name": "IPv4Dhcp",
+      "type": "string"
+    },
+    {
+      "name": "MacAddress",
+      "type": "string"
+    },
+    {
+      "name": "MachineGroup",
+      "type": "string"
+    },
+    {
+      "name": "NetworkAdapterName",
+      "type": "string"
+    },
+    {
+      "name": "NetworkAdapterStatus",
+      "type": "string"
+    },
+    {
+      "name": "NetworkAdapterType",
+      "type": "string"
+    },
+    {
+      "name": "NetworkAdapterVendor",
+      "type": "string"
+    },
+    {
+      "name": "ReportId",
+      "type": "long"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Timestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "TunnelType",
+      "type": "string"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

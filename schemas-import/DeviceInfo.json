@@ -1,0 +1,233 @@
+{
+  "table": "DeviceInfo",
+  "fields": [
+    {
+      "name": "AadDeviceId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.InternetFacingLastSeen",
+      "type": "datetime"
+    },
+    {
+      "name": "AdditionalFields.InternetFacingLocalIp",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InternetFacingLocalPort",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InternetFacingPublicScannedIp",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InternetFacingPublicScannedPort",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InternetFacingReason",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.InternetFacingTransportProtocol",
+      "type": "string"
+    },
+    {
+      "name": "AzureResourceId",
+      "type": "string"
+    },
+    {
+      "name": "AzureVmId",
+      "type": "string"
+    },
+    {
+      "name": "AzureVmSubscriptionId",
+      "type": "string"
+    },
+    {
+      "name": "ClientVersion",
+      "type": "string"
+    },
+    {
+      "name": "CloudPlatforms",
+      "type": "string"
+    },
+    {
+      "name": "ConnectivityType",
+      "type": "string"
+    },
+    {
+      "name": "DeviceCategory",
+      "type": "string"
+    },
+    {
+      "name": "DeviceDynamicTags",
+      "type": "string"
+    },
+    {
+      "name": "DeviceId",
+      "type": "string"
+    },
+    {
+      "name": "DeviceManualTags",
+      "type": "string"
+    },
+    {
+      "name": "DeviceName",
+      "type": "string"
+    },
+    {
+      "name": "DeviceSubtype",
+      "type": "string"
+    },
+    {
+      "name": "DeviceType",
+      "type": "string"
+    },
+    {
+      "name": "ExclusionReason",
+      "type": "string"
+    },
+    {
+      "name": "ExposureLevel",
+      "type": "string"
+    },
+    {
+      "name": "HardwareUuid",
+      "type": "string"
+    },
+    {
+      "name": "HostDeviceId",
+      "type": "string"
+    },
+    {
+      "name": "IsAzureADJoined",
+      "type": "bool"
+    },
+    {
+      "name": "IsExcluded",
+      "type": "bool"
+    },
+    {
+      "name": "IsInternetFacing",
+      "type": "bool"
+    },
+    {
+      "name": "IsTransient",
+      "type": "bool"
+    },
+    {
+      "name": "JoinType",
+      "type": "string"
+    },
+    {
+      "name": "LoggedOnUsers",
+      "type": "object"
+    },
+    {
+      "name": "LoggedOnUsers.[]",
+      "type": "object"
+    },
+    {
+      "name": "LoggedOnUsers.[].DomainName",
+      "type": "string"
+    },
+    {
+      "name": "LoggedOnUsers.[].Sid",
+      "type": "string"
+    },
+    {
+      "name": "LoggedOnUsers.[].UserName",
+      "type": "string"
+    },
+    {
+      "name": "MachineGroup",
+      "type": "string"
+    },
+    {
+      "name": "MergedDeviceIds",
+      "type": "string"
+    },
+    {
+      "name": "MergedToDeviceId",
+      "type": "string"
+    },
+    {
+      "name": "Model",
+      "type": "string"
+    },
+    {
+      "name": "OnboardingStatus",
+      "type": "string"
+    },
+    {
+      "name": "OSArchitecture",
+      "type": "string"
+    },
+    {
+      "name": "OSBuild",
+      "type": "long"
+    },
+    {
+      "name": "OsBuildRevision",
+      "type": "string"
+    },
+    {
+      "name": "OSDistribution",
+      "type": "string"
+    },
+    {
+      "name": "OSPlatform",
+      "type": "string"
+    },
+    {
+      "name": "OSVersion",
+      "type": "string"
+    },
+    {
+      "name": "OSVersionInfo",
+      "type": "string"
+    },
+    {
+      "name": "PublicIP",
+      "type": "string"
+    },
+    {
+      "name": "RegistryDeviceTag",
+      "type": "string"
+    },
+    {
+      "name": "ReportId",
+      "type": "long"
+    },
+    {
+      "name": "SensorHealthState",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Timestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "Vendor",
+      "type": "string"
+    }
+  ]
+}

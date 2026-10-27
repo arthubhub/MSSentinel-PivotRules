@@ -1,0 +1,517 @@
+{
+  "table": "IdentityLogonEvents",
+  "fields": [
+    {
+      "name": "AccountDisplayName",
+      "type": "string"
+    },
+    {
+      "name": "AccountDomain",
+      "type": "string"
+    },
+    {
+      "name": "AccountName",
+      "type": "string"
+    },
+    {
+      "name": "AccountObjectId",
+      "type": "string"
+    },
+    {
+      "name": "AccountSid",
+      "type": "string"
+    },
+    {
+      "name": "AccountUpn",
+      "type": "string"
+    },
+    {
+      "name": "ActionType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields",
+      "type": "object"
+    },
+    {
+      "name": "AdditionalFields.ActionTypeInner",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ACTOR.ACCOUNT",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ACTOR.ALIAS",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ACTOR.DEVICE",
+      "type": "array"
+    },
+    {
+      "name": "AdditionalFields.ACTOR.DEVICE[].[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ACTOR.ENTITY_USER",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.AdfsAuthenticationProtocol",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ARG.CLOUD_SERVICE",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.AttackTechniques",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.BadPasswordCount",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Category",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.CertificateIssuer",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.CertificateSubject",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.CertificateThumbprint",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Count",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DestinationComputerDnsName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DestinationComputerObjectGuid",
+      "type": "array"
+    },
+    {
+      "name": "AdditionalFields.DestinationComputerObjectGuid[].[]",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.DestinationComputerOperatingSystem",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DestinationComputerOperatingSystem[].[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DestinationComputerOperatingSystemType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DestinationComputerOperatingSystemVersion",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.DestinationComputerOperatingSystemVersion[].[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.EffectiveName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.EncryptionType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Error",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ErrorText",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ExtraSids",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.FROM.DEVICE",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.FullName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.GroupIds",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.GroupMembershipNames",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.IsMfaPerformed",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.IsNtlmV1",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.IsResourceAccountTrustedForUnconstrainedDelegation",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.IsSourceAccountLocalAdminOnResource",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.KdcOptions",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.KerberosType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.LogonCount",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.LogonDomainId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.LogonDomainName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.LogonTime",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Pass-through authentication",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.PasswordCanChangeTime",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.PasswordLastChangeTime",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.PasswordMustChangeTime",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.PrimaryGroupId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.PrimaryGroupName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Request ID",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.RequestorSid",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.RequestTicketHash",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.ResponseTicketHash",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SourceAccountId",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.SourceAccountLastLogonToSourceComputerTime",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SourceAccountName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SourceAccountSid",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SourceComputerDisplayName",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SourceComputerId",
+      "type": "array"
+    },
+    {
+      "name": "AdditionalFields.SourceComputerId[].[]",
+      "type": "array"
+    },
+    {
+      "name": "AdditionalFields.SourceComputerObjectGuid",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.SourceComputerOperatingSystem",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SourceComputerOperatingSystemServicePack",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SourceComputerOperatingSystemType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SourceComputerOperatingSystemVersion",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SourceComputerSid",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.SourceComputerSid[].[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.Spns",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TARGET.ACCOUNT",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TARGET.ALIAS",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TARGET.DEVICE",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TARGET.ENTITY_USER",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TARGET.USER",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TargetAccountId",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.TargetAccountSid",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TargetComputerObjectGuid",
+      "type": "guid"
+    },
+    {
+      "name": "AdditionalFields.TargetComputerOperatingSystem",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TargetComputerOperatingSystemServicePack",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TargetComputerOperatingSystemType",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TargetComputerOperatingSystemVersion",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TicketAuthTime",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TicketEndTime",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TicketRenewUntil",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TicketStartTime",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TO.CLOUD_SERVICE",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.TO.DEVICE",
+      "type": "array"
+    },
+    {
+      "name": "AdditionalFields.TO.DEVICE[].[]",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.UserAccountControlFlags",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.UserId",
+      "type": "string"
+    },
+    {
+      "name": "AdditionalFields.WeakEncryptionType",
+      "type": "string"
+    },
+    {
+      "name": "Application",
+      "type": "string"
+    },
+    {
+      "name": "DestinationDeviceName",
+      "type": "string"
+    },
+    {
+      "name": "DestinationIPAddress",
+      "type": "string"
+    },
+    {
+      "name": "DestinationPort",
+      "type": "string"
+    },
+    {
+      "name": "DeviceName",
+      "type": "string"
+    },
+    {
+      "name": "DeviceType",
+      "type": "string"
+    },
+    {
+      "name": "FailureReason",
+      "type": "string"
+    },
+    {
+      "name": "IPAddress",
+      "type": "string"
+    },
+    {
+      "name": "ISP",
+      "type": "string"
+    },
+    {
+      "name": "LastSeenForUser",
+      "type": "object"
+    },
+    {
+      "name": "LastSeenForUser.ActionType",
+      "type": "long"
+    },
+    {
+      "name": "LastSeenForUser.Application",
+      "type": "long"
+    },
+    {
+      "name": "LastSeenForUser.CountryCode",
+      "type": "long"
+    },
+    {
+      "name": "LastSeenForUser.IPAddress",
+      "type": "long"
+    },
+    {
+      "name": "LastSeenForUser.ISP",
+      "type": "long"
+    },
+    {
+      "name": "LastSeenForUser.OSPlatform",
+      "type": "long"
+    },
+    {
+      "name": "LastSeenForUser.UserAgent",
+      "type": "long"
+    },
+    {
+      "name": "Location",
+      "type": "string"
+    },
+    {
+      "name": "LogonType",
+      "type": "string"
+    },
+    {
+      "name": "OSPlatform",
+      "type": "string"
+    },
+    {
+      "name": "Port",
+      "type": "string"
+    },
+    {
+      "name": "Protocol",
+      "type": "string"
+    },
+    {
+      "name": "ReportId",
+      "type": "string"
+    },
+    {
+      "name": "TargetAccountDisplayName",
+      "type": "string"
+    },
+    {
+      "name": "TargetDeviceName",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Timestamp",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "UncommonForUser",
+      "type": "object"
+    },
+    {
+      "name": "UncommonForUser.[]",
+      "type": "string"
+    }
+  ]
+}

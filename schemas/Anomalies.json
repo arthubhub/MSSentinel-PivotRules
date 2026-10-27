@@ -1,0 +1,477 @@
+{
+  "table": "Anomalies",
+  "fields": [
+    {
+      "name": "ActivityInsights",
+      "type": "object"
+    },
+    {
+      "name": "ActivityInsights.ActionUncommonlyPerformedByUser",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.ActionUncommonlyPerformedInTenant",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.LastTimeUserPerformedAction",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.MandatoryLabel",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.NewProcessId",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.NewProcessName",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.ParentProcessName",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.Process",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.ProcessId",
+      "type": "string"
+    },
+    {
+      "name": "ActivityInsights.UncommonHighVolumeOfActions",
+      "type": "string"
+    },
+    {
+      "name": "AnomalyDetails",
+      "type": "object"
+    },
+    {
+      "name": "AnomalyDetails.AlgorithmName",
+      "type": "string"
+    },
+    {
+      "name": "AnomalyDetails.Observables",
+      "type": "object"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[]",
+      "type": "object"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].$id",
+      "type": "string"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].$ref",
+      "type": "string"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].IsAnomalous",
+      "type": "bool"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].Name",
+      "type": "string"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].Type",
+      "type": "string"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].TypicalObservations",
+      "type": "object"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].TypicalObservations.$id",
+      "type": "string"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].TypicalObservations.ActionUncommonlyPerformedInTenant",
+      "type": "object"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].TypicalObservations.ActionUncommonlyPerformedInTenant.$id",
+      "type": "string"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].TypicalObservations.ActionUncommonlyPerformedInTenant.ValueKind",
+      "type": "long"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].TypicalObservations.LastTimeUserPerformedAction",
+      "type": "object"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].TypicalObservations.LastTimeUserPerformedAction.$id",
+      "type": "string"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].TypicalObservations.LastTimeUserPerformedAction.ValueKind",
+      "type": "long"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].TypicalObservations.MandatoryLabel",
+      "type": "object"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].TypicalObservations.MandatoryLabel.$id",
+      "type": "string"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].TypicalObservations.MandatoryLabel.ValueKind",
+      "type": "long"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].TypicalObservations.NewProcessId",
+      "type": "object"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].TypicalObservations.NewProcessId.$id",
+      "type": "string"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].TypicalObservations.NewProcessId.ValueKind",
+      "type": "long"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].TypicalObservations.NewProcessName",
+      "type": "object"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].TypicalObservations.NewProcessName.$id",
+      "type": "string"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].TypicalObservations.NewProcessName.ValueKind",
+      "type": "long"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].TypicalObservations.ParentProcessName",
+      "type": "object"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].TypicalObservations.ParentProcessName.$id",
+      "type": "string"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].TypicalObservations.ParentProcessName.ValueKind",
+      "type": "long"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].TypicalObservations.Process",
+      "type": "object"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].TypicalObservations.Process.$id",
+      "type": "string"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].TypicalObservations.Process.ValueKind",
+      "type": "long"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].TypicalObservations.ProcessId",
+      "type": "object"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].TypicalObservations.ProcessId.$id",
+      "type": "string"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].TypicalObservations.ProcessId.ValueKind",
+      "type": "long"
+    },
+    {
+      "name": "AnomalyDetails.Observables.[].Value",
+      "type": "string"
+    },
+    {
+      "name": "AnomalyDetails.Score",
+      "type": "double"
+    },
+    {
+      "name": "AnomalyDetails.TemplateId",
+      "type": "guid"
+    },
+    {
+      "name": "AnomalyDetails.TemplateName",
+      "type": "string"
+    },
+    {
+      "name": "AnomalyDetails.TemplateVersion",
+      "type": "string"
+    },
+    {
+      "name": "AnomalyReasons",
+      "type": "object"
+    },
+    {
+      "name": "AnomalyReasons.[]",
+      "type": "object"
+    },
+    {
+      "name": "AnomalyReasons.[].$id",
+      "type": "string"
+    },
+    {
+      "name": "AnomalyReasons.[].IsAnomalous",
+      "type": "bool"
+    },
+    {
+      "name": "AnomalyReasons.[].Name",
+      "type": "string"
+    },
+    {
+      "name": "AnomalyReasons.[].Type",
+      "type": "string"
+    },
+    {
+      "name": "AnomalyReasons.[].TypicalObservations",
+      "type": "object"
+    },
+    {
+      "name": "AnomalyReasons.[].TypicalObservations.$id",
+      "type": "string"
+    },
+    {
+      "name": "AnomalyReasons.[].TypicalObservations.ActionUncommonlyPerformedByUser",
+      "type": "object"
+    },
+    {
+      "name": "AnomalyReasons.[].TypicalObservations.ActionUncommonlyPerformedByUser.$id",
+      "type": "string"
+    },
+    {
+      "name": "AnomalyReasons.[].TypicalObservations.ActionUncommonlyPerformedByUser.ValueKind",
+      "type": "long"
+    },
+    {
+      "name": "AnomalyReasons.[].TypicalObservations.UncommonHighVolumeOfActions",
+      "type": "object"
+    },
+    {
+      "name": "AnomalyReasons.[].TypicalObservations.UncommonHighVolumeOfActions.$id",
+      "type": "string"
+    },
+    {
+      "name": "AnomalyReasons.[].TypicalObservations.UncommonHighVolumeOfActions.ValueKind",
+      "type": "long"
+    },
+    {
+      "name": "AnomalyReasons.[].Value",
+      "type": "string"
+    },
+    {
+      "name": "AnomalyTemplateId",
+      "type": "string"
+    },
+    {
+      "name": "AnomalyTemplateName",
+      "type": "string"
+    },
+    {
+      "name": "AnomalyTemplateVersion",
+      "type": "string"
+    },
+    {
+      "name": "Description",
+      "type": "string"
+    },
+    {
+      "name": "DeviceInsights",
+      "type": "object"
+    },
+    {
+      "name": "DeviceInsights.SourceComputerId",
+      "type": "guid"
+    },
+    {
+      "name": "EndTime",
+      "type": "datetime"
+    },
+    {
+      "name": "Entities",
+      "type": "object"
+    },
+    {
+      "name": "Entities.[]",
+      "type": "object"
+    },
+    {
+      "name": "Entities.[].$id",
+      "type": "string"
+    },
+    {
+      "name": "Entities.[].FriendlyName",
+      "type": "string"
+    },
+    {
+      "name": "Entities.[].HostName",
+      "type": "string"
+    },
+    {
+      "name": "Entities.[].IsDomainJoined",
+      "type": "bool"
+    },
+    {
+      "name": "Entities.[].Name",
+      "type": "string"
+    },
+    {
+      "name": "Entities.[].Type",
+      "type": "string"
+    },
+    {
+      "name": "Entities.[].UPNSuffix",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedLinks",
+      "type": "object"
+    },
+    {
+      "name": "ExtendedLinks.[]",
+      "type": "object"
+    },
+    {
+      "name": "ExtendedLinks.[].$id",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedLinks.[].BladeType",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedLinks.[].DetailBladeInputs",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedLinks.[].Extension",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedLinks.[].Label",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedLinks.[].Type",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties",
+      "type": "object"
+    },
+    {
+      "name": "ExtendedProperties.ActivityInsights",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.DeviceInsights",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.RuleConfigVersion",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.RuleId",
+      "type": "guid"
+    },
+    {
+      "name": "ExtendedProperties.RuleName",
+      "type": "string"
+    },
+    {
+      "name": "ExtendedProperties.UserInsights",
+      "type": "string"
+    },
+    {
+      "name": "Id",
+      "type": "string"
+    },
+    {
+      "name": "RuleConfigVersion",
+      "type": "string"
+    },
+    {
+      "name": "RuleId",
+      "type": "string"
+    },
+    {
+      "name": "RuleName",
+      "type": "string"
+    },
+    {
+      "name": "Score",
+      "type": "double"
+    },
+    {
+      "name": "SourceDevice",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "StartTime",
+      "type": "datetime"
+    },
+    {
+      "name": "Tactics",
+      "type": "string"
+    },
+    {
+      "name": "Techniques",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "UserInsights",
+      "type": "object"
+    },
+    {
+      "name": "UserInsights.AccountDisplayName",
+      "type": "string"
+    },
+    {
+      "name": "UserInsights.AccountDomain",
+      "type": "string"
+    },
+    {
+      "name": "UserInsights.OnPremisesSID",
+      "type": "string"
+    },
+    {
+      "name": "UserName",
+      "type": "string"
+    },
+    {
+      "name": "UserPrincipalName",
+      "type": "string"
+    },
+    {
+      "name": "VendorName",
+      "type": "string"
+    },
+    {
+      "name": "WorkspaceId",
+      "type": "string"
+    }
+  ]
+}

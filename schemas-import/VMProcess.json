@@ -1,0 +1,125 @@
+{
+  "table": "VMProcess",
+  "fields": [
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "AgentId",
+      "type": "string"
+    },
+    {
+      "name": "CommandLine",
+      "type": "string"
+    },
+    {
+      "name": "CompanyName",
+      "type": "string"
+    },
+    {
+      "name": "Computer",
+      "type": "string"
+    },
+    {
+      "name": "Description",
+      "type": "string"
+    },
+    {
+      "name": "DisplayName",
+      "type": "string"
+    },
+    {
+      "name": "ExecutableName",
+      "type": "string"
+    },
+    {
+      "name": "ExecutablePath",
+      "type": "string"
+    },
+    {
+      "name": "FileVersion",
+      "type": "string"
+    },
+    {
+      "name": "FirstPid",
+      "type": "long"
+    },
+    {
+      "name": "Group",
+      "type": "string"
+    },
+    {
+      "name": "InternalName",
+      "type": "string"
+    },
+    {
+      "name": "Machine",
+      "type": "string"
+    },
+    {
+      "name": "Process",
+      "type": "string"
+    },
+    {
+      "name": "ProductName",
+      "type": "string"
+    },
+    {
+      "name": "ProductVersion",
+      "type": "string"
+    },
+    {
+      "name": "Role",
+      "type": "string"
+    },
+    {
+      "name": "Services",
+      "type": "object"
+    },
+    {
+      "name": "Services.[]",
+      "type": "object"
+    },
+    {
+      "name": "Services.[].DisplayName",
+      "type": "string"
+    },
+    {
+      "name": "Services.[].Name",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "StartTime",
+      "type": "datetime"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "UserDomain",
+      "type": "string"
+    },
+    {
+      "name": "UserName",
+      "type": "string"
+    },
+    {
+      "name": "WorkingDirectory",
+      "type": "string"
+    }
+  ]
+}

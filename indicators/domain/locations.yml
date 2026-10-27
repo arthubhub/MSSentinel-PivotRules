@@ -1,0 +1,85 @@
+# locations.yml — domain
+# Généré par scripts/generate-locations.mjs (#31). NE PAS ÉDITER À LA MAIN : relancer le script.
+# Paires "Table.Colonne" où ce type d'indicateur peut apparaître.
+#   confirmed : signal fort — comparaison dans une règle existante, ou table Entity Defender.
+#   uncertain : signal faible — motif de nom de colonne. Publié quand même (décision du 23/10) :
+#               aide à la présélection, et l'analyste peut toujours changer de type dans le panneau.
+# L'ORDRE COMPTE : confirmed avant uncertain. Pour une colonne candidate à plusieurs types, le type
+# qui la liste en confirmed gagne la présélection (décision 2 : cet ordre prime sur INDICATOR_PRIORITY).
+# 7 confirmée(s), 67 incertaine(s). Publication dans pivot-rules.json : en 2d.
+confirmed:
+  - ASimDnsActivityLogs.DnsQuery
+  - AZFWApplicationRule.Fqdn
+  - DnsEvents.Name
+  - EmailEvents.SenderFromDomain
+  - EmailEvents.SenderMailFromDomain
+  - EmailUrlInfo.UrlDomain
+  - MessageUrlInfo.UrlDomain
+uncertain:
+  - ASimAuthenticationEventLogs.DvcDomain
+  - ASimAuthenticationEventLogs.DvcFQDN
+  - ASimAuthenticationEventLogs.SrcDomain
+  - ASimAuthenticationEventLogs.SrcFQDN
+  - ASimAuthenticationEventLogs.TargetDomain
+  - ASimAuthenticationEventLogs.TargetFQDN
+  - ASimDnsActivityLogs.AdditionalFields
+  - ASimDnsActivityLogs.DstDomain
+  - ASimDnsActivityLogs.DstFQDN
+  - ASimDnsActivityLogs.DstHostname
+  - ASimDnsActivityLogs.DvcDomain
+  - ASimDnsActivityLogs.DvcFQDN
+  - ASimDnsActivityLogs.SrcDomain
+  - ASimDnsActivityLogs.SrcFQDN
+  - ASimFileEventLogs.DvcDomain
+  - ASimFileEventLogs.DvcFQDN
+  - ASimFileEventLogs.SrcDomain
+  - ASimFileEventLogs.SrcFQDN
+  - ASimNetworkSessionLogs.DstDomain
+  - ASimNetworkSessionLogs.DstFQDN
+  - ASimNetworkSessionLogs.DvcDomain
+  - ASimNetworkSessionLogs.DvcFQDN
+  - ASimNetworkSessionLogs.SrcDomain
+  - ASimNetworkSessionLogs.SrcFQDN
+  - ASimProcessEventLogs.DvcDomain
+  - ASimProcessEventLogs.DvcFQDN
+  - ASimWebSessionLogs.DstHostname
+  - AZFWApplicationRule.TargetUrl
+  - AlertEvidence.AccountDomain
+  - AzureDiagnostics.Fqdn_s
+  - AzureDiagnostics.domain_s
+  - CommonSecurityLog.DestinationNTDomain
+  - CommonSecurityLog.DeviceNtDomain
+  - CommonSecurityLog.RequestURL
+  - CommonSecurityLog.SourceNTDomain
+  - DeviceEvents.AccountDomain
+  - DeviceEvents.AdditionalFields
+  - DeviceEvents.InitiatingProcessAccountDomain
+  - DeviceFileEvents.AdditionalFields
+  - DeviceFileEvents.InitiatingProcessAccountDomain
+  - DeviceFileEvents.RequestAccountDomain
+  - DeviceImageLoadEvents.InitiatingProcessAccountDomain
+  - DeviceLogonEvents.AccountDomain
+  - DeviceLogonEvents.InitiatingProcessAccountDomain
+  - DeviceNetworkEvents.AdditionalFields
+  - DeviceNetworkEvents.InitiatingProcessAccountDomain
+  - DeviceProcessEvents.AccountDomain
+  - DeviceProcessEvents.InitiatingProcessAccountDomain
+  - DeviceProcessEvents.ProcessCommandLine
+  - DeviceRegistryEvents.InitiatingProcessAccountDomain
+  - EmailEvents.AdditionalFields
+  - EmailEvents.RecipientDomain
+  - IdentityDirectoryEvents.AccountDomain
+  - IdentityInfo.AccountDomain
+  - IdentityLogonEvents.AccountDomain
+  - IdentityQueryEvents.AccountDomain
+  - MDCDetectionDNSEvents.Domain
+  - OfficeActivity.MachineDomainInfo
+  - SecurityEvent.AccountDomain
+  - SecurityEvent.SubjectDomainName
+  - SecurityEvent.TargetDomainName
+  - SecurityEvent.TargetOutboundDomainName
+  - ThreatIntelligenceIndicator.DomainName
+  - ThreatIntelligenceIndicator.EmailSourceDomain
+  - VMComputer.AzureFaultDomain
+  - VMComputer.AzureUpdateDomain
+  - VMProcess.UserDomain

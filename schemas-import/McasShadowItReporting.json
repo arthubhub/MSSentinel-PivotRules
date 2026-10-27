@@ -1,0 +1,85 @@
+{
+  "table": "McasShadowItReporting",
+  "fields": [
+    {
+      "name": "AppCategory",
+      "type": "string"
+    },
+    {
+      "name": "AppId",
+      "type": "string"
+    },
+    {
+      "name": "AppName",
+      "type": "string"
+    },
+    {
+      "name": "AppScore",
+      "type": "long"
+    },
+    {
+      "name": "AppTags",
+      "type": "object"
+    },
+    {
+      "name": "AppTags.[]",
+      "type": "string"
+    },
+    {
+      "name": "BlockedEvents",
+      "type": "long"
+    },
+    {
+      "name": "DownloadedBytes",
+      "type": "long"
+    },
+    {
+      "name": "EnrichedUserName",
+      "type": "string"
+    },
+    {
+      "name": "IpAddress",
+      "type": "string"
+    },
+    {
+      "name": "MachineId",
+      "type": "string"
+    },
+    {
+      "name": "MachineName",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "StreamName",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "TotalBytes",
+      "type": "long"
+    },
+    {
+      "name": "TotalEvents",
+      "type": "long"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "UploadedBytes",
+      "type": "long"
+    }
+  ]
+}

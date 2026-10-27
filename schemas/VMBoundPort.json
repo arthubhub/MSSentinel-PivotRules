@@ -1,0 +1,101 @@
+{
+  "table": "VMBoundPort",
+  "fields": [
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "AgentId",
+      "type": "string"
+    },
+    {
+      "name": "BytesReceived",
+      "type": "long"
+    },
+    {
+      "name": "BytesSent",
+      "type": "long"
+    },
+    {
+      "name": "Computer",
+      "type": "string"
+    },
+    {
+      "name": "Ip",
+      "type": "string"
+    },
+    {
+      "name": "IsWildcardBind",
+      "type": "bool"
+    },
+    {
+      "name": "LinksEstablished",
+      "type": "long"
+    },
+    {
+      "name": "LinksLive",
+      "type": "long"
+    },
+    {
+      "name": "LinksTerminated",
+      "type": "long"
+    },
+    {
+      "name": "Machine",
+      "type": "string"
+    },
+    {
+      "name": "Port",
+      "type": "long"
+    },
+    {
+      "name": "PortId",
+      "type": "string"
+    },
+    {
+      "name": "Process",
+      "type": "string"
+    },
+    {
+      "name": "ProcessName",
+      "type": "string"
+    },
+    {
+      "name": "Protocol",
+      "type": "string"
+    },
+    {
+      "name": "Responses",
+      "type": "long"
+    },
+    {
+      "name": "ResponseTimeMax",
+      "type": "long"
+    },
+    {
+      "name": "ResponseTimeMin",
+      "type": "long"
+    },
+    {
+      "name": "ResponseTimeSum",
+      "type": "long"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "table": "Syslog",
+  "fields": [
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "CollectorHostName",
+      "type": "string"
+    },
+    {
+      "name": "Computer",
+      "type": "string"
+    },
+    {
+      "name": "EventTime",
+      "type": "datetime"
+    },
+    {
+      "name": "Facility",
+      "type": "string"
+    },
+    {
+      "name": "HostIP",
+      "type": "string"
+    },
+    {
+      "name": "HostName",
+      "type": "string"
+    },
+    {
+      "name": "MG",
+      "type": "string"
+    },
+    {
+      "name": "ProcessID",
+      "type": "long"
+    },
+    {
+      "name": "ProcessName",
+      "type": "string"
+    },
+    {
+      "name": "SeverityLevel",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "SyslogMessage",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

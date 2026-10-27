@@ -1,0 +1,109 @@
+{
+  "table": "DnsEvents",
+  "fields": [
+    {
+      "name": "_BilledSize",
+      "type": "real"
+    },
+    {
+      "name": "ClientIP",
+      "type": "string"
+    },
+    {
+      "name": "Computer",
+      "type": "string"
+    },
+    {
+      "name": "Confidence",
+      "type": "string"
+    },
+    {
+      "name": "Description",
+      "type": "string"
+    },
+    {
+      "name": "EventId",
+      "type": "int"
+    },
+    {
+      "name": "IndicatorThreatType",
+      "type": "string"
+    },
+    {
+      "name": "IPAddresses",
+      "type": "string"
+    },
+    {
+      "name": "_IsBillable",
+      "type": "string"
+    },
+    {
+      "name": "MaliciousIP",
+      "type": "string"
+    },
+    {
+      "name": "Message",
+      "type": "string"
+    },
+    {
+      "name": "Name",
+      "type": "string"
+    },
+    {
+      "name": "QueryType",
+      "type": "string"
+    },
+    {
+      "name": "RemoteIPCountry",
+      "type": "string"
+    },
+    {
+      "name": "RemoteIPLatitude",
+      "type": "real"
+    },
+    {
+      "name": "RemoteIPLongitude",
+      "type": "real"
+    },
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "Result",
+      "type": "string"
+    },
+    {
+      "name": "ResultCode",
+      "type": "int"
+    },
+    {
+      "name": "Severity",
+      "type": "int"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "_SubscriptionId",
+      "type": "string"
+    },
+    {
+      "name": "SubType",
+      "type": "string"
+    },
+    {
+      "name": "TaskCategory",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

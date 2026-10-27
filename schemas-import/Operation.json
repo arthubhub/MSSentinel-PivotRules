@@ -1,0 +1,61 @@
+{
+  "table": "Operation",
+  "fields": [
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "Computer",
+      "type": "string"
+    },
+    {
+      "name": "CorrelationId",
+      "type": "string"
+    },
+    {
+      "name": "Detail",
+      "type": "string"
+    },
+    {
+      "name": "MG",
+      "type": "string"
+    },
+    {
+      "name": "OperationCategory",
+      "type": "string"
+    },
+    {
+      "name": "OperationKey",
+      "type": "string"
+    },
+    {
+      "name": "OperationStatus",
+      "type": "string"
+    },
+    {
+      "name": "Solution",
+      "type": "string"
+    },
+    {
+      "name": "SourceComputerId",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    }
+  ]
+}

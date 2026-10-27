@@ -1,0 +1,297 @@
+{
+  "table": "MicrosoftPurviewInformationProtection",
+  "fields": [
+    {
+      "name": "ActionSource",
+      "type": "string"
+    },
+    {
+      "name": "ActionSourceDetail",
+      "type": "string"
+    },
+    {
+      "name": "AppAccessContext",
+      "type": "object"
+    },
+    {
+      "name": "AppAccessContext.AADSessionId",
+      "type": "guid"
+    },
+    {
+      "name": "AppAccessContext.ClientAppId",
+      "type": "guid"
+    },
+    {
+      "name": "AppAccessContext.ClientAppName",
+      "type": "string"
+    },
+    {
+      "name": "AppAccessContext.CorrelationId",
+      "type": "guid"
+    },
+    {
+      "name": "AppAccessContext.DeviceId",
+      "type": "guid"
+    },
+    {
+      "name": "AppAccessContext.RequestMethod",
+      "type": "string"
+    },
+    {
+      "name": "AppAccessContext.TokenIssuedAtTime",
+      "type": "datetime"
+    },
+    {
+      "name": "AppAccessContext.UniqueTokenId",
+      "type": "string"
+    },
+    {
+      "name": "AppAccessContext.UserObjectId",
+      "type": "guid"
+    },
+    {
+      "name": "Application",
+      "type": "string"
+    },
+    {
+      "name": "ApplicationMode",
+      "type": "string"
+    },
+    {
+      "name": "ClientIP",
+      "type": "string"
+    },
+    {
+      "name": "ContentType",
+      "type": "string"
+    },
+    {
+      "name": "CorrelationId",
+      "type": "string"
+    },
+    {
+      "name": "CurrentProtectionType",
+      "type": "object"
+    },
+    {
+      "name": "CurrentProtectionType.documentEncrypted",
+      "type": "bool"
+    },
+    {
+      "name": "CurrentProtectionType.owner",
+      "type": "string"
+    },
+    {
+      "name": "CurrentProtectionType.protectionType",
+      "type": "long"
+    },
+    {
+      "name": "CurrentProtectionType.templateId",
+      "type": "string"
+    },
+    {
+      "name": "CurrentProtectionTypeName",
+      "type": "string"
+    },
+    {
+      "name": "DeviceName",
+      "type": "string"
+    },
+    {
+      "name": "EmailInfo",
+      "type": "object"
+    },
+    {
+      "name": "EmailInfo.bcc",
+      "type": "object"
+    },
+    {
+      "name": "EmailInfo.bcc.[]",
+      "type": "string"
+    },
+    {
+      "name": "EmailInfo.Cc",
+      "type": "object"
+    },
+    {
+      "name": "EmailInfo.cc",
+      "type": "object"
+    },
+    {
+      "name": "EmailInfo.Cc.[]",
+      "type": "string"
+    },
+    {
+      "name": "EmailInfo.cc.[]",
+      "type": "string"
+    },
+    {
+      "name": "EmailInfo.From",
+      "type": "string"
+    },
+    {
+      "name": "EmailInfo.from",
+      "type": "string"
+    },
+    {
+      "name": "EmailInfo.Subject",
+      "type": "string"
+    },
+    {
+      "name": "EmailInfo.subject",
+      "type": "string"
+    },
+    {
+      "name": "EmailInfo.To",
+      "type": "object"
+    },
+    {
+      "name": "EmailInfo.to",
+      "type": "object"
+    },
+    {
+      "name": "EmailInfo.To.[]",
+      "type": "string"
+    },
+    {
+      "name": "EmailInfo.to.[]",
+      "type": "string"
+    },
+    {
+      "name": "Id",
+      "type": "string"
+    },
+    {
+      "name": "IrmContentId",
+      "type": "string"
+    },
+    {
+      "name": "ItemName",
+      "type": "string"
+    },
+    {
+      "name": "LabelAction",
+      "type": "string"
+    },
+    {
+      "name": "LabelAppliedDateTime",
+      "type": "datetime"
+    },
+    {
+      "name": "LabelEventType",
+      "type": "string"
+    },
+    {
+      "name": "LabelName",
+      "type": "string"
+    },
+    {
+      "name": "ObjectId",
+      "type": "string"
+    },
+    {
+      "name": "OldSensitivityLabelId",
+      "type": "string"
+    },
+    {
+      "name": "Operation",
+      "type": "string"
+    },
+    {
+      "name": "OrganizationId",
+      "type": "string"
+    },
+    {
+      "name": "Platform",
+      "type": "string"
+    },
+    {
+      "name": "PreviousProtectionType",
+      "type": "object"
+    },
+    {
+      "name": "PreviousProtectionType.documentEncrypted",
+      "type": "bool"
+    },
+    {
+      "name": "PreviousProtectionType.owner",
+      "type": "string"
+    },
+    {
+      "name": "PreviousProtectionType.protectionType",
+      "type": "long"
+    },
+    {
+      "name": "PreviousProtectionType.templateId",
+      "type": "string"
+    },
+    {
+      "name": "PreviousProtectionTypeName",
+      "type": "string"
+    },
+    {
+      "name": "ProtectionEventTypeName",
+      "type": "string"
+    },
+    {
+      "name": "Receivers",
+      "type": "object"
+    },
+    {
+      "name": "Receivers.[]",
+      "type": "string"
+    },
+    {
+      "name": "RecordType",
+      "type": "long"
+    },
+    {
+      "name": "RecordTypeName",
+      "type": "string"
+    },
+    {
+      "name": "Sender",
+      "type": "string"
+    },
+    {
+      "name": "SensitivityLabelId",
+      "type": "string"
+    },
+    {
+      "name": "SensitivityLabelOwnerEmail",
+      "type": "string"
+    },
+    {
+      "name": "TargetLocation",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "UserId",
+      "type": "string"
+    },
+    {
+      "name": "UserKey",
+      "type": "string"
+    },
+    {
+      "name": "UserType",
+      "type": "string"
+    },
+    {
+      "name": "Workload",
+      "type": "string"
+    }
+  ]
+}

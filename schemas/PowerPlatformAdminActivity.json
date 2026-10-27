@@ -1,0 +1,173 @@
+{
+  "table": "PowerPlatformAdminActivity",
+  "fields": [
+    {
+      "name": "ActorName",
+      "type": "string"
+    },
+    {
+      "name": "ActorUserId",
+      "type": "string"
+    },
+    {
+      "name": "ActorUserType",
+      "type": "string"
+    },
+    {
+      "name": "EnvironmentId",
+      "type": "string"
+    },
+    {
+      "name": "EventOriginalType",
+      "type": "string"
+    },
+    {
+      "name": "EventOriginalUid",
+      "type": "string"
+    },
+    {
+      "name": "EventResult",
+      "type": "string"
+    },
+    {
+      "name": "OrganizationId",
+      "type": "string"
+    },
+    {
+      "name": "Properties",
+      "type": "object"
+    },
+    {
+      "name": "Properties.enduser.id",
+      "type": "guid"
+    },
+    {
+      "name": "Properties.enduser.ip_address",
+      "type": "string"
+    },
+    {
+      "name": "Properties.enduser.principal_name",
+      "type": "string"
+    },
+    {
+      "name": "Properties.enduser.role",
+      "type": "string"
+    },
+    {
+      "name": "Properties.http.request.method",
+      "type": "string"
+    },
+    {
+      "name": "Properties.http.response.status_code",
+      "type": "string"
+    },
+    {
+      "name": "Properties.powerplatform.analytics.activity.id",
+      "type": "guid"
+    },
+    {
+      "name": "Properties.powerplatform.analytics.activity.name",
+      "type": "string"
+    },
+    {
+      "name": "Properties.powerplatform.analytics.correlation.id",
+      "type": "guid"
+    },
+    {
+      "name": "Properties.powerplatform.analytics.operation.is_successful",
+      "type": "string"
+    },
+    {
+      "name": "Properties.powerplatform.analytics.resource.environment.id",
+      "type": "array"
+    },
+    {
+      "name": "Properties.powerplatform.analytics.resource.environment.name",
+      "type": "string"
+    },
+    {
+      "name": "Properties.powerplatform.analytics.resource.power_app.display_name",
+      "type": "string"
+    },
+    {
+      "name": "Properties.powerplatform.analytics.resource.power_app.id",
+      "type": "guid"
+    },
+    {
+      "name": "Properties.powerplatform.analytics.resource.tenant.id",
+      "type": "guid"
+    },
+    {
+      "name": "Properties.powerplatform.analytics.resource.type",
+      "type": "string"
+    },
+    {
+      "name": "Properties.server.address",
+      "type": "string"
+    },
+    {
+      "name": "Properties.type",
+      "type": "string"
+    },
+    {
+      "name": "Properties.url.full",
+      "type": "string"
+    },
+    {
+      "name": "Properties.url.path",
+      "type": "string"
+    },
+    {
+      "name": "Properties.url.query",
+      "type": "string"
+    },
+    {
+      "name": "Properties.url.scheme",
+      "type": "string"
+    },
+    {
+      "name": "Properties.user_agent.original",
+      "type": "string"
+    },
+    {
+      "name": "Properties.version",
+      "type": "string"
+    },
+    {
+      "name": "PropertyCollection",
+      "type": "object"
+    },
+    {
+      "name": "PropertyCollection.[]",
+      "type": "object"
+    },
+    {
+      "name": "PropertyCollection.[].Name",
+      "type": "string"
+    },
+    {
+      "name": "PropertyCollection.[].Value",
+      "type": "array"
+    },
+    {
+      "name": "RequiresCustomerKeyEncryption",
+      "type": "bool"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "Workload",
+      "type": "string"
+    }
+  ]
+}

@@ -1,0 +1,133 @@
+{
+  "table": "Heartbeat",
+  "fields": [
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "Category",
+      "type": "string"
+    },
+    {
+      "name": "Computer",
+      "type": "string"
+    },
+    {
+      "name": "ComputerEnvironment",
+      "type": "string"
+    },
+    {
+      "name": "ComputerIP",
+      "type": "string"
+    },
+    {
+      "name": "ComputerPrivateIPs",
+      "type": "object"
+    },
+    {
+      "name": "ComputerPrivateIPs.[]",
+      "type": "string"
+    },
+    {
+      "name": "IsGatewayInstalled",
+      "type": "bool"
+    },
+    {
+      "name": "ManagementGroupName",
+      "type": "string"
+    },
+    {
+      "name": "MG",
+      "type": "string"
+    },
+    {
+      "name": "OSMajorVersion",
+      "type": "string"
+    },
+    {
+      "name": "OSMinorVersion",
+      "type": "string"
+    },
+    {
+      "name": "OSName",
+      "type": "string"
+    },
+    {
+      "name": "OSType",
+      "type": "string"
+    },
+    {
+      "name": "RemoteIPCountry",
+      "type": "string"
+    },
+    {
+      "name": "RemoteIPLatitude",
+      "type": "double"
+    },
+    {
+      "name": "RemoteIPLongitude",
+      "type": "double"
+    },
+    {
+      "name": "Resource",
+      "type": "string"
+    },
+    {
+      "name": "ResourceGroup",
+      "type": "string"
+    },
+    {
+      "name": "ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "ResourceProvider",
+      "type": "string"
+    },
+    {
+      "name": "ResourceType",
+      "type": "string"
+    },
+    {
+      "name": "SCAgentChannel",
+      "type": "string"
+    },
+    {
+      "name": "Solutions",
+      "type": "string"
+    },
+    {
+      "name": "SourceComputerId",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "SubscriptionId",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "Version",
+      "type": "string"
+    },
+    {
+      "name": "VMUUID",
+      "type": "string"
+    }
+  ]
+}

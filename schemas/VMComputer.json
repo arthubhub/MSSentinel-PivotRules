@@ -1,0 +1,185 @@
+{
+  "table": "VMComputer",
+  "fields": [
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "AgentId",
+      "type": "string"
+    },
+    {
+      "name": "AzureFaultDomain",
+      "type": "string"
+    },
+    {
+      "name": "AzureLocation",
+      "type": "string"
+    },
+    {
+      "name": "AzureResourceGroup",
+      "type": "string"
+    },
+    {
+      "name": "AzureResourceName",
+      "type": "string"
+    },
+    {
+      "name": "AzureSize",
+      "type": "string"
+    },
+    {
+      "name": "AzureSubscriptionId",
+      "type": "string"
+    },
+    {
+      "name": "AzureUpdateDomain",
+      "type": "string"
+    },
+    {
+      "name": "AzureVmId",
+      "type": "string"
+    },
+    {
+      "name": "BootTime",
+      "type": "datetime"
+    },
+    {
+      "name": "Computer",
+      "type": "string"
+    },
+    {
+      "name": "Cpus",
+      "type": "long"
+    },
+    {
+      "name": "CpuSpeed",
+      "type": "long"
+    },
+    {
+      "name": "DependencyAgentVersion",
+      "type": "string"
+    },
+    {
+      "name": "DisplayName",
+      "type": "string"
+    },
+    {
+      "name": "DnsNames",
+      "type": "object"
+    },
+    {
+      "name": "DnsNames.[]",
+      "type": "string"
+    },
+    {
+      "name": "FullDisplayName",
+      "type": "string"
+    },
+    {
+      "name": "HostingProvider",
+      "type": "string"
+    },
+    {
+      "name": "HostName",
+      "type": "string"
+    },
+    {
+      "name": "Ipv4Addresses",
+      "type": "object"
+    },
+    {
+      "name": "Ipv4Addresses.[]",
+      "type": "string"
+    },
+    {
+      "name": "Ipv4DefaultGateways",
+      "type": "object"
+    },
+    {
+      "name": "Ipv4DefaultGateways.[]",
+      "type": "string"
+    },
+    {
+      "name": "Ipv4SubnetMasks",
+      "type": "object"
+    },
+    {
+      "name": "Ipv4SubnetMasks.[]",
+      "type": "string"
+    },
+    {
+      "name": "Ipv6Addresses",
+      "type": "object"
+    },
+    {
+      "name": "Ipv6Addresses.[]",
+      "type": "null"
+    },
+    {
+      "name": "MacAddresses",
+      "type": "object"
+    },
+    {
+      "name": "MacAddresses.[]",
+      "type": "string"
+    },
+    {
+      "name": "Machine",
+      "type": "string"
+    },
+    {
+      "name": "OperatingSystemFamily",
+      "type": "string"
+    },
+    {
+      "name": "OperatingSystemFullName",
+      "type": "string"
+    },
+    {
+      "name": "PhysicalMemoryMB",
+      "type": "long"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "TimeZone",
+      "type": "string"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "VirtualizationState",
+      "type": "string"
+    },
+    {
+      "name": "VirtualMachineHypervisorId",
+      "type": "string"
+    },
+    {
+      "name": "VirtualMachineNativeId",
+      "type": "string"
+    },
+    {
+      "name": "VirtualMachineNativeName",
+      "type": "string"
+    },
+    {
+      "name": "VirtualMachineType",
+      "type": "string"
+    }
+  ]
+}

@@ -1,0 +1,117 @@
+{
+  "table": "LAQueryLogs",
+  "fields": [
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "AADClientId",
+      "type": "string"
+    },
+    {
+      "name": "AADEmail",
+      "type": "string"
+    },
+    {
+      "name": "AADObjectId",
+      "type": "string"
+    },
+    {
+      "name": "AADTenantId",
+      "type": "string"
+    },
+    {
+      "name": "CorrelationId",
+      "type": "string"
+    },
+    {
+      "name": "IsBillableQuery",
+      "type": "bool"
+    },
+    {
+      "name": "QueryText",
+      "type": "string"
+    },
+    {
+      "name": "QueryThumbprint",
+      "type": "string"
+    },
+    {
+      "name": "QueryTimeRangeEnd",
+      "type": "datetime"
+    },
+    {
+      "name": "QueryTimeRangeStart",
+      "type": "datetime"
+    },
+    {
+      "name": "RequestClientApp",
+      "type": "string"
+    },
+    {
+      "name": "RequestContext",
+      "type": "object"
+    },
+    {
+      "name": "RequestContext.workspaces",
+      "type": "object"
+    },
+    {
+      "name": "RequestContext.workspaces.[]",
+      "type": "string"
+    },
+    {
+      "name": "RequestTarget",
+      "type": "string"
+    },
+    {
+      "name": "ResponseCode",
+      "type": "long"
+    },
+    {
+      "name": "ResponseDurationMs",
+      "type": "double"
+    },
+    {
+      "name": "ResponseRowCount",
+      "type": "long"
+    },
+    {
+      "name": "StatsCPUTimeMs",
+      "type": "double"
+    },
+    {
+      "name": "StatsDataProcessedEnd",
+      "type": "datetime"
+    },
+    {
+      "name": "StatsDataProcessedStart",
+      "type": "datetime"
+    },
+    {
+      "name": "StatsRegionCount",
+      "type": "long"
+    },
+    {
+      "name": "StatsWorkspaceCount",
+      "type": "long"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "WorkspaceRegion",
+      "type": "string"
+    }
+  ]
+}

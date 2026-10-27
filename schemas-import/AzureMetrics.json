@@ -1,0 +1,77 @@
+{
+  "table": "AzureMetrics",
+  "fields": [
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "Average",
+      "type": "double"
+    },
+    {
+      "name": "Count",
+      "type": "double"
+    },
+    {
+      "name": "Maximum",
+      "type": "double"
+    },
+    {
+      "name": "MetricName",
+      "type": "string"
+    },
+    {
+      "name": "Minimum",
+      "type": "double"
+    },
+    {
+      "name": "Resource",
+      "type": "string"
+    },
+    {
+      "name": "ResourceGroup",
+      "type": "string"
+    },
+    {
+      "name": "ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "ResourceProvider",
+      "type": "string"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "SubscriptionId",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "TimeGrain",
+      "type": "string"
+    },
+    {
+      "name": "Total",
+      "type": "double"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "UnitName",
+      "type": "string"
+    }
+  ]
+}

@@ -1,0 +1,209 @@
+{
+  "table": "AZKVAuditLogs",
+  "fields": [
+    {
+      "name": "AddressAuthorizationType",
+      "type": "string"
+    },
+    {
+      "name": "Algorithm",
+      "type": "string"
+    },
+    {
+      "name": "AppliedAssignmentId",
+      "type": "string"
+    },
+    {
+      "name": "_BilledSize",
+      "type": "real"
+    },
+    {
+      "name": "CallerIpAddress",
+      "type": "string"
+    },
+    {
+      "name": "CertificateIssuerProperties",
+      "type": "dynamic"
+    },
+    {
+      "name": "CertificatePolicyProperties",
+      "type": "dynamic"
+    },
+    {
+      "name": "CertificateProperties",
+      "type": "dynamic"
+    },
+    {
+      "name": "CertificateRequestProperties",
+      "type": "dynamic"
+    },
+    {
+      "name": "ClientInfo",
+      "type": "string"
+    },
+    {
+      "name": "CorrelationId",
+      "type": "string"
+    },
+    {
+      "name": "DurationMs",
+      "type": "int"
+    },
+    {
+      "name": "EnabledForDeployment",
+      "type": "bool"
+    },
+    {
+      "name": "EnabledForDiskEncryption",
+      "type": "bool"
+    },
+    {
+      "name": "EnabledForTemplateDeployment",
+      "type": "bool"
+    },
+    {
+      "name": "EnablePurgeProtection",
+      "type": "bool"
+    },
+    {
+      "name": "EnableRbacAuthorization",
+      "type": "bool"
+    },
+    {
+      "name": "EnableSoftDelete",
+      "type": "bool"
+    },
+    {
+      "name": "HsmPoolResourceId",
+      "type": "string"
+    },
+    {
+      "name": "HttpStatusCode",
+      "type": "int"
+    },
+    {
+      "name": "Id",
+      "type": "string"
+    },
+    {
+      "name": "Identity",
+      "type": "dynamic"
+    },
+    {
+      "name": "IsAccessPolicyMatch",
+      "type": "bool"
+    },
+    {
+      "name": "IsAddressAuthorized",
+      "type": "bool"
+    },
+    {
+      "name": "_IsBillable",
+      "type": "string"
+    },
+    {
+      "name": "IsRbacAuthorized",
+      "type": "bool"
+    },
+    {
+      "name": "KeyProperties",
+      "type": "dynamic"
+    },
+    {
+      "name": "NetworkAcls",
+      "type": "dynamic"
+    },
+    {
+      "name": "Nsp",
+      "type": "dynamic"
+    },
+    {
+      "name": "OperationName",
+      "type": "string"
+    },
+    {
+      "name": "OperationVersion",
+      "type": "string"
+    },
+    {
+      "name": "Properties",
+      "type": "dynamic"
+    },
+    {
+      "name": "RequestUri",
+      "type": "string"
+    },
+    {
+      "name": "_ResourceId",
+      "type": "string"
+    },
+    {
+      "name": "ResultDescription",
+      "type": "string"
+    },
+    {
+      "name": "ResultSignature",
+      "type": "string"
+    },
+    {
+      "name": "ResultType",
+      "type": "string"
+    },
+    {
+      "name": "SecretProperties",
+      "type": "dynamic"
+    },
+    {
+      "name": "Sku",
+      "type": "dynamic"
+    },
+    {
+      "name": "SoftDeleteRetentionInDays",
+      "type": "int"
+    },
+    {
+      "name": "SourceSystem",
+      "type": "string"
+    },
+    {
+      "name": "StorageAccountProperties",
+      "type": "dynamic"
+    },
+    {
+      "name": "StorageSasDefinitionProperties",
+      "type": "dynamic"
+    },
+    {
+      "name": "SubnetId",
+      "type": "string"
+    },
+    {
+      "name": "_SubscriptionId",
+      "type": "string"
+    },
+    {
+      "name": "TenantId",
+      "type": "string"
+    },
+    {
+      "name": "TimeGenerated",
+      "type": "datetime"
+    },
+    {
+      "name": "Tlsversion",
+      "type": "string"
+    },
+    {
+      "name": "TrustedService",
+      "type": "string"
+    },
+    {
+      "name": "Type",
+      "type": "string"
+    },
+    {
+      "name": "VaultProperties",
+      "type": "dynamic"
+    }
+  ]
+}
