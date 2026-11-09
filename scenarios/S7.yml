@@ -1,0 +1,13 @@
+id: S7
+name: Malicious file
+description: >
+  A hash flagged by the antivirus or threat intelligence: its prevalence in the tenant, where it came from (URL,
+  email, IP), the devices that have it, then the persistence and timeline of one of them.
+indicator: hash
+steps:
+  - ruleId: HS-S1     # hash prevalence
+  - ruleId: HS-P2     # file origin
+  - ruleId: HS-P1     # devices and paths of the file
+    carry: device
+  - ruleId: MC-P3     # persistence installed
+  - ruleId: MC-T1     # device timeline

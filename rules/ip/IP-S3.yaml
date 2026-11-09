@@ -1,16 +1,17 @@
 id: IP-S3
-name: Utilisation par jour, par machine
+name: Daily usage by device
 indicators: [ip]
 action: statistics
+targets: [device]
 description: >
-  Tableau croisé machine × jour du nombre d'événements où l'IP apparaît (connexions réseau Defender,
-  journaux Windows, Defender for Identity, pare-feu, Linux). La machine est la cible réelle de l'événement : un contrôleur
-  de domaine qui n'a fait que valider des identifiants (4768, 4769, 4771, 4776) apparaît à part, suffixé « validation des
-  identifiants ». Le rôle connu de chaque machine (DC, serveur déclaré dans la watchlist) est indiqué entre crochets.
+  Device × day cross-table of the number of events where the IP appears (Defender network connections,
+  Windows logs, Defender for Identity, firewall, Linux). The device is the actual target of the event: a domain
+  controller that only validated credentials (4768, 4769, 4771, 4776) appears separately, with the suffix "credential
+  validation". The known role of each device (DC, server declared in the watchlist) is shown in brackets.
 reading:
-  decisive: Machines touchées uniquement le jour de l'alerte, alors que l'IP existait déjà avant.
-  context: Nombre de machines qui augmente d'un jour à l'autre (balayage, mouvement latéral).
-  noise: Serveurs de supervision, d'inventaire ou de sauvegarde contactés tous les jours ; lignes « validation des identifiants » des DC.
+  decisive: Devices touched only on the day of the alert, while the IP already existed before.
+  context: Number of devices growing from one day to the next (scanning, lateral movement).
+  noise: Monitoring, inventory or backup servers contacted every day; "credential validation" rows of DCs.
 window: { before: 7d, after: 1d }
 uses: [ip_events, roles]
 query: |
@@ -18,6 +19,6 @@ query: |
   | where isnotempty(Host) or isnotempty(AuthBy)
   | extend MachineKey = _HostKey(coalesce(Host, AuthBy))
   | lookup kind=leftouter (_MachineRoles(EndTimestamp)) on MachineKey
-  | extend Machine = _Labeled(iff(isnotempty(Host), Host, strcat(AuthBy, " · validation des identifiants")), MachineRole)
+  | extend Machine = _Labeled(iff(isnotempty(Host), Host, strcat(AuthBy, " · credential validation")), MachineRole)
   | summarize Events = count() by Machine, Day = format_datetime(bin(TimeGenerated, 1d), "yyyy-MM-dd")
   | evaluate pivot(Day, sum(Events), Machine)

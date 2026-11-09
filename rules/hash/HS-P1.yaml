@@ -1,17 +1,18 @@
 id: HS-P1
-name: Machines et chemins du fichier
+name: Devices and paths of the file
 indicators: [hash]
 action: pivot
+targets: [device, account, process]
 description: >
-  Machines, chemins et noms sous lesquels le fichier apparaît, avec les actions vues (écrit, exécuté, chargé),
-  les comptes et les processus à l'origine. Defender for Endpoint, complété dans Sentinel par les fichiers et processus
-  normalisés ASIM et par Sysmon (1 processus, 7 DLL chargée, 15 flux de fichier, 23 et 26 suppression, 29 exécutable
-  détecté). MachineRole donne le rôle connu de la machine (DC, serveur déclaré).
-  Le contexte HOST restreint à une machine.
+  Devices, paths and names under which the file appears, with the actions seen (written, executed, loaded),
+  the originating accounts and processes. Defender for Endpoint, completed in Sentinel by ASIM normalized
+  files and processes and by Sysmon (1 process, 7 DLL loaded, 15 file stream, 23 and 26 delete, 29 executable
+  detected). MachineRole gives the known role of the device (DC, declared server).
+  The HOST context narrows the search to one device.
 reading:
-  decisive: Même fichier dans le même chemin sur plusieurs machines, exécuté (propagation ou campagne).
-  context: Fichier renommé (noms différents pour un même hash).
-  noise: Copies de logiciels déployés par l'IT.
+  decisive: Same file in the same path on several devices, executed (spread or campaign).
+  context: Renamed file (different names for the same hash).
+  noise: Copies of software deployed by IT.
 v1: true
 window: { before: 30d, after: 1d }
 context: [HOST]
@@ -23,7 +24,7 @@ query: |
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where SHA256 == ValueHash or SHA1 == ValueHash or MD5 == ValueHash
       | where isempty(HostFilter) or DeviceName startswith HostFilter
-      | project TimeGenerated, DeviceName = tolower(DeviceName), FolderPath, FileName, Action = strcat("Fichier ", ActionType),
+      | project TimeGenerated, DeviceName = tolower(DeviceName), FolderPath, FileName, Action = strcat("File ", ActionType),
           Account = tolower(InitiatingProcessAccountName), Process = InitiatingProcessFileName
   ),
   (
@@ -31,7 +32,7 @@ query: |
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where SHA256 == ValueHash or SHA1 == ValueHash or MD5 == ValueHash
       | where isempty(HostFilter) or DeviceName startswith HostFilter
-      | project TimeGenerated, DeviceName = tolower(DeviceName), FolderPath, FileName, Action = "Exécuté",
+      | project TimeGenerated, DeviceName = tolower(DeviceName), FolderPath, FileName, Action = "Executed",
           Account = tolower(AccountName), Process = InitiatingProcessFileName
   ),
   (
@@ -39,7 +40,7 @@ query: |
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where SHA256 == ValueHash or SHA1 == ValueHash or MD5 == ValueHash
       | where isempty(HostFilter) or DeviceName startswith HostFilter
-      | project TimeGenerated, DeviceName = tolower(DeviceName), FolderPath, FileName, Action = "Chargé (DLL)",
+      | project TimeGenerated, DeviceName = tolower(DeviceName), FolderPath, FileName, Action = "Loaded (DLL)",
           Account = tolower(InitiatingProcessAccountName), Process = InitiatingProcessFileName
   )
   // @sentinel-only:begin
@@ -49,7 +50,7 @@ query: |
       | where TargetFileSHA256 =~ ValueHash or TargetFileSHA1 =~ ValueHash or TargetFileMD5 =~ ValueHash
       | where isempty(HostFilter) or DvcHostname startswith HostFilter
       | project TimeGenerated, DeviceName = tolower(DvcHostname), FolderPath = TargetFilePath, FileName = TargetFileName,
-          Action = strcat("Fichier ", EventType, " (ASIM)"), Account = tolower(ActorUsername), Process = ActingProcessName
+          Action = strcat("File ", EventType, " (ASIM)"), Account = tolower(ActorUsername), Process = ActingProcessName
   ),
   (
       ASimProcessEventLogs
@@ -57,7 +58,7 @@ query: |
       | where TargetProcessSHA256 =~ ValueHash or TargetProcessSHA1 =~ ValueHash or TargetProcessMD5 =~ ValueHash
       | where isempty(HostFilter) or DvcHostname startswith HostFilter
       | project TimeGenerated, DeviceName = tolower(DvcHostname), FolderPath = TargetProcessName, FileName = TargetProcessFilename,
-          Action = "Exécuté (ASIM)", Account = tolower(ActorUsername), Process = ActingProcessFilename
+          Action = "Executed (ASIM)", Account = tolower(ActorUsername), Process = ActingProcessFilename
   ),
   (
       _Sysmon(StartTimestamp, EndTimestamp, dynamic([1, 7, 15, 23, 26, 29]), ValueHash)

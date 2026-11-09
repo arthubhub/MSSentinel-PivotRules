@@ -1,21 +1,50 @@
 id: AC-S1
-name: Connexions par application et par pays
+name: Sign-ins by application and country
 indicators: [account]
 action: statistics
+targets: [application]
 description: >
-  Connexions Entra ID du compte (interactives et non interactives) regroupées par pays et par application :
-  volume, échecs, jours actifs, IP distinctes, première et dernière apparition. Signale les combinaisons
-  apparues dans les deux derniers jours de la fenêtre.
+  Sign-ins of the account grouped by country and application: Entra ID sign-ins (interactive and non-interactive),
+  Active Directory authentications seen by Defender for Identity (IdentityLogonEvents, excluding Entra ID: application and
+  protocol, Kerberos, NTLM, LDAP) and Microsoft 365 and cloud app activity recorded by Defender for Cloud Apps
+  (CloudAppEvents: country, IP and provider, linked to the account by its object ID or its UPN). Volume, failures,
+  active days, distinct IPs, first and last seen; flags the combinations that appeared in the last two
+  days of the window. SignIns counts sign-ins (Entra ID, Active Directory), Activities counts CloudAppEvents actions;
+  ISPs and Sources are added.
 reading:
-  decisive: Pays ou application jamais utilisés par le compte, apparus juste avant l'alerte.
-  context: Hausse des échecs sur une application précise.
-  noise: Déplacements, VPN commerciaux, applications Microsoft qui se connectent en arrière-plan.
+  decisive: Country or application never used by the account, appearing just before the alert; cloud activity from a country or provider missing from sign-ins.
+  context: Rise in failures on a specific application; Active Directory authentications from an unexpected country (VPN, roaming workstation).
+  noise: Travel, commercial VPNs, Microsoft applications signing in in the background; empty country for internal Active Directory authentications.
 window: { before: 14d, after: 1d }
 uses: [signins]
 query: |
-  _Signins(StartTimestamp, EndTimestamp, "", ValueUpn)
-  | summarize SignIns = count(), Failures = countif(not(Succeeded)), ActiveDays = dcount(bin(TimeGenerated, 1d)),
-      IPs = dcount(IPAddress), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated)
-      by Country = Location, App = AppDisplayName
+  let Sig = materialize(_Signins(StartTimestamp, EndTimestamp, "", ValueUpn));
+  let UserIds = Sig | where isnotempty(UserId) | distinct UserId;
+  union isfuzzy=true
+  (
+      Sig
+      | project TimeGenerated, Country = Location, App = AppDisplayName, Kind = "signin", Failed = not(Succeeded), IPAddress, Isp = "",
+          Source = SourceTable
+  ),
+  (
+      IdentityLogonEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where AccountUpn =~ ValueUpn or AccountName =~ ValueSam
+      | where Application !in~ ("Azure Active Directory", "Microsoft Entra ID")
+      | project TimeGenerated, Country = Location, App = strcat(Application, " (", Protocol, ")"), Kind = "signin",
+          Failed = ActionType != "LogonSuccess", IPAddress, Isp = ISP, Source = "IdentityLogonEvents"
+  ),
+  (
+      CloudAppEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where AccountObjectId in (UserIds) or (RawEventData has ValueUpn and tostring(RawEventData.UserId) =~ ValueUpn)
+      | project TimeGenerated, Country = CountryCode, App = Application, Kind = "activity", Failed = false, IPAddress, Isp = ISP,
+          Source = "CloudAppEvents"
+  )
+  | summarize SignIns = countif(Kind == "signin"), Failures = countif(Failed), ActiveDays = dcount(bin(TimeGenerated, 1d)),
+      IPs = dcount(IPAddress), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
+      Activities = countif(Kind == "activity"), ISPs = make_set_if(Isp, isnotempty(Isp), 5), Sources = make_set(Source)
+      by Country, App
   | extend NewCombination = FirstSeen > T0 - 2d
   | sort by NewCombination desc, SignIns desc
+  | project Country, App, SignIns, Failures, ActiveDays, IPs, FirstSeen, LastSeen, NewCombination, Activities, ISPs, Sources

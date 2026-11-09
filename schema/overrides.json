@@ -1,5 +1,5 @@
 {
- "_comment": "Compléments au schéma généré : AzureDiagnostics (schéma du dépôt Azure-Sentinel), colonne Timestamp des tables Defender XDR (présente dans Defender et dans les tables diffusées vers Sentinel), et tables propres à Defender XDR absentes de la référence Azure Monitor (EntraIdSignInEvents, EntraIdSpnSignInEvents : schémas repris de Azure-Sentinel/.script/tests/KqlvalidationsTests/CustomTables ; colonne Timestamp seulement).",
+ "_comment": "Additions to the generated schema: AzureDiagnostics (schema from the Azure-Sentinel repository), Timestamp column of the Defender XDR tables (present in Defender and in the tables streamed to Sentinel), and Defender XDR-only tables missing from the Azure Monitor reference (EntraIdSignInEvents, EntraIdSpnSignInEvents: schemas taken from Azure-Sentinel/.script/tests/KqlvalidationsTests/CustomTables; Timestamp column only).",
  "xdrTables": [
   "DeviceNetworkEvents",
   "DeviceNetworkInfo",
@@ -27,7 +27,7 @@
   "IdentityQueryEvents",
   "IdentityDirectoryEvents"
  ],
- "_defenderOptional": "Tables hors Defender XDR tolérées dans la variante Defender d'une règle : elles ne sont lues que dans une branche de union isfuzzy=true, sans colonne de temps, et disparaissent simplement quand elles n'existent pas (Defender sans Sentinel).",
+ "_defenderOptional": "Non-Defender XDR tables tolerated in the Defender variant of a rule: they are only read in a union isfuzzy=true branch, without a time column, and simply drop out when they do not exist (Defender without Sentinel).",
  "defenderOptional": [
   "Watchlist"
  ],

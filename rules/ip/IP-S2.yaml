@@ -1,14 +1,14 @@
 id: IP-S2
-name: Volume par 10 minutes, par table et par événement
+name: Volume per 10 minutes, by table and event
 indicators: [ip]
 action: statistics
 description: >
-  Nombre d'événements contenant l'IP par tranche de 10 minutes, ventilé par table et par type d'événement
-  (EventID, ActionType ou opération). Montre un pic d'échecs, un balisage régulier ou une activité inhabituelle.
+  Number of events containing the IP per 10-minute bucket, broken down by table and event type
+  (EventID, ActionType or operation). Shows a spike of failures, regular beaconing or unusual activity.
 reading:
-  decisive: Pic d'échecs 4625 ou ResultType 50126 concentré sur quelques minutes, suivi d'un succès.
-  context: Intervalles réguliers entre événements réseau (balisage C2).
-  noise: NAT d'entreprise, scanners internes et passerelles qui produisent un fond constant.
+  decisive: Spike of 4625 failures or ResultType 50126 within a few minutes, followed by a success.
+  context: Regular intervals between network events (C2 beaconing).
+  noise: Corporate NAT, internal scanners and gateways that produce a constant background.
 scenarios: [S1, S6]
 v1: true
 window: { before: 24h, after: 1h }

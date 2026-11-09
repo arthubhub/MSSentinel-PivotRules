@@ -1,15 +1,16 @@
 id: IP-T3
-name: Comptes vus depuis l'IP dans le temps
+name: Accounts seen from the IP over time
 indicators: [ip]
 action: timeline
+targets: [account]
 description: >
-  Liste des comptes et identités associés à l'IP dans l'ordre de leur première apparition, avec tentatives, succès,
-  sources (Entra ID utilisateurs et applications, Windows, Defender for Endpoint, Defender for Identity, ASIM, SSH Linux)
-  et rôle connu du compte (compte de service, groupe privilégié, watchlist).
+  Accounts and identities linked to the IP in the order they first appeared, with attempts, successes,
+  sources (Entra ID users and applications, Windows, Defender for Endpoint, Defender for Identity, ASIM, Linux SSH)
+  and known role of the account (service account, privileged group, watchlist).
 reading:
-  decisive: Comptes qui apparaissent l'un après l'autre à quelques secondes d'intervalle (spray automatisé).
-  context: Premier succès après une série d'échecs sur d'autres comptes ; compte privilégié dans la série.
-  noise: Rotation normale des utilisateurs derrière un proxy ou un serveur de terminaux.
+  decisive: Accounts appearing one after another a few seconds apart (automated spray).
+  context: First success after a series of failures on other accounts; privileged account in the series.
+  noise: Normal rotation of users behind a proxy or a terminal server.
 window: { before: 2h, after: 2h }
 uses: [signins, spn_signins, win_security, roles]
 query: |
@@ -22,12 +23,14 @@ query: |
       _SpnSignins(StartTimestamp, EndTimestamp, "", Value)
       | project TimeGenerated, Account = tolower(ServicePrincipalName), Source = strcat("Entra ID ", SignInType), Success = Succeeded
   ),
+  // @sentinel-only:begin
   (
       _WinSecurity(StartTimestamp, EndTimestamp, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776]), Value)
       | where IpAddress == Value
       | project TimeGenerated, Account = TargetSam, Source = SourceTable,
           Success = EventID !in (4625, 4771) and Status in ("", "-", "0x0")
   ),
+  // @sentinel-only:end
   (
       DeviceLogonEvents
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
@@ -39,8 +42,9 @@ query: |
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where IPAddress == Value
       | project TimeGenerated, Account = tolower(coalesce(AccountUpn, AccountName)), Source = "IdentityLogonEvents", Success = ActionType == "LogonSuccess"
-  ),
-  (
+  )
+  // @sentinel-only:begin
+  , (
       ASimAuthenticationEventLogs
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where SrcIpAddr == Value
@@ -54,6 +58,7 @@ query: |
       | where isnotempty(User)
       | project TimeGenerated, Account = tolower(User), Source = "Syslog (sshd)", Success = SyslogMessage startswith "Accepted"
   )
+  // @sentinel-only:end
   | where isnotempty(Account) and Account !endswith "$"
   | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Attempts = count(),
       Successes = countif(Success), FirstSuccess = minif(TimeGenerated, Success), Sources = make_set(Source) by Account

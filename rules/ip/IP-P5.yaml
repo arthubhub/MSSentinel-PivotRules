@@ -1,17 +1,20 @@
 id: IP-P5
-name: Alertes et renseignement sur l'IP
+name: Alerts and threat intel on the IP
 indicators: [ip]
 action: pivot
 description: >
-  Alertes Sentinel et Defender XDR qui citent l'IP, et indicateurs de menace (ThreatIntelIndicators, format STIX)
-  qui la contiennent. La table historique ThreatIntelligenceIndicator n'est plus alimentée depuis le 31 juillet 2025.
+  Sentinel and Defender XDR alerts that mention the IP, and threat indicators (ThreatIntelIndicators, STIX format)
+  that contain it. The legacy ThreatIntelligenceIndicator table is no longer populated since July 31, 2025.
+  In Sentinel, adds the flows blocked or flagged by Azure Firewall threat intel (AZFWThreatIntel) and
+  the Entra ID Protection risk detections from the IP (AADUserRiskEvents: detection type, account, state).
 reading:
-  decisive: Indicateur actif à confiance élevée, ou alerte déjà confirmée sur la même IP.
-  context: Alertes anciennes ou indicateurs expirés.
-  noise: IP de CDN ou d'hébergeurs mutualisés présentes dans des flux de renseignement génériques.
+  decisive: Active high-confidence indicator, or an alert already confirmed on the same IP.
+  context: Old alerts or expired indicators.
+  noise: CDN or shared hosting IPs listed in generic threat intel feeds.
 window: { before: 30d, after: 1d }
 query: |
   union isfuzzy=true
+  // @sentinel-only:begin
   (
       SecurityAlert
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
@@ -20,23 +23,61 @@ query: |
       | project TimeGenerated, Source = "SecurityAlert", Title = AlertName, Severity = AlertSeverity, Provider = ProductName,
           Detail = strcat(CompromisedEntity, " · ", Status), Reference = SystemAlertId
   ),
+  // @sentinel-only:end
   (
       AlertEvidence
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where RemoteIP == Value or LocalIP == Value
       | summarize arg_min(TimeGenerated, Title, Severity, ServiceSource, EntityType, EvidenceRole, DeviceName) by AlertId
+      // @defender-only:begin
+      // Defender XDR: alert title, severity, category and detection source (AlertInfo, one row per alert)
+      | lookup kind=leftouter (
+          AlertInfo
+          | where TimeGenerated between ((StartTimestamp - 1d) .. EndTimestamp)
+          | summarize InfoTitle = take_any(Title), InfoSeverity = take_any(Severity), Category = take_any(Category),
+              DetectionSource = take_any(DetectionSource), AttackTechniques = take_any(AttackTechniques) by AlertId
+        ) on AlertId
+      | extend Title = coalesce(InfoTitle, Title), Severity = coalesce(InfoSeverity, Severity),
+          ServiceSource = strcat(ServiceSource, iff(isnotempty(DetectionSource), strcat(" / ", DetectionSource), "")),
+          EvidenceRole = strcat(EvidenceRole, iff(isnotempty(Category), strcat(" · ", Category), ""),
+              iff(isnotempty(AttackTechniques) and AttackTechniques != "[]", strcat(" · ", AttackTechniques), ""))
+      // @defender-only:end
       | project TimeGenerated, Source = "AlertEvidence", Title, Severity, Provider = ServiceSource,
           Detail = strcat(EntityType, " · ", EvidenceRole, " · ", DeviceName), Reference = AlertId
-  ),
-  (
+  )
+  // @sentinel-only:begin
+  , (
       ThreatIntelIndicators
       | where TimeGenerated between ((StartTimestamp - 60d) .. EndTimestamp)
       | where ObservableValue == Value or Pattern has Value
       | summarize arg_max(TimeGenerated, *) by Id
       | where not(IsDeleted) and not(Revoked)
       | project TimeGenerated, Source = "ThreatIntelIndicators", Title = tostring(Data.name),
-          Severity = strcat("Confiance ", tostring(Confidence)), Provider = SourceSystem,
-          Detail = strcat(Pattern, " · valide jusqu'au ", format_datetime(ValidUntil, "yyyy-MM-dd"), iff(IsActive, "", " · inactif")),
+          Severity = strcat("Confidence ", tostring(Confidence)), Provider = SourceSystem,
+          Detail = strcat(Pattern, " · valid until ", format_datetime(ValidUntil, "yyyy-MM-dd"), iff(IsActive, "", " · inactive")),
+          Reference = Id
+  ),
+  (
+      AZFWThreatIntel
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where SourceIp == Value or DestinationIp == Value
+      | summarize FirstSeen = min(TimeGenerated), TimeGenerated = max(TimeGenerated), Hits = count(), Ports = make_set(DestinationPort, 5),
+          Peers = make_set(iff(SourceIp == Value, DestinationIp, SourceIp), 5) by Action, ThreatDescription
+      | project TimeGenerated, Source = "AZFWThreatIntel", Title = ThreatDescription, Severity = strcat("Azure Firewall ", Action),
+          Provider = "Azure Firewall (Microsoft threat intel)",
+          Detail = strcat(Hits, " flows since ", format_datetime(FirstSeen, "yyyy-MM-dd HH:mm"), " · peers ", strcat_array(Peers, ", "),
+              " · ports ", strcat_array(Ports, ", ")),
+          Reference = ""
+  ),
+  (
+      AADUserRiskEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where IpAddress == Value
+      | summarize arg_max(TimeGenerated, *) by Id
+      | extend Provider = strcat("Entra ID Protection (", Source, ")")
+      | project TimeGenerated, Source = "AADUserRiskEvents", Title = RiskEventType, Severity = RiskLevel, Provider,
+          Detail = strcat(UserPrincipalName, " · ", RiskState, " · ", DetectionTimingType, iff(isnotempty(RiskDetail) and RiskDetail != "none", strcat(" · ", RiskDetail), "")),
           Reference = Id
   )
+  // @sentinel-only:end
   | sort by TimeGenerated desc

@@ -1,83 +1,100 @@
 id: AC-P2
-name: Machines où le compte s'est connecté
+name: Devices where the account logged on
 indicators: [account]
 action: pivot
+targets: [device, ip]
 description: >
-  Machines liées au compte, classées par nature du lien (colonne Perspective) pour ne pas confondre la machine
-  utilisée avec le contrôleur de domaine qui a validé les identifiants :
-  1. « Session sur la machine » : ouverture de session sur la machine elle-même (Defender for Endpoint, 4624 et 4625 de
-  la machine, Defender for Identity, ASIM, SSH) ;
-  2. « Identifiants explicites vers la machine » : 4648 (runas, connexion avec d'autres identifiants), la machine est le
-  serveur visé ;
-  3. « Ticket de service Kerberos » : 4769 journalisé par le DC pour un service de la machine (partage, RDP, WinRM…), seule
-  trace quand la machine elle-même n'envoie pas ses journaux ;
-  4. « Poste d'origine (vu par le DC) » : poste ou IP depuis lequel le compte s'est authentifié (4768, 4769, 4771, 4776,
-  Defender for Identity) ;
-  5. « Accès réseau au contrôleur de domaine » : ouverture réseau (type 3) sur un DC (stratégies de groupe, SYSVOL, LDAP),
-  présente pour tout compte du domaine, classée en dernier.
-  Le rôle de chaque machine (DC détecté, watchlist EasyPivotRoles) est indiqué, et ValidatedBy liste les DC qui ont
-  validé les identifiants.
+  Devices linked to the account, sorted by kind of link (Perspective column) so that the device actually used
+  is not mistaken for the domain controller that validated the credentials:
+  1. "Session on the device": logon on the device itself (Defender for Endpoint, 4624 and 4625 from
+  the device, Defender for Identity, ASIM, SSH);
+  2. "Explicit credentials to the device": 4648 (runas, logon with other credentials), the device is the
+  target server;
+  3. "Kerberos service ticket": 4769 logged by the DC for a service of the device (share, RDP, WinRM…), the only
+  trace when the device itself does not send its logs;
+  4. "Source workstation (seen by the DC)": workstation or IP the account authenticated from (4768, 4769, 4771, 4776,
+  Defender for Identity);
+  5. "Network access to the domain controller": network logon (type 3) on a DC (group policies, SYSVOL, LDAP),
+  present for every domain account, ranked last.
+  The role of each device (detected DC, EasyPivotRoles watchlist) is shown, and ValidatedBy lists the DCs that
+  validated the credentials.
 reading:
-  decisive: Compte standard en session sur des serveurs sensibles ou des contrôleurs de domaine (type 2 ou 10) hors de son périmètre.
-  context: Ouvertures RemoteInteractive (RDP) ou NewCredentials (runas /netonly) inhabituelles ; tickets 4769 vers un serveur jamais vu.
-  noise: Accès réseau aux DC (GPO, SYSVOL), postes partagés, serveurs de fichiers ou d'impression en ouverture réseau (type 3).
+  decisive: Standard account with a session on sensitive servers or domain controllers (type 2 or 10) outside its scope.
+  context: Unusual RemoteInteractive (RDP) or NewCredentials (runas /netonly) logons; 4769 tickets to a server never seen before.
+  noise: Network access to DCs (GPO, SYSVOL), shared workstations, file or print servers with network logons (type 3).
 v1: true
 window: { before: 24h, after: 1h }
 uses: [win_security, roles]
 query: |
+  // @sentinel-only:begin
   let Win = materialize(_WinSecurity(StartTimestamp, EndTimestamp, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776]), ValueSam)
       | where TargetSam == ValueSam);
+  // @sentinel-only:end
   union isfuzzy=true
   (
       DeviceLogonEvents
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where AccountName =~ ValueSam
-      | project TimeGenerated, Machine = tolower(DeviceName), Perspective = "Session sur la machine", Source = "DeviceLogonEvents",
+      | project TimeGenerated, Machine = tolower(DeviceName), Perspective = "Session on the device", Source = "DeviceLogonEvents",
           LogonType, Success = ActionType == "LogonSuccess", SourceIp = RemoteIP, SourceHost = tolower(RemoteDeviceName), AuthBy = "",
           IsLocalAdmin
   ),
+  // @sentinel-only:begin
   (
       Win
       | where EventID in (4624, 4625, 4648)
       | project TimeGenerated, Machine = TargetHost,
-          Perspective = iff(EventID == 4648, "Identifiants explicites vers la machine", "Session sur la machine"),
-          Source = SourceTable, LogonType = iff(EventID == 4648, "Identifiants explicites (4648)", LogonTypeName),
+          Perspective = iff(EventID == 4648, "Explicit credentials to the device", "Session on the device"),
+          Source = SourceTable, LogonType = iff(EventID == 4648, "Explicit credentials (4648)", LogonTypeName),
           Success = EventID != 4625, SourceIp = IpAddress, SourceHost = iff(EventID == 4648, tolower(Computer), tolower(WorkstationName)),
           AuthBy = "", IsLocalAdmin = bool(null)
   ),
   (
       Win
       | where EventID == 4769 and isnotempty(TargetHost)
-      | project TimeGenerated, Machine = TargetHost, Perspective = "Ticket de service Kerberos (vu par le DC)", Source = SourceTable,
+      | project TimeGenerated, Machine = TargetHost, Perspective = "Kerberos service ticket (seen by the DC)", Source = SourceTable,
           LogonType = strcat("Kerberos · ", ServiceName), Success = Status in ("", "-", "0x0"), SourceIp = IpAddress, SourceHost = "",
           AuthBy = AuthAuthority, IsLocalAdmin = bool(null)
   ),
   (
       Win
       | where EventID in (4768, 4769, 4771, 4776) and isnotempty(SourceHost)
-      | project TimeGenerated, Machine = SourceHost, Perspective = "Poste d'origine (vu par le DC)", Source = SourceTable,
+      | project TimeGenerated, Machine = SourceHost, Perspective = "Source workstation (seen by the DC)", Source = SourceTable,
           LogonType = strcat(tostring(EventID), " ", EventName), Success = EventID != 4771 and Status in ("", "-", "0x0"),
           SourceIp = IpAddress, SourceHost = "", AuthBy = AuthAuthority, IsLocalAdmin = bool(null)
   ),
+  // @sentinel-only:end
   (
       IdentityLogonEvents
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where AccountUpn =~ ValueUpn or AccountName =~ ValueSam
       | extend Pair = pack_array(
-          bag_pack("Machine", tolower(TargetDeviceName), "Perspective", "Session sur la machine"),
-          bag_pack("Machine", tolower(DeviceName), "Perspective", "Poste d'origine (vu par le DC)"))
+          bag_pack("Machine", tolower(TargetDeviceName), "Perspective", "Session on the device"),
+          bag_pack("Machine", tolower(DeviceName), "Perspective", "Source workstation (seen by the DC)"))
       | mv-expand Pair
       | project TimeGenerated, Machine = tostring(Pair.Machine), Perspective = tostring(Pair.Perspective), Source = "IdentityLogonEvents",
           LogonType = strcat(Protocol, " ", LogonType), Success = ActionType == "LogonSuccess", SourceIp = IPAddress,
           SourceHost = iff(tostring(Pair.Perspective) startswith "Session", tolower(DeviceName), ""), AuthBy = tolower(DestinationDeviceName),
           IsLocalAdmin = bool(null)
-  ),
-  (
+  )
+  // @defender-only:begin
+  // Defender XDR, no DC log: source workstation of a network logon, seen by the target device (Defender for Endpoint)
+  , (
+      DeviceLogonEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where AccountName =~ ValueSam and isnotempty(RemoteDeviceName)
+      | project TimeGenerated, Machine = tolower(RemoteDeviceName), Perspective = "Source workstation (seen by the target device)",
+          Source = "DeviceLogonEvents", LogonType, Success = ActionType == "LogonSuccess", SourceIp = RemoteIP,
+          SourceHost = "", AuthBy = "", IsLocalAdmin = bool(null)
+  )
+  // @defender-only:end
+  // @sentinel-only:begin
+  , (
       ASimAuthenticationEventLogs
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where TargetUsername has ValueSam
       | where tolower(TargetUsername) in (ValueSam, ValueUpn) or tolower(TargetUsername) endswith strcat(@"\", ValueSam)
-      | project TimeGenerated, Machine = tolower(coalesce(TargetHostname, DvcHostname)), Perspective = "Session sur la machine",
+      | project TimeGenerated, Machine = tolower(coalesce(TargetHostname, DvcHostname)), Perspective = "Session on the device",
           Source = strcat("ASIM ", EventProduct), LogonType = strcat(LogonProtocol, " ", LogonMethod), Success = EventResult == "Success",
           SourceIp = SrcIpAddr, SourceHost = tolower(SrcHostname), AuthBy = "", IsLocalAdmin = bool(null)
   ),
@@ -87,17 +104,18 @@ query: |
       | where ProcessName in~ ("sshd", "sshd-session") and SyslogMessage has ValueSam
       | extend User = extract(@"(?:Accepted|Failed) \S+ for (?:invalid user )?(\S+) from", 1, SyslogMessage)
       | where tolower(User) == ValueSam
-      | project TimeGenerated, Machine = tolower(Computer), Perspective = "Session sur la machine", Source = "Syslog (sshd)",
+      | project TimeGenerated, Machine = tolower(Computer), Perspective = "Session on the device", Source = "Syslog (sshd)",
           LogonType = "SSH", Success = SyslogMessage startswith "Accepted",
           SourceIp = extract(@" from (\S+)", 1, SyslogMessage), SourceHost = "", AuthBy = "", IsLocalAdmin = bool(null)
   )
+  // @sentinel-only:end
   | where isnotempty(Machine) and Machine != "-"
   | extend MachineKey = _HostKey(Machine)
   | lookup kind=leftouter (_MachineRoles(EndTimestamp)) on MachineKey
-  | extend Perspective = iff(MachineRole has "DC" and Perspective == "Session sur la machine" and LogonType has "Network",
-      "Accès réseau au contrôleur de domaine (GPO, SYSVOL, LDAP)", Perspective)
-  | extend Rank = case(Perspective startswith "Session", 1, Perspective startswith "Identifiants", 2, Perspective startswith "Ticket", 3,
-      Perspective startswith "Poste", 4, 5)
+  | extend Perspective = iff(MachineRole has "DC" and Perspective == "Session on the device" and LogonType has "Network",
+      "Network access to the domain controller (GPO, SYSVOL, LDAP)", Perspective)
+  | extend Rank = case(Perspective startswith "Session", 1, Perspective startswith "Explicit", 2, Perspective startswith "Kerberos", 3,
+      Perspective startswith "Source", 4, 5)
   | summarize Logons = count(), Failures = countif(not(Success)), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
       LogonTypes = make_set(LogonType, 10), SourceIps = make_set_if(SourceIp, isnotempty(SourceIp), 10),
       SourceHosts = make_set_if(SourceHost, isnotempty(SourceHost), 10), ValidatedBy = make_set_if(AuthBy, isnotempty(AuthBy), 5),

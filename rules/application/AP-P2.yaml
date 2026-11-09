@@ -1,17 +1,19 @@
 id: AP-P2
-name: Connexions et appels du service principal
+name: Service principal sign-ins and calls
 indicators: [application]
 action: pivot
+targets: [ip]
 description: >
-  Connexions du service principal ou de l'identité managée (IP, ressource, résultat, type d'identifiant) et
-  requêtes Microsoft Graph de l'application regroupées par méthode et chemin (identifiants remplacés par {id}).
-  Connexions lues dans AADServicePrincipalSignInLogs et AADManagedIdentitySignInLogs, ou dans EntraIdSpnSignInEvents
-  (Defender XDR) quand elles manquent. AppOrigin dit si l'application est éditée par Microsoft, par le tenant ou par un
-  autre tenant (application tierce multi-tenant).
+  Sign-ins of the service principal or managed identity (IP, resource, result, credential type) and
+  Microsoft Graph requests (and legacy Azure AD Graph, AADGraphActivityLogs) of the application grouped by method and path (identifiers replaced by {id}).
+  Sign-ins read from AADServicePrincipalSignInLogs and AADManagedIdentitySignInLogs, or from EntraIdSpnSignInEvents
+  (Defender XDR) when they are missing. In the Defender XDR variant, with no Graph log, the Microsoft 365 activity of
+  the application is read from CloudAppEvents (OAuthAppId). AppOrigin tells whether the application is published by Microsoft, by the tenant or by another
+  tenant (third-party multi-tenant application).
 reading:
-  decisive: Connexions réussies avec secret client depuis une IP hors de la base, suivies d'appels Graph de lecture massive (messages, fichiers, utilisateurs).
-  context: Taux d'échec élevé (secret testé), ressources inhabituelles (Key Vault, Azure Resource Manager).
-  noise: Rotation de secrets, déploiements automatisés.
+  decisive: Successful sign-ins with a client secret from an IP outside the baseline, followed by bulk-read Graph calls (messages, files, users).
+  context: High failure rate (secret being tested), unusual resources (Key Vault, Azure Resource Manager).
+  noise: Secret rotation, automated deployments.
 window: { before: 7d, after: 1d }
 uses: [spn_signins]
 query: |
@@ -19,16 +21,36 @@ query: |
   (
       _SpnSignins(StartTimestamp, EndTimestamp, ValueApp, "")
       | project TimeGenerated, Source = SignInType, Identity = ServicePrincipalName, AppOrigin, IPAddress, Location,
-          Operation = strcat("Connexion à ", ResourceDisplayName), Result = ResultType, Credential
-  ),
-  (
+          Operation = strcat("Sign-in to ", ResourceDisplayName), Result = ResultType, Credential
+  )
+  // @sentinel-only:begin
+  , (
       MicrosoftGraphActivityLogs
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where AppId == ValueApp or ServicePrincipalId == ValueApp
       | project TimeGenerated, Source = "Microsoft Graph", Identity = coalesce(UserId, ServicePrincipalId), AppOrigin = "", IPAddress, Location = "",
           Operation = strcat(RequestMethod, " ", replace_regex(tostring(parse_url(RequestUri).Path), @"[0-9a-fA-F-]{36}", "{id}")),
           Result = tostring(ResponseStatusCode), Credential = ""
+  ),
+  (
+      AADGraphActivityLogs
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where AppId == ValueApp or ServicePrincipalId == ValueApp
+      | project TimeGenerated, Source = "Azure AD Graph", Identity = coalesce(UserId, ServicePrincipalId), AppOrigin = "", IPAddress = CallerIpAddress,
+          Location = "", Operation = strcat(RequestMethod, " ", replace_regex(tostring(parse_url(RequestUri).Path), @"[0-9a-fA-F-]{36}", "{id}")),
+          Result = tostring(ResponseStatusCode), Credential = ""
   )
+  // @sentinel-only:end
+  // @defender-only:begin
+  // Defender XDR: no Graph log; Microsoft 365 activity of the application seen by Defender for Cloud Apps
+  , (
+      CloudAppEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where OAuthAppId == ValueApp
+      | project TimeGenerated, Source = "Defender for Cloud Apps", Identity = coalesce(AccountDisplayName, AccountObjectId), AppOrigin = "",
+          IPAddress, Location = CountryCode, Operation = strcat(Application, " · ", ActionType), Result = "", Credential = ""
+  )
+  // @defender-only:end
   | summarize Events = count(), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), IPs = make_set(IPAddress, 10),
       Locations = make_set(Location, 5), Results = make_set(Result, 5), AppOrigin = take_any(AppOrigin) by Source, Identity, Operation, Credential
   | sort by Source asc, Events desc

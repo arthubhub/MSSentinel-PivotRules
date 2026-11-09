@@ -1,27 +1,27 @@
 #!/usr/bin/env node
-// Génère indicators/<type>/locations.yml + indicators/REVIEW-locations.md (#31).
+// Generates indicators/<type>/locations.yml + indicators/REVIEW-locations.md (#31).
 //
-// Objectif : pour chaque type d'indicateur EasyPivot, une liste de paires "Table.Colonne" où ce type de
-// valeur est effectivement trouvé, triée par ordre de confiance décroissant :
-//   1. Les règles existantes sont la vérité de terrain : on repère, dans le texte des règles (et de 4
-//      fragments partagés qui énumèrent des colonnes pour un paramètre générique), les colonnes RÉELLEMENT
-//      comparées à la valeur (`== Value`, `has Value`…) — pas celles simplement projetées ou utilisées
-//      pour grouper (`by Machine = tolower(DeviceName)` ne prouve rien sur le type de DeviceName).
-//   2. La table de correspondance `Entity` Defender → type EasyPivot (relevée sur tenant réel, cf. plan).
-//   3. Les motifs de nom de colonne sur les 105 schémas (`schemas/`) — la moins fiable des trois.
+// Goal: for each EasyPivot indicator type, a list of "Table.Column" pairs where that type of value is
+// actually found, sorted by decreasing confidence:
+//   1. Existing rules are the ground truth: in the rule text (and in 4 shared fragments that list
+//      columns for a generic parameter), find the columns ACTUALLY compared to the value
+//      (`== Value`, `has Value`…), not those merely projected or used for grouping
+//      (`by Machine = tolower(DeviceName)` proves nothing about the type of DeviceName).
+//   2. The Defender `Entity` -> EasyPivot type mapping (observed on a real tenant, see plan).
+//   3. Column name patterns over the 105 schemas (`schemas/`), the least reliable of the three.
 //
-// Décision du 23/10 : les trois niveaux sont retenus. Les deux premiers vont dans `confirmed`, le
-// troisième dans `uncertain`, et les DEUX sont destinés à la publication. `locations` est une aide à la
-// présélection, pas une contrainte : le panneau propose toujours les 9 types et signale « La valeur ne
-// correspond pas à ce type, pivot possible quand même », donc l'analyste peut toujours pivoter
-// autrement — indispensable, puisqu'un nom de machine peut être une adresse IP. Une paire fausse coûte
-// un clic ; une paire absente coûte une présélection utile.
+// Decision of 23/10: all three levels are kept. The first two go to `confirmed`, the third to
+// `uncertain`, and BOTH are meant to be published. `locations` helps preselection, it is not a
+// constraint: the panel always offers the 9 types and shows "The value does not match this type,
+// pivot still possible", so the analyst can always pivot another way; this is required, since a
+// device name can be an IP address. A wrong pair costs one click; a missing pair costs a useful
+// preselection.
 //
-// Ce script n'écrit toujours PAS dans pivot-rules.json : la publication se fait en 2d. Il n'est pas
-// câblé dans build/check/test (script npm indépendant).
+// This script does NOT write pivot-rules.json: publishing happens in 2d (build.mjs). It is not
+// wired into build/check/test (standalone npm script).
 //
-// Déterminisme : toute sortie (locations.yml, rapport) est triée ; deux exécutions successives ne
-// produisent aucune différence si rien n'a changé dans rules/, fragments/ ou schemas/.
+// Determinism: every output (locations.yml, report) is sorted; two successive runs produce no
+// difference if nothing changed in rules/, fragments/ or schemas/.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -34,24 +34,24 @@ const walk = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) =
 const INDICATOR_TYPES = ['ip', 'account', 'email', 'url', 'domain', 'device', 'process', 'application', 'hash'];
 
   ////////////////////////////////
- // 1. Chargement des schémas  //
+ // 1. Load the schemas       //
 ////////////////////////////////
 
-// Table -> Set(colonnes exactes). Les champs imbriqués pointés (AdditionalFields.xxx) sont exclus : ce sont
-// des sous-champs dynamic, pas des colonnes KQL ("Table.AdditionalFields.xxx" serait une paire invalide).
+// Table -> Set(exact columns). Dotted nested fields (AdditionalFields.xxx) are excluded: they are
+// dynamic sub-fields, not KQL columns ("Table.AdditionalFields.xxx" would be an invalid pair).
 const tableColumns = new Map();
-// Nom de colonne sans le suffixe Log Analytics (_s, _d, _t) -> liste de {table, column} (colonne réelle, avec suffixe).
-// Les colonnes émises dans locations.yml gardent TOUJOURS leur suffixe : c'est le vrai nom de la colonne KQL.
+// Column name without the Log Analytics suffix (_s, _d, _t) -> list of {table, column} (real column, with suffix).
+// Columns written to locations.yml ALWAYS keep their suffix: it is the real KQL column name.
 const byBaseName = new Map();
 const stripSuffix = (n) => n.replace(/_(s|d|t)$/, '');
 
 for (const file of fs.readdirSync(path.join(ROOT, 'schemas')).filter((f) => f.endsWith('.json'))) {
   const data = JSON.parse(fs.readFileSync(path.join(ROOT, 'schemas', file), 'utf8'));
   const table = data.table;
-  if (/_CL$/i.test(table)) throw new Error(`garde-fou : table personnalisée ${table} dans schemas/ (ne devrait jamais arriver, 2a l'exclut déjà)`);
+  if (/_CL$/i.test(table)) throw new Error(`guard: custom table ${table} in schemas/ (should never happen, 2a already excludes it)`);
   const cols = new Set();
   for (const f of data.fields) {
-    if (f.name.includes('.')) continue; // sous-champ dynamic imbriqué, pas une colonne KQL
+    if (f.name.includes('.')) continue; // nested dynamic sub-field, not a KQL column
     cols.add(f.name);
     const base = stripSuffix(f.name);
     (byBaseName.get(base) || byBaseName.set(base, []).get(base)).push({ table, column: f.name });
@@ -61,12 +61,12 @@ for (const file of fs.readdirSync(path.join(ROOT, 'schemas')).filter((f) => f.en
 const allTables = [...tableColumns.keys()].sort((a, b) => b.length - a.length);
 
   /////////////////////////////////////////////////////////
- // 2. Table de correspondance Entity Defender -> type   //
+ // 2. Defender Entity -> type mapping                   //
 /////////////////////////////////////////////////////////
-// Reprise exacte de la table du plan (step 0), relevée sur tenant réel : DeviceInfo, DeviceProcessEvents,
+// Exact copy of the plan's table (step 0), observed on a real tenant: DeviceInfo, DeviceProcessEvents,
 // DeviceNetworkEvents, DeviceFileEvents, EmailEvents, EmailUrlInfo, IdentityLogonEvents, CloudAppEvents,
-// EntraIdSignInEvents. Les 7 dernières lignes sont les colonnes à Entity=null listées comme ayant
-// spécifiquement besoin de `locations` (aucun signal Entity ne les couvre).
+// EntraIdSignInEvents. The last 7 lines are the Entity=null columns listed as specifically needing
+// `locations` (no Entity signal covers them).
 
 const ENTITY_MAP = {
   device: ['DeviceName', 'DeviceId', 'DestinationDeviceName', 'TargetDeviceName'],
@@ -81,15 +81,15 @@ const ENTITY_MAP = {
 };
 
   ///////////////////////////////////////////////////////////
- // 3. Niveau 1 : vérité de terrain (comparaisons de règle) //
+ // 3. Level 1: ground truth (rule comparisons)           //
 ///////////////////////////////////////////////////////////
 
-// Variables dérivées de Value par les fragments indicators/*.kql -> type qu'elles représentent réellement.
-// « Value » nu n'est pas ici : son type dépend des indicateurs déclarés par la règle (traité à part).
-// ValueMailLocal (partie locale d'un e-mail) est volontairement absente : une comparaison contre cette
-// variable (ex. InitiatingProcessAccountName =~ ValueMailLocal) ne prouve pas qu'une colonne contient un
-// e-mail, seulement un nom de compte qui ressemble à la partie locale — signal trop faible, exclu plutôt
-// que mal classé.
+// Variables derived from Value by the indicators/*.kql fragments -> type they actually represent.
+// Bare "Value" is not here: its type depends on the indicators declared by the rule (handled separately).
+// ValueMailLocal (local part of an email) is left out on purpose: a comparison against it
+// (e.g. InitiatingProcessAccountName =~ ValueMailLocal) does not prove that a column holds an email,
+// only an account name that looks like the local part; too weak a signal, excluded rather than
+// misclassified.
 const VALUE_TOKENS = {
   ValueUpn: 'account', ValueSam: 'account',
   ValueMail: 'email',
@@ -101,12 +101,12 @@ const VALUE_TOKENS = {
   ValueUrl: 'url',
 };
 
-// 4 fragments partagés qui énumèrent des colonnes pour un paramètre générique, sur de nombreuses tables :
-// _IpEvents(ip), _DomainHits(d), _Signins(ip, upn), _SpnSignins(app, ip). Analysés une seule fois, pour
-// eux-mêmes (indépendamment des règles qui les appellent) : la comparaison "RemoteIP == ip" dans
-// ip_events.kql est vraie quel que soit l'appelant. Cas particulier documenté, pas une solution générale :
-// les autres fragments (win_security, sysmon…) comparent à un paramètre "term" générique, réutilisé pour
-// des types différents selon l'appelant, donc exploités à tort donnerait un signal faux ; ils sont ignorés.
+// 4 shared fragments that list columns for a generic parameter, over many tables:
+// _IpEvents(ip), _DomainHits(d), _Signins(ip, upn), _SpnSignins(app, ip). Analyzed once, on their own
+// (regardless of the rules that call them): the comparison "RemoteIP == ip" in ip_events.kql holds
+// whoever the caller is. A documented special case, not a general solution: the other fragments
+// (win_security, sysmon…) compare to a generic "term" parameter reused for different types depending on
+// the caller, so using them would give a false signal; they are ignored.
 const FRAGMENT_TOKENS = {
   'ip_events.kql': { ip: 'ip' },
   'domain_hits.kql': { d: 'domain' },
@@ -118,30 +118,30 @@ const EQ_OPS = ['==', '=~', '!=', '!~'];
 const HAS_OPS = ['has', 'contains', 'startswith', 'endswith'];
 const NON_COLUMN = new Set(['true', 'false', 'and', 'or', 'not', 'isempty', 'isnotempty', 'isnull', 'isnotnull']);
 
-// Colonnes "texte libre" où une correspondance par sous-chaîne (has/contains…) est peu fiable, quel que
-// soit le type recherché : ligne de commande, XML/JSON brut, message, description…
-// "pattern", "parameters", "members" ajoutés après relecture (#31, audit du 22/10) : STIX Pattern
-// (ThreatIntelIndicators), Parameters (cmdlet OfficeActivity), Members (liste de membres OfficeActivity) —
-// même famille que CommandLine/RawEventData/AdditionalFields (texte ou liste fourre-tout), mais noms qui
-// n'auraient pas été couverts par le reste de la liste. Hardcodé : aucun prédicat sur le nom seul ne les
-// distingue proprement d'une colonne légitime (voir detectFallbackColumns ci-dessous pour la détection
-// structurelle qui, elle, les aurait repérées sans les nommer).
-// "targetresources" ajouté le 23/10 sur décision de l'utilisateur : AuditLogs.TargetResources est un
-// JSON fourre-tout (ressources ciblées d'une opération Entra ID), confiant à la fois pour account et
-// application — c'était le dernier conflit non tranché. Classé fourre-tout, donc écarté des deux.
-// "entities" ajouté le 22/10 : SecurityAlert.Entities est un JSON d'entités d'alerte, même famille que
-// AdditionalFields. Il était masqué jusque-là parce qu'il tombait en conflit de types ; le conflit ayant
-// disparu, il devenait confiant à tort.
+// "Free text" columns where a substring match (has/contains…) is unreliable, whatever the type
+// searched: command line, raw XML/JSON, message, description…
+// "pattern", "parameters", "members" added after review (#31, audit of 22/10): STIX Pattern
+// (ThreatIntelIndicators), Parameters (OfficeActivity cmdlet), Members (OfficeActivity member list);
+// same family as CommandLine/RawEventData/AdditionalFields (catch-all text or list), but names the rest
+// of the list would not have covered. Hardcoded: no predicate on the name alone cleanly tells them apart
+// from a legitimate column (see fallbackColumns below for the structural detection, which would have
+// found them without naming them).
+// "targetresources" added on 23/10 by user decision: AuditLogs.TargetResources is a catch-all JSON
+// (resources targeted by an Entra ID operation), confident for both account and application; it was the
+// last unresolved conflict. Classified as catch-all, so dropped from both.
+// "entities" added on 22/10: SecurityAlert.Entities is a JSON of alert entities, same family as
+// AdditionalFields. It was hidden until then because it fell into a type conflict; once the conflict
+// was gone, it wrongly became confident.
 const BLOB_RE = /(commandline|raweventdata|^eventdata$|additionalfields|syslogmessage|^message$|details|^content$|^contents$|^body$|subject|useragent|description|failurereason|^text$|^pattern$|^parameters$|^members$|^entities$|^targetresources$)/i;
 
 
-// Détection structurelle, principielle, des colonnes "de repli" : dans "ColA == Value or ColB has Value"
-// (ou l'inverse, "ColB has Value or ColA == Value"), ColB n'est interrogée qu'EN PLUS d'une comparaison
-// stricte sur une AUTRE colonne — elle sert à "si on ne l'a pas trouvée ailleurs, cherche dans ce fourre-
-// tout". C'est exactement la forme des 3 cas relevés (ObservableValue == Value or Pattern has Value ;
-// UserId =~ ValueUpn or Parameters/Members has ValueUpn/ValueMail) : repérée automatiquement, sans
-// connaître le nom de la colonne. Couvre aussi Syslog.SyslogMessage et quelques autres déjà dans BLOB_RE
-// (double filet, sans dépendre d'un nom codé en dur pour ces cas structurels).
+// Principled structural detection of "fallback" columns: in "ColA == Value or ColB has Value"
+// (or the reverse, "ColB has Value or ColA == Value"), ColB is only queried ON TOP of a strict
+// comparison on ANOTHER column; it means "if not found elsewhere, search this catch-all". That is
+// exactly the shape of the 3 cases found (ObservableValue == Value or Pattern has Value;
+// UserId =~ ValueUpn or Parameters/Members has ValueUpn/ValueMail): detected automatically, without
+// knowing the column name. Also covers Syslog.SyslogMessage and a few others already in BLOB_RE
+// (double safety net, without relying on a hardcoded name for these structural cases).
 function fallbackColumns(code) {
   const cols = new Set();
   const fwd = /([A-Za-z_][A-Za-z0-9_]*)\s*(?:==|=~)\s*\S+\s+or\s+([A-Za-z_][A-Za-z0-9_]*)\s+(?:has|contains|startswith|endswith)\s+[A-Za-z_][A-Za-z0-9_]*/g;
@@ -150,19 +150,18 @@ function fallbackColumns(code) {
   for (const m of code.matchAll(rev)) cols.add(m[1]);
   return cols;
 }
-// Pour le type domain spécifiquement : une colonne-URL (Url, RemoteUrl, TargetUrl…) CONTIENT souvent le
-// domaine comme sous-chaîne (Url has ValueDomain) sans pour autant être elle-même une colonne de domaine —
-// elle est déjà classée "url" par ailleurs. Confiant seulement si le nom contient explicitement "domain",
-// ou fait partie d'une courte liste de colonnes de requête/nom DNS. "Name" est volontairement limité à
-// DnsEvents.Name (la seule occurrence réelle, DM-P4) : un "Name" générique sur une autre table n'a aucune
-// raison d'être un domaine.
+// For the domain type specifically: a URL column (Url, RemoteUrl, TargetUrl…) often CONTAINS the
+// domain as a substring (Url has ValueDomain) without being a domain column itself; it is already
+// classified "url" elsewhere. Confident only if the name explicitly contains "domain", or is in a short
+// list of DNS query/name columns. "Name" is deliberately limited to DnsEvents.Name (the only real
+// occurrence, DM-P4): a generic "Name" in another table has no reason to be a domain.
 const DOMAIN_SAFE_EXACT = new Set(['fqdn', 'dnsquery', 'httphost']);
 const isDomainSafe = (table, column) => DOMAIN_SAFE_EXACT.has(stripSuffix(column).toLowerCase()) ||
   (table === 'DnsEvents' && column === 'Name');
 
 const stripComments = (text) => text.replace(/(^|[^:])\/\/.*$/gm, '$1');
-// Décolle quelques enrobages simples (tolower(X), tostring(X)…) pour exposer l'identifiant nu, sur
-// plusieurs passes (tolower(tostring(X))).
+// Peels a few simple wrappers (tolower(X), tostring(X)…) to expose the bare identifier, over
+// several passes (tolower(tostring(X))).
 function unwrap(text) {
   let prev;
   let out = text;
@@ -180,8 +179,8 @@ function tablesIn(text) {
   return found;
 }
 
-// Motifs de nom par type. Défini ici (et non plus bas) parce que scanComparisons s'en sert comme
-// garde-fou : une colonne de repli dont le NOM dit déjà le type reste confiante.
+// Name patterns per type. Defined here (not further down) because scanComparisons uses it as a
+// guard: a fallback column whose NAME already says the type stays confident.
 const NAME_PATTERNS = {
   ip: (t, toks) => toks.includes('ip') && !toks.some((x) => ['city', 'country', 'region', 'latitude', 'longitude', 'asn', 'location'].includes(x)),
   hash: (t, toks) => toks.includes('hash') || /sha(1|256|512)$/i.test(stripSuffix(t)) || /md5$/i.test(stripSuffix(t)),
@@ -202,8 +201,8 @@ const NAME_PATTERNS = {
     !toks.some((x) => ['role', 'type', 'protocol', 'entity', 'entitykey', 'owner', 'instance'].includes(x)),
 };
 
-// Un candidat brut : colonne trouvée comparée à un jeton de valeur connu, pour un ensemble de tables
-// candidates (celles citées littéralement dans le texte analysé).
+// A raw candidate: a column found compared to a known value token, for a set of candidate tables
+// (those quoted literally in the analyzed text).
 function scanComparisons(text, tokenMap, candidateTables, bareValueTypes) {
   const out = [];
   const code = unwrap(stripComments(text));
@@ -217,12 +216,12 @@ function scanComparisons(text, tokenMap, candidateTables, bareValueTypes) {
     for (const table of resolvedTables) {
       for (const type of types) {
         let confident;
-        // Le repli structurel ne doit pas déclasser une colonne dont le NOM dit déjà le type :
-        // « ComputerIP == Value or ComputerPrivateIPs has Value » interroge bien une liste d'IP, le
-        // `has` n'est là que parce que la colonne est multivaluée, pas parce qu'elle est fourre-tout.
+        // The structural fallback must not downgrade a column whose NAME already says the type:
+        // "ComputerIP == Value or ComputerPrivateIPs has Value" does query a list of IPs; the `has`
+        // is only there because the column is multi-valued, not because it is a catch-all.
         const nameSaysType = !BLOB_RE.test(column) && NAME_PATTERNS[type]?.(column, tokenize(column), table) === true;
         if (EQ_OPS.includes(op)) confident = true;
-        else if (fallback.has(column) && !nameSaysType) confident = false; // repli vers un fourre-tout
+        else if (fallback.has(column) && !nameSaysType) confident = false; // fallback to a catch-all
         else if (type === 'domain') confident = /domain/.test(column.toLowerCase()) || isDomainSafe(table, column);
         else confident = !BLOB_RE.test(column);
         out.push({ table, column, type, confident, op, evidence: `${column} ${op} … (${table})` });
@@ -230,7 +229,7 @@ function scanComparisons(text, tokenMap, candidateTables, bareValueTypes) {
     }
   };
 
-  // Jetons dérivés (ValueXxx, ou paramètre de fragment comme "ip"/"d"/"upn"/"app")
+  // Derived tokens (ValueXxx, or a fragment parameter such as "ip"/"d"/"upn"/"app")
   for (const [token, type] of Object.entries(tokenMap)) {
     const tokenRe = `\\b${token}\\b`;
     for (const op of EQ_OPS) {
@@ -242,8 +241,8 @@ function scanComparisons(text, tokenMap, candidateTables, bareValueTypes) {
       for (const m of code.matchAll(new RegExp(`([A-Za-z_][A-Za-z0-9_]*)\\s+${op}\\s+${tokenRe}`, 'g'))) emit(m[1], type, op);
     }
   }
-  // Jeton nu "Value" : type = indicateur(s) déclaré(s) par la règle (ambigu seulement pour les règles DM,
-  // qui déclarent [domain, url] ensemble — Value peut être l'un ou l'autre selon ce que l'analyste a saisi).
+  // Bare "Value" token: type = indicator(s) declared by the rule (ambiguous only for the DM rules, which
+  // declare [domain, url] together: Value can be either, depending on what the analyst entered).
   if (bareValueTypes) {
     for (const op of EQ_OPS) {
       const opRe = op.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -254,7 +253,7 @@ function scanComparisons(text, tokenMap, candidateTables, bareValueTypes) {
       for (const m of code.matchAll(new RegExp(`([A-Za-z_][A-Za-z0-9_]*)\\s+${op}\\s+\\bValue\\b`, 'g'))) emit(m[1], bareValueTypes, op);
     }
   }
-  // _IsHost(X) / _IsHost(coalesce(X, Y)) : comparaison d'égalité du nom court -> device, fiable.
+  // _IsHost(X) / _IsHost(coalesce(X, Y)): equality comparison on the short name -> device, reliable.
   for (const m of code.matchAll(/_IsHost\(\s*([^()]*(?:\([^()]*\)[^()]*)?)\s*\)/g)) {
     const inner = m[1].replace(/^coalesce\(|\)$/g, '');
     for (const id of inner.split(',').map((s) => s.trim())) {
@@ -266,7 +265,7 @@ function scanComparisons(text, tokenMap, candidateTables, bareValueTypes) {
 
 const candidates = []; // { table, column, type, confident, tier, evidence }
 
-// 3a. Règles
+// 3a. Rules
 const ruleFiles = walk(path.join(ROOT, 'rules')).filter((f) => /\.ya?ml$/.test(f)).sort();
 for (const file of ruleFiles) {
   const rel = path.relative(ROOT, file).replace(/\\/g, '/');
@@ -278,7 +277,7 @@ for (const file of ruleFiles) {
   }
 }
 
-// 3b. 4 fragments partagés (analysés pour eux-mêmes, cf. commentaire plus haut)
+// 3b. 4 shared fragments (analyzed on their own, see comment above)
 for (const [fname, tokenMap] of Object.entries(FRAGMENT_TOKENS)) {
   const text = fs.readFileSync(path.join(ROOT, 'fragments', fname), 'utf8');
   for (const c of scanComparisons(text, tokenMap, [], null)) {
@@ -287,24 +286,24 @@ for (const [fname, tokenMap] of Object.entries(FRAGMENT_TOKENS)) {
 }
 
   ///////////////////////////////////////////
- // 4. Niveau 2 : table Entity (tier 2)    //
+ // 4. Level 2: Entity table (tier 2)      //
 ///////////////////////////////////////////
 
 for (const [type, names] of Object.entries(ENTITY_MAP)) {
   for (const name of names) {
     for (const { table, column } of byBaseName.get(name) || []) {
-      candidates.push({ table, column, type, confident: true, tier: 'entity', evidence: `Entity Defender : colonne ${name}`, source: 'plan (step 0)' });
+      candidates.push({ table, column, type, confident: true, tier: 'entity', evidence: `Defender Entity: column ${name}`, source: 'plan (step 0)' });
     }
   }
 }
 
   /////////////////////////////////////////////////////
- // 5. Niveau 3 : motifs de nom (jamais confident)   //
+ // 5. Level 3: name patterns (never confident)       //
 /////////////////////////////////////////////////////
 
 function tokenize(name) {
-  // `IPs` au pluriel se découpait en "i" + "ps" (ComputerPrivateIPs -> computer, private, i, ps),
-  // donc NAME_PATTERNS.ip ne le reconnaissait pas. Normalisé comme ipv4/ipv6.
+  // Plural `IPs` was split into "i" + "ps" (ComputerPrivateIPs -> computer, private, i, ps),
+  // so NAME_PATTERNS.ip did not match it. Normalized like ipv4/ipv6.
   const n = stripSuffix(name).replace(/(?:ipv[46])/ig, 'IP').replace(/IPs(?![a-z])/g, 'IP');
   const toks = [];
   for (const part of n.split(/[^A-Za-z0-9]+/)) {
@@ -314,13 +313,13 @@ function tokenize(name) {
   return toks;
 }
 
-// Motifs par type, resserrés après une première passe à 925 lignes de relecture (beaucoup de bruit :
-// champs CEF génériques DeviceCustomString1(Label), métadonnées *Type/*Role/*EntityKey, compteurs…).
-// Un jeton seul (ex. "device") ne suffit plus : il faut un second jeton qui en fait une valeur
-// d'identité (name, id, command…), et une liste d'exclusion écarte les métadonnées connues. Tout ce qui
-// matche ici va UNIQUEMENT au rapport de relecture, jamais dans locations.yml.
-// Exclusion globale : champs CEF "libres" (DeviceCustomString1…) et libellés de champ (…Label) — leur
-// type réel dépend du déploiement, pas du nom ; les deviner serait pire que ne rien proposer.
+// Patterns per type, tightened after a first pass that gave 925 review lines (lots of noise: generic
+// CEF fields DeviceCustomString1(Label), *Type/*Role/*EntityKey metadata, counters…).
+// A single token (e.g. "device") is no longer enough: a second token must make it an identity value
+// (name, id, command…), and an exclusion list drops known metadata. Everything matched here goes ONLY
+// to the review report, never to locations.yml.
+// Global exclusion: "free" CEF fields (DeviceCustomString1…) and field labels (…Label); their real
+// type depends on the deployment, not on the name; guessing them would be worse than offering nothing.
 const GLOBAL_SKIP = (toks) => toks.includes('custom') || toks.includes('label');
 
 
@@ -330,14 +329,14 @@ for (const [table, cols] of tableColumns) {
     if (GLOBAL_SKIP(toks)) continue;
     for (const type of INDICATOR_TYPES) {
       if (NAME_PATTERNS[type](column, toks, table)) {
-        candidates.push({ table, column, type, confident: false, tier: 'name-pattern', evidence: `motif de nom (jetons : ${toks.join(', ')})`, source: 'schemas/' });
+        candidates.push({ table, column, type, confident: false, tier: 'name-pattern', evidence: `name pattern (tokens: ${toks.join(', ')})`, source: 'schemas/' });
       }
     }
   }
 }
 
   //////////////////////////////////////////////
- // 6. Fusion : confident vs review, conflits //
+ // 6. Merge: confident vs review, conflicts //
 //////////////////////////////////////////////
 
 const byPair = new Map(); // "Table.Column" -> { types: Map(type -> [candidates]) }
@@ -347,78 +346,77 @@ for (const c of candidates) {
   (entry.types.get(c.type) || entry.types.set(c.type, []).get(c.type)).push(c);
 }
 
-// Colonnes polymorphes connues : une même colonne contient plusieurs types d'indicateur selon la ligne
-// (ex. ThreatIntelIndicators.ObservableValue, STIX : IP, domaine, URL ou hash selon Pattern/ObservableKey/
-// Data.pattern — pas selon la colonne elle-même). Pas de détection générale ici : un seul cas connu dans
-// les 234 paires confiantes, et une heuristique générique (table avec une colonne "clé"/"type" à côté d'une
-// colonne de valeur) n'a pas été construite pour un seul exemple. Exclues explicitement du jeu confident
-// quel que soit le signal qui les y aurait mises, et placées en relecture avec le motif exact : `locations`
-// étant le PREMIER signal de detection.ts (avant Entity et les regex), une colonne polymorphe mal typée y
-// est pire qu'une colonne absente.
-// Vérifié : ThreatIntelligenceIndicator (table historique) n'a PAS ce problème — colonnes déjà séparées par
-// type (NetworkIP, NetworkSourceIP, NetworkDestinationIP, DomainName, Url, FileHashValue…) ; aucune colonne
-// de ce type n'y nécessite le même traitement.
+// Known polymorphic columns: one column holds several indicator types depending on the row
+// (e.g. ThreatIntelIndicators.ObservableValue, STIX: IP, domain, URL or hash depending on Pattern/
+// ObservableKey/Data.pattern, not on the column itself). No general detection here: only one known case
+// among the 234 confident pairs, and a generic heuristic (table with a "key"/"type" column next to a
+// value column) was not built for a single example. Explicitly excluded from the confident set whatever
+// signal would have put them there, and sent to review with the exact reason: since `locations` is the
+// FIRST signal of detection.ts (before Entity and the regexes), a mistyped polymorphic column there is
+// worse than a missing one.
+// Checked: ThreatIntelligenceIndicator (legacy table) does NOT have this problem; its columns are already
+// split by type (NetworkIP, NetworkSourceIP, NetworkDestinationIP, DomainName, Url, FileHashValue…); no
+// column there needs the same handling.
 const POLYMORPHIC = {
-  'ThreatIntelIndicators.ObservableValue': 'Colonne STIX polymorphe : contient une IP, un domaine, une URL ou un ' +
-    'hash selon la ligne (discriminée par ObservableKey/Pattern/Data.pattern, pas par la colonne elle-même). ' +
-    'ThreatIntelligenceIndicator (table historique) n\'a pas ce problème : colonnes déjà séparées par type.',
+  'ThreatIntelIndicators.ObservableValue': 'Polymorphic STIX column: holds an IP, a domain, a URL or a ' +
+    'hash depending on the row (told apart by ObservableKey/Pattern/Data.pattern, not by the column itself). ' +
+    'ThreatIntelligenceIndicator (legacy table) does not have this problem: columns already split by type.',
 
-  'ThreatIntelIndicators.Pattern': 'Motif STIX (ex. "[ipv4-addr:value = \'…\']") : texte libre qui ENCADRE ' +
-    'la valeur au lieu de la contenir, et de type variable comme ObservableValue. Vu en repli dans IP-P5 ' +
+  'ThreatIntelIndicators.Pattern': 'STIX pattern (e.g. "[ipv4-addr:value = \'…\']"): free text that WRAPS ' +
+    'the value instead of holding it, and of variable type like ObservableValue. Seen as a fallback in IP-P5 ' +
     '(`ObservableValue == Value or Pattern has Value`).',
-  'SecurityAlert.CompromisedEntity': 'Entité compromise d\'une alerte : un nom d\'hôte ou une IP selon ' +
-    'l\'alerte. Utilisée dans les deux sens par les règles — MC-S2 `CompromisedEntity has ValueShort` ' +
-    '(device) et IP-P5 `CompromisedEntity == Value` (ip).',
+  'SecurityAlert.CompromisedEntity': 'Compromised entity of an alert: a host name or an IP depending on ' +
+    'the alert. Used both ways by the rules: MC-S2 `CompromisedEntity has ValueShort` ' +
+    '(device) and IP-P5 `CompromisedEntity == Value` (ip).',
 };
-// Arbitrage des conflits account/email (décision du 22/10, point 2b-bis de docs/STATE.md).
-// Un UPN *est* presque toujours une adresse e-mail : pour ces colonnes, les deux types sont corrects, et
-// les écarter des deux (comportement de 2b) perdait la paire au lieu de trancher. Elles sont donc publiées
-// dans les DEUX locations.yml ; l'ORDRE (account d'abord, email ensuite) ne se joue pas ici mais dans
-// INDICATOR_PRIORITY côté userscript — où email précède encore account, À REVOIR EN 3a, sinon la
-// présélection sera email alors que la décision dit account.
-// Deux familles de noms, qui ne se promeuvent PAS de la même façon.
-//   UPN_SHAPED      : `*Upn`, `UserPrincipalName` — un UPN a la forme d'une adresse e-mail.
-//   ACCOUNT_GENERIC : `AccountName`, `UserId` — identifiants de compte qui ne sont PAS des adresses
-//                     (`StorageBlobLogs.AccountName` = compte de stockage, `SigninLogs.UserId` /
-//                     `AppRequests.UserId` / `DataverseActivity.UserId` = GUID d'objet).
+// Account/email conflict resolution (decision of 22/10, item 2b-bis of docs/STATE.md).
+// A UPN *is* almost always an email address: for these columns both types are right, and dropping them
+// from both (2b behavior) lost the pair instead of settling it. So they are published in BOTH
+// locations.yml files; the ORDER (account first, then email) is not decided here but in
+// INDICATOR_PRIORITY in the userscript, where email still comes before account: TO REVISIT IN 3a,
+// otherwise the preselection will be email while the decision says account.
+// Two name families, NOT promoted the same way.
+//   UPN_SHAPED      : `*Upn`, `UserPrincipalName`: a UPN has the shape of an email address.
+//   ACCOUNT_GENERIC : `AccountName`, `UserId`: account identifiers that are NOT addresses
+//                     (`StorageBlobLogs.AccountName` = storage account, `SigninLogs.UserId` /
+//                     `AppRequests.UserId` / `DataverseActivity.UserId` = object GUID).
 const UPN_SHAPED = (column) => {
   const base = stripSuffix(column);
   return /Upn$/i.test(base) || /^UserPrincipalName$/i.test(base);
 };
 const ACCOUNT_GENERIC = (column) => /^(AccountName|UserId)$/i.test(stripSuffix(column));
 const DUAL_ACCOUNT_EMAIL = (column) => UPN_SHAPED(column) || ACCOUNT_GENERIC(column);
-// Asymétrie volontaire : seul le sens email -> account est appliqué.
-//   - email confiant + nom de la liste  => account aussi : un UPN/AccountName/UserId qui contient une
-//     adresse e-mail est bien un identifiant de compte.
-//   - account confiant SEUL             => surtout PAS email : la liste attrape aussi des colonnes qui ne
-//     sont pas des adresses — `StorageBlobLogs.AccountName` est un nom de compte de *stockage*, et
-//     `SigninLogs.UserId` / `AppRequests.UserId` / `DataverseActivity.UserId` sont des GUID d'objet.
-//     Promouvoir en bloc les 48 colonnes que le motif reconnaît (29 tables) publierait ces trois-là comme
-//     emplacements d'e-mail. On ne promeut donc que sur preuve d'un signal e-mail réel.
-// Décision de l'utilisateur du 23/10 : « si l'UPN est une adresse e-mail, on veut pouvoir pivoter à la
-// fois sur le nom d'utilisateur et sur les événements e-mail ; l'analyste choisit ». Le critère est donc
-// la VALEUR, pas la table : une colonne UPN déclare les DEUX types, et c'est la forme de la valeur qui
-// tranche au moment du pivot.
-//   - `UPN_SHAPED` confiant pour account OU email => publié dans les deux (promotion symétrique).
-//   - `ACCOUNT_GENERIC` : toujours asymétrique, email -> account seulement. Promouvoir ces noms en bloc
-//     publierait `StorageBlobLogs.AccountName` et des GUID `UserId` comme emplacements d'e-mail.
-// ⚠️ 3a DOIT restreindre par la forme de la valeur : `locations` propose account + email pour ces
-// colonnes, mais une valeur sans « @ » (compte de service, UPN non routable d'un AD on-prem lu par
-// Defender for Identity) ne doit PAS proposer les règles e-mail. Sans ce filtre, pivoter sur
-// `CORP\\svcsql` offrirait des règles e-mail qui ne renverront rien.
+// Deliberate asymmetry: only the email -> account direction is applied.
+//   - email confident + name in the list => account too: a UPN/AccountName/UserId holding an email
+//     address is indeed an account identifier.
+//   - account confident ALONE            => definitely NOT email: the list also catches columns that are
+//     not addresses: `StorageBlobLogs.AccountName` is a *storage* account name, and
+//     `SigninLogs.UserId` / `AppRequests.UserId` / `DataverseActivity.UserId` are object GUIDs.
+//     Promoting all 48 columns the pattern matches (29 tables) would publish those three as email
+//     locations. So promotion only happens on evidence of a real email signal.
+// User decision of 23/10: "if the UPN is an email address, we want to pivot both on the user name and on
+// the email events; the analyst chooses". So the criterion is the VALUE, not the table: a UPN column
+// declares BOTH types, and the shape of the value decides at pivot time.
+//   - `UPN_SHAPED` confident for account OR email => published in both (symmetric promotion).
+//   - `ACCOUNT_GENERIC`: still asymmetric, email -> account only. Promoting these names wholesale
+//     would publish `StorageBlobLogs.AccountName` and `UserId` GUIDs as email locations.
+// ⚠️ 3a MUST filter on the shape of the value: `locations` offers account + email for these columns,
+// but a value without "@" (service account, non-routable UPN from an on-prem AD read by Defender for
+// Identity) must NOT offer the email rules. Without this filter, pivoting on `CORP\\svcsql` would
+// offer email rules that return nothing.
 const dualArbitration = (types, column) => {
   if (!types.every((t) => t === 'account' || t === 'email')) return false;
   if (UPN_SHAPED(column)) return types.includes('account') || types.includes('email');
   return ACCOUNT_GENERIC(column) && types.includes('email');
 };
 
-// Exclusions dures, décidées à la main : ni `confirmed`, ni `uncertain`, donc jamais publiées.
-// À distinguer de POLYMORPHIC (écartée du confiant mais renvoyée en relecture avec son motif) : ici la
-// paire est jugée inutilisable, pas incertaine.
+// Hard exclusions, decided by hand: neither `confirmed` nor `uncertain`, so never published.
+// Not to be confused with POLYMORPHIC (dropped from confident but sent to review with its reason): here
+// the pair is deemed unusable, not uncertain.
 const EXCLUDED = {
-  // Décision de l'utilisateur du 23/10 : JSON fourre-tout (ressources ciblées d'une opération Entra
-  // ID). Elle était confiante pour account ET application — le dernier conflit non tranché.
-  'AuditLogs.TargetResources': 'JSON fourre-tout, écarté sur décision du 23/10',
+  // User decision of 23/10: catch-all JSON (resources targeted by an Entra ID operation). It was
+  // confident for account AND application, the last unresolved conflict.
+  'AuditLogs.TargetResources': 'Catch-all JSON, dropped by decision of 23/10',
 };
 
 const confident = {}; // type -> Set("Table.Column")
@@ -426,19 +424,19 @@ for (const t of INDICATOR_TYPES) confident[t] = new Set();
 const reviewByType = {}; // type -> [ { pair, candidates, bestTier } ]
 for (const t of INDICATOR_TYPES) reviewByType[t] = [];
 const conflicts = [];
-const arbitrated = []; // paires publiées dans account ET email par la règle ci-dessus
+const arbitrated = []; // pairs published in account AND email by the rule above
 
 for (const [key, entry] of byPair) {
   const confidentTypes = [...entry.types.entries()].filter(([, cs]) => cs.some((c) => c.confident)).map(([t]) => t);
 
-  // Les exclusions polymorphes passent AVANT la détection de conflits : sinon une colonne écartée à la main
-  // (SecurityAlert.CompromisedEntity, device/ip) ressortait en « conflit » et son motif d'exclusion n'était
-  // jamais affiché — le lecteur du rapport voyait un arbitrage à rendre là où la décision était déjà prise.
+  // Polymorphic exclusions run BEFORE conflict detection: otherwise a column dropped by hand
+  // (SecurityAlert.CompromisedEntity, device/ip) came out as a "conflict" and its exclusion reason was
+  // never shown; the report reader saw a decision to make where it had already been made.
   if (POLYMORPHIC[key] && confidentTypes.length) {
     const reason = POLYMORPHIC[key];
     for (const type of confidentTypes) {
       reviewByType[type].push({ key, table: entry.table, column: entry.column,
-        candidates: [{ tier: 'polymorphic', evidence: reason, source: 'audit manuel (#31)' }],
+        candidates: [{ tier: 'polymorphic', evidence: reason, source: 'manual audit (#31)' }],
         best: { tier: 'polymorphic', evidence: reason } });
     }
     continue;
@@ -453,46 +451,45 @@ for (const [key, entry] of byPair) {
 
   if (confidentTypes.length > 1) {
     conflicts.push({ key, table: entry.table, column: entry.column, types: confidentTypes, entry });
-    continue; // ambigu : ni publié, ni dans la review "normale" -> section conflits dédiée
+    continue; // ambiguous: neither published nor in the "normal" review -> dedicated conflicts section
   }
   if (confidentTypes.length === 1) {
     confident[confidentTypes[0]].add(key);
     continue;
   }
-  // Pas de signal confident pour cette paire : chaque type porteur d'un signal faible va en relecture.
+  // No confident signal for this pair: each type with a weak signal goes to review.
   for (const [type, cs] of entry.types) {
-    const tierRank = (c) => (c.tier === 'rule' ? 0 : c.tier === 'entity' ? 1 : 2); // entity ne devrait jamais être non-confident, gardé par sécurité
+    const tierRank = (c) => (c.tier === 'rule' ? 0 : c.tier === 'entity' ? 1 : 2); // entity should never be non-confident, kept for safety
     const best = cs.slice().sort((a, b) => tierRank(a) - tierRank(b))[0];
     reviewByType[type].push({ key, table: entry.table, column: entry.column, candidates: cs, best });
   }
 }
 
   //////////////////////////////////////
- // 7. Écriture indicators/<t>/...   //
+ // 7. Write indicators/<t>/...      //
 //////////////////////////////////////
 
-// Décision de l'utilisateur du 23/10 : on fait confiance à l'algorithme, et les paires **incertaines
-// sont publiées aussi**. `locations` est une AIDE à la présélection, jamais une contrainte : le panneau
-// propose toujours les 9 types (`getIndicatorIds()` dans `ui/panel/params-view.ts`) et affiche
-// « La valeur ne correspond pas à ce type, pivot possible quand même » — l'analyste peut donc toujours
-// pivoter autrement. C'est nécessaire : un nom de machine peut être une adresse IP, et d'autres
-// indicateurs ont des comportements analogues. Une paire fausse coûte un clic, une paire manquante
-// coûte une présélection utile.
+// User decision of 23/10: trust the algorithm, and **uncertain pairs are published too**.
+// `locations` HELPS preselection, it is never a constraint: the panel always offers the 9 types
+// (`getIndicatorIds()` in `ui/panel/params-view.ts`) and shows "The value does not match this type,
+// pivot still possible", so the analyst can always pivot another way. This is required: a device
+// name can be an IP address, and other indicators behave the same way. A wrong pair costs one click,
+// a missing pair costs a useful preselection.
 //
-// Les deux niveaux restent SÉPARÉS dans le fichier plutôt que fusionnés : c'est ce qui porte l'ordre
-// par colonne demandé par la décision 2 (une colonne confirmée pour `account` et incertaine pour
-// `email` doit présélectionner `account`). À la publication (2d), les deux listes se concatènent
-// dans cet ordre pour donner le `string[]` du format du plan.
+// The two levels stay SEPARATE in the file rather than merged: that is what carries the per-column
+// order required by decision 2 (a column confirmed for `account` and uncertain for `email` must
+// preselect `account`). On publishing (2d), the two lists are concatenated in this order to give the
+// `string[]` of the plan's format.
 const header = (type, nConf, nUnc) => [
   `# locations.yml — ${type}`,
-  '# Généré par scripts/generate-locations.mjs (#31). NE PAS ÉDITER À LA MAIN : relancer le script.',
-  '# Paires "Table.Colonne" où ce type d\'indicateur peut apparaître.',
-  '#   confirmed : signal fort — comparaison dans une règle existante, ou table Entity Defender.',
-  '#   uncertain : signal faible — motif de nom de colonne. Publié quand même (décision du 23/10) :',
-  '#               aide à la présélection, et l\'analyste peut toujours changer de type dans le panneau.',
-  '# L\'ORDRE COMPTE : confirmed avant uncertain. Pour une colonne candidate à plusieurs types, le type',
-  '# qui la liste en confirmed gagne la présélection (décision 2 : cet ordre prime sur INDICATOR_PRIORITY).',
-  `# ${nConf} confirmée(s), ${nUnc} incertaine(s). Publication dans pivot-rules.json : en 2d.`,
+  '# Generated by scripts/generate-locations.mjs (#31). DO NOT EDIT BY HAND: run the script again.',
+  '# "Table.Column" pairs where this indicator type can appear.',
+  '#   confirmed: strong signal (comparison in an existing rule, or Defender Entity table).',
+  '#   uncertain: weak signal (column name pattern). Published anyway (decision of 23/10):',
+  '#              helps preselection, and the analyst can always change the type in the panel.',
+  '# ORDER MATTERS: confirmed before uncertain. For a column that is a candidate for several types, the type',
+  '# that lists it as confirmed wins the preselection (decision 2: this order takes precedence over INDICATOR_PRIORITY).',
+  `# ${nConf} confirmed, ${nUnc} uncertain. Published in pivot-rules.json: in 2d.`,
   '',
 ].join('\n');
 
@@ -508,7 +505,7 @@ for (const key of Object.keys(EXCLUDED)) {
 
 for (const type of INDICATOR_TYPES) {
   const conf = [...confident[type]].sort();
-  // Même paire jamais dans les deux listes : confirmed gagne.
+  // A pair is never in both lists: confirmed wins.
   const confSet = new Set(conf);
   const unc = [...new Set(reviewByType[type].map((r) => r.key))].filter((k) => !confSet.has(k)).sort();
   const out = header(type, conf.length, unc.length) + yamlList('confirmed', conf) + yamlList('uncertain', unc);
@@ -516,33 +513,33 @@ for (const type of INDICATOR_TYPES) {
 }
 
   ///////////////////////////////////
- // 8. Rapport de relecture (MD)  //
+ // 8. Review report (MD)         //
 ///////////////////////////////////
 
-const TIER_LABEL = { rule: 'règle (comparaison faible/sous-chaîne)', entity: 'Entity Defender',
-  'name-pattern': 'motif de nom (schémas)', polymorphic: 'colonne polymorphe (écartée par audit)' };
+const TIER_LABEL = { rule: 'rule (weak/substring comparison)', entity: 'Defender Entity',
+  'name-pattern': 'name pattern (schemas)', polymorphic: 'polymorphic column (dropped by audit)' };
 const md = [];
-md.push('# Correspondances incertaines — `locations` (#31)', '');
-md.push('Généré par `scripts/generate-locations.mjs`. **Rien ici n\'est publié** dans `pivot-rules.json` : ' +
-  'ce rapport sert à la relecture humaine avant intégration (consigne du plan, phase 2b).', '');
-md.push('Pour chaque paire `Table.Colonne`, le ou les types candidats, le niveau d\'où vient le signal et la preuve. ' +
-  'Classées par type, du signal le plus probable (comparaison de règle sur une sous-chaîne) au moins probable (motif de nom seul).', '');
+md.push('# Uncertain matches: `locations` (#31)', '');
+md.push('Generated by `scripts/generate-locations.mjs`. **Nothing here is published** in `pivot-rules.json`: ' +
+  'this report is for human review before integration (plan instruction, phase 2b).', '');
+md.push('For each `Table.Column` pair, the candidate type(s), the level the signal comes from and the evidence. ' +
+  'Sorted by type, from the most likely signal (rule comparison on a substring) to the least likely (name pattern only).', '');
 
 const totalConfident = Object.values(confident).reduce((s, set) => s + set.size, 0);
 const totalReview = Object.values(reviewByType).reduce((s, l) => s + l.length, 0);
-md.push('## Résumé', '', '| Type | Confiant (publié dans locations.yml) | Incertain (ce rapport) |', '| --- | --- | --- |');
+md.push('## Summary', '', '| Type | Confident (published in locations.yml) | Uncertain (this report) |', '| --- | --- | --- |');
 for (const type of INDICATOR_TYPES) md.push(`| ${type} | ${confident[type].size} | ${reviewByType[type].length} |`);
 md.push(`| **Total** | **${totalConfident}** | **${totalReview}** |`);
-md.push('', `Conflits (même colonne confiante pour deux types différents) : **${conflicts.length}** — voir section dédiée.`);
-md.push(`Arbitrages account/email appliqués (paire publiée dans les deux types) : **${arbitrated.length}** — voir section dédiée.`, '');
+md.push('', `Conflicts (same column confident for two different types): **${conflicts.length}**; see the dedicated section.`);
+md.push(`Account/email resolutions applied (pair published in both types): **${arbitrated.length}**; see the dedicated section.`, '');
 
-// polymorphic en tête : ce sont des exclusions décidées à la main, les plus utiles à relire.
+// polymorphic first: these are exclusions decided by hand, the most useful to review.
 const tierOrder = { polymorphic: -1, rule: 0, entity: 1, 'name-pattern': 2 };
 for (const type of INDICATOR_TYPES) {
   const list = reviewByType[type];
   if (!list.length) continue;
   list.sort((a, b) => tierOrder[a.best.tier] - tierOrder[b.best.tier] || a.key.localeCompare(b.key));
-  md.push(`## ${type} (${list.length})`, '', '| Table.Colonne | Niveau | Preuve | Source |', '| --- | --- | --- | --- |');
+  md.push(`## ${type} (${list.length})`, '', '| Table.Column | Level | Evidence | Source |', '| --- | --- | --- | --- |');
   for (const r of list) {
     const sources = [...new Set(r.candidates.map((c) => c.source))].slice(0, 3).join('; ');
     md.push(`| \`${r.key}\` | ${TIER_LABEL[r.best.tier]} | ${r.best.evidence} | ${sources} |`);
@@ -551,13 +548,13 @@ for (const type of INDICATOR_TYPES) {
 }
 
 if (arbitrated.length) {
-  md.push('## Arbitrage account/email (publié dans les DEUX types)', '',
-    'Décision du 22/10 : les colonnes `*Upn`, `UserPrincipalName`, `AccountName`, `UserId` confiantes pour ' +
-    '`email` sont **account d\'abord, puis email** — publiées dans les deux `locations.yml` au lieu d\'être ' +
-    'écartées des deux. L\'ordre de présélection est porté par `INDICATOR_PRIORITY` côté userscript (à revoir ' +
-    'en 3a). Les colonnes de la même famille confiantes pour `account` **seulement** ne sont volontairement ' +
-    'pas promues en `email` (`StorageBlobLogs.AccountName` est un compte de stockage, `SigninLogs.UserId` un GUID).', '',
-    '| Table.Colonne | Types confiants d\'origine | Détail |', '| --- | --- | --- |');
+  md.push('## Account/email resolution (published in BOTH types)', '',
+    'Decision of 22/10: the `*Upn`, `UserPrincipalName`, `AccountName`, `UserId` columns confident for ' +
+    '`email` are **account first, then email**: published in both `locations.yml` files instead of being ' +
+    'dropped from both. The preselection order is carried by `INDICATOR_PRIORITY` in the userscript (to revisit ' +
+    'in 3a). Columns of the same family confident for `account` **only** are deliberately ' +
+    'not promoted to `email` (`StorageBlobLogs.AccountName` is a storage account, `SigninLogs.UserId` a GUID).', '',
+    '| Table.Column | Original confident types | Detail |', '| --- | --- | --- |');
   for (const a of arbitrated.sort((x, y) => x.key.localeCompare(y.key))) {
     const detail = a.types.map((t) => `${t}: ${a.entry.types.get(t).map((x) => x.evidence).join(' / ')}`).join(' — ');
     md.push(`| \`${a.key}\` | ${a.types.join(', ')} | ${detail} |`);
@@ -566,7 +563,7 @@ if (arbitrated.length) {
 }
 
 if (conflicts.length) {
-  md.push('## Conflits (colonne confiante pour plusieurs types)', '', '| Table.Colonne | Types en conflit | Détail |', '| --- | --- | --- |');
+  md.push('## Conflicts (column confident for several types)', '', '| Table.Column | Conflicting types | Detail |', '| --- | --- | --- |');
   for (const c of conflicts.sort((a, b) => a.key.localeCompare(b.key))) {
     const detail = c.types.map((t) => `${t}: ${c.entry.types.get(t).map((x) => x.evidence).join(' / ')}`).join(' — ');
     md.push(`| \`${c.key}\` | ${c.types.join(', ')} | ${detail} |`);
@@ -576,7 +573,7 @@ if (conflicts.length) {
 
 fs.writeFileSync(path.join(ROOT, 'indicators', 'REVIEW-locations.md'), md.join('\n'));
 
-console.log(`locations : ${totalConfident} paire(s) confiante(s) (${INDICATOR_TYPES.map((t) => `${t}: ${confident[t].size}`).join(', ')}), ` +
-  `${totalReview} en relecture, ${conflicts.length} conflit(s), ${arbitrated.length} arbitrage(s) account/email.`);
-console.log('Écrit : indicators/<type>/locations.yml (9 fichiers), indicators/REVIEW-locations.md');
-console.log('Rappel : PAS encore câblé dans pivot-rules.json. En attente de relecture humaine (#31).');
+console.log(`locations: ${totalConfident} confident pair(s) (${INDICATOR_TYPES.map((t) => `${t}: ${confident[t].size}`).join(', ')}), ` +
+  `${totalReview} in review, ${conflicts.length} conflict(s), ${arbitrated.length} account/email resolution(s).`);
+console.log('Written: indicators/<type>/locations.yml (9 files), indicators/REVIEW-locations.md');
+console.log('Note: this script does not write pivot-rules.json; npm run build publishes locations (2d).');

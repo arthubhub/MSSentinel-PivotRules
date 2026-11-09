@@ -1,5 +1,5 @@
-// Fonctions communes URL / domaine.
-// _Host : hôte d'une URL ou d'un nom (ajoute un schéma si absent pour que parse_url fonctionne).
-// _InDomain : vrai si l'hôte est le domaine ou l'un de ses sous-domaines.
+// Common URL / domain functions.
+// _Host: host of a URL or a name (adds a scheme if missing so that parse_url works).
+// _InDomain: true if the host is the domain or one of its subdomains.
 let _Host = (u:string) { tolower(tostring(parse_url(iff(u contains "://", u, strcat("http://", u))).Host)) };
 let _InDomain = (h:string, d:string) { isnotempty(d) and (h == d or h endswith strcat(".", d)) };

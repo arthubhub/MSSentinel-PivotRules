@@ -1,4 +1,4 @@
-// Indicateurs URL et Domaine : ValueDomain est l'hôte de l'URL, ou la valeur elle-même si c'est un domaine.
+// URL and Domain indicators: ValueDomain is the URL host, or the value itself if it is a domain.
 // @requires: web_functions
 let ValueUrl = Value;
 let ValueDomain = trim_end(@"\.", _Host(Value));

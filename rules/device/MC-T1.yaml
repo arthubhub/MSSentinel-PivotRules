@@ -1,19 +1,19 @@
 id: MC-T1
-name: Timeline de la machine
+name: Device timeline
 indicators: [device]
 action: timeline
+targets: [account, process]
 description: >
-  Déroulé autour de T0 sur la machine : processus, premier contact avec chaque destination publique, fichiers
-  exécutables, scripts et archives écrits, ouvertures de session, clés de persistance, événements Defender
-  notables (antivirus, ASR, altération, injection, tâches, services), alertes et événements Windows clés
-  (4624, 4625, 4672, 4688, 4697, 4698, 4720, 4732), accès vus par Defender for Identity, processus et
-  authentifications des journaux ASIM, Sysmon (processus, connexions, fichiers, registre, DNS), fichiers modifiés ou
-  supprimés et partages accédés selon l'audit Windows (4660, 4663, 5145), et journaux Linux notables (SSH, sudo,
-  erreurs). Limité à 5 000 lignes.
+  Sequence around T0 on the device: processes, first contact with each public destination, executable files, scripts
+  and archives written, logons, persistence keys, notable Defender events (antivirus, ASR, tampering, injection,
+  tasks, services), alerts and key Windows events (4624, 4625, 4672, 4688, 4697, 4698, 4720, 4732), access seen by
+  Defender for Identity, processes and authentications from ASIM logs, Sysmon (process, connections, files, registry,
+  DNS), files modified or deleted and shares accessed according to the Windows audit (4660, 4663, 5145), and notable
+  Linux logs (SSH, sudo, errors). Limited to 5,000 rows.
 reading:
-  decisive: Enchaînement processus inhabituel → fichier déposé → persistance → connexion sortante, avec alerte associée.
-  context: Ouverture de session distante juste avant l'activité suspecte (mouvement latéral entrant).
-  noise: Activité de fond (mises à jour, agents de gestion, antivirus).
+  decisive: Unusual process → dropped file → persistence → outbound connection chain, with a related alert.
+  context: Remote logon just before the suspicious activity (inbound lateral movement).
+  noise: Background activity (updates, management agents, antivirus).
 v1: true
 window: { before: 30m, after: 30m }
 uses: [persistence, win_security, sysmon]
@@ -26,7 +26,7 @@ query: |
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where DeviceName startswith ValueShort and _IsHost(DeviceName)
       | project TimeGenerated, Source = "DeviceProcessEvents", Host = tolower(DeviceName), Account = tolower(AccountName),
-          Action = strcat("Processus ", FileName), Detail = strcat(InitiatingProcessFileName, " → ", ProcessCommandLine)
+          Action = strcat("Process ", FileName), Detail = strcat(InitiatingProcessFileName, " → ", ProcessCommandLine)
   ),
   (
       DeviceNetworkEvents
@@ -36,7 +36,7 @@ query: |
       | summarize TimeGenerated = min(TimeGenerated), Account = take_any(InitiatingProcessAccountName)
           by DeviceName, InitiatingProcessFileName, Destination = coalesce(RemoteUrl, RemoteIP), RemotePort
       | project TimeGenerated, Source = "DeviceNetworkEvents", Host = tolower(DeviceName), Account = tolower(Account),
-          Action = strcat("Premier contact · ", InitiatingProcessFileName), Detail = strcat(Destination, ":", tostring(RemotePort))
+          Action = strcat("First contact · ", InitiatingProcessFileName), Detail = strcat(Destination, ":", tostring(RemotePort))
   ),
   (
       DeviceFileEvents
@@ -44,7 +44,7 @@ query: |
       | where DeviceName startswith ValueShort and _IsHost(DeviceName)
       | where FileName matches regex @"(?i)\.(exe|dll|sys|ps1|psm1|bat|cmd|vbs|vbe|js|jse|wsf|hta|msi|lnk|scr|zip|iso|img|rar|7z)$"
       | project TimeGenerated, Source = "DeviceFileEvents", Host = tolower(DeviceName), Account = tolower(InitiatingProcessAccountName),
-          Action = strcat("Fichier ", ActionType), Detail = strcat(FolderPath, " ← ", InitiatingProcessFileName, iff(isempty(FileOriginUrl), "", strcat(" ← ", FileOriginUrl)))
+          Action = strcat("File ", ActionType), Detail = strcat(FolderPath, " ← ", InitiatingProcessFileName, iff(isempty(FileOriginUrl), "", strcat(" ← ", FileOriginUrl)))
   ),
   (
       DeviceLogonEvents
@@ -75,7 +75,7 @@ query: |
       | where DeviceName startswith ValueShort and _IsHost(DeviceName)
       | summarize arg_min(TimeGenerated, Title, Severity, DeviceName) by AlertId
       | project TimeGenerated, Source = "AlertEvidence", Host = tolower(DeviceName), Account = "",
-          Action = strcat("Alerte ", Severity), Detail = Title
+          Action = strcat("Alert ", Severity), Detail = Title
   ),
   (
       IdentityLogonEvents
@@ -83,16 +83,16 @@ query: |
       | where TargetDeviceName has ValueShort or DeviceName has ValueShort
       | where _IsHost(TargetDeviceName) or _IsHost(DeviceName)
       | project TimeGenerated, Source = "IdentityLogonEvents", Host = ValueShort, Account = tolower(coalesce(AccountUpn, AccountName)),
-          Action = strcat(iff(_IsHost(TargetDeviceName), "Accès entrant ", "Authentification sortante "), Protocol, " ", ActionType),
+          Action = strcat(iff(_IsHost(TargetDeviceName), "Inbound access ", "Outbound authentication "), Protocol, " ", ActionType),
           Detail = strcat(DeviceName, " → ", coalesce(TargetDeviceName, DestinationDeviceName), " · ", LogonType)
-  ),
+  )
   // @sentinel-only:begin
-  (
+  , (
       ASimProcessEventLogs
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where DvcHostname startswith ValueShort and _IsHost(DvcHostname)
       | project TimeGenerated, Source = strcat("ASIM ", EventProduct), Host = tolower(DvcHostname), Account = tolower(ActorUsername),
-          Action = strcat("Processus ", tostring(split(replace_string(TargetProcessName, "/", @"\"), @"\")[-1])),
+          Action = strcat("Process ", tostring(split(replace_string(TargetProcessName, "/", @"\"), @"\")[-1])),
           Detail = strcat(ParentProcessName, " → ", TargetProcessCommandLine)
   ),
   (
@@ -101,7 +101,7 @@ query: |
       | where TargetHostname has ValueShort or DvcHostname has ValueShort
       | where _IsHost(coalesce(TargetHostname, DvcHostname))
       | project TimeGenerated, Source = strcat("ASIM ", EventProduct), Host = ValueShort, Account = tolower(TargetUsername),
-          Action = strcat(EventType, " ", EventResult), Detail = strcat("depuis ", coalesce(SrcHostname, SrcIpAddr), " · ", LogonProtocol)
+          Action = strcat(EventType, " ", EventResult), Detail = strcat("from ", coalesce(SrcHostname, SrcIpAddr), " · ", LogonProtocol)
   ),
   (
       Syslog
@@ -117,19 +117,18 @@ query: |
       | where _IsHost(Computer)
       | where EventID != 3 or Initiated == "true"
       | project TimeGenerated, Source = strcat("Sysmon ", tostring(EventID)), Host = tolower(Computer), Account = UserSam,
-          Action = case(EventID == 1, strcat("Processus ", ProcessFile), strcat(EventName, " · ", ProcessFile)),
+          Action = case(EventID == 1, strcat("Process ", ProcessFile), strcat(EventName, " · ", ProcessFile)),
           Detail = case(EventID == 1, strcat(ParentFile, " → ", CommandLine), EventID == 3, strcat(coalesce(DestinationHostname, DestinationIp), ":", DestinationPort),
               EventID == 13, strcat(TargetObject, " = ", Details), EventID == 22, strcat(QueryName, " → ", QueryResults), TargetFilename)
   ),
   (
       _WinSecurity(StartTimestamp, EndTimestamp, dynamic([4660, 4663, 5145]), ValueShort)
       | where _IsHost(Computer)
-      | where EventID == 5145 or ObjectAccess has_any ("écriture", "suppression", "permissions")
+      | where EventID == 5145 or ObjectAccess has_any ("write", "delete", "permissions")
       | project TimeGenerated, Source = SourceTable, Host = tolower(Computer), Account = SubjectSam,
           Action = strcat(tostring(EventID), " · ", EventName, " (", ObjectAccess, ")"),
-          Detail = iff(EventID == 5145, strcat(ShareName, @"\", RelativeTargetName, " depuis ", IpAddress), strcat(ObjectName, " · ", ProcessName))
+          Detail = iff(EventID == 5145, strcat(ShareName, @"\", RelativeTargetName, " from ", IpAddress), strcat(ObjectName, " · ", ProcessName))
   ),
-  // @sentinel-only:end
   (
       _WinSecurity(StartTimestamp, EndTimestamp, dynamic([4624, 4625, 4672, 4688, 4697, 4698, 4720, 4732]), ValueShort)
       | where _IsHost(Computer)
@@ -141,5 +140,6 @@ query: |
               EventID in (4624, 4625), strcat(LogonTypeName, " · ", IpAddress, " ", WorkstationName),
               EventID == 4698, TaskName, EventID == 4697, strcat(ServiceName, " · ", ServiceFileName), "")
   )
+  // @sentinel-only:end
   | sort by TimeGenerated asc
   | take 5000

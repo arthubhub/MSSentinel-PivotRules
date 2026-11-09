@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Règle de pivot (source YAML)",
+  "title": "Pivot rule (YAML source)",
   "type": "object",
   "additionalProperties": false,
   "required": ["id", "name", "indicators", "action", "description", "window", "query"],
@@ -12,13 +12,18 @@
       "items": { "enum": ["ip", "account", "email", "url", "domain", "device", "process", "application", "hash"] }
     },
     "action": { "enum": ["statistics", "pivot", "timeline"] },
+    "targets": {
+      "description": "Indicator types the rule brings up in its results (cross pivots: IP → device, account → IP…)",
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": { "enum": ["ip", "account", "email", "url", "domain", "device", "process", "application", "hash"] }
+    },
     "description": { "type": "string" },
     "reading": {
       "type": "object", "additionalProperties": false,
       "properties": {
-        "decisive": { "type": "string", "description": "Ce qui permet de trancher" },
-        "context": { "type": "string", "description": "Ce qui oriente sans conclure" },
-        "noise": { "type": "string", "description": "Bruit fréquent en production saine" }
+        "decisive": { "type": "string", "description": "What settles the question" },
+        "context": { "type": "string", "description": "What points a direction without concluding" },
+        "noise": { "type": "string", "description": "Common noise in a healthy production environment" }
       }
     },
     "scenarios": { "type": "array", "items": { "type": "string", "pattern": "^S[0-9]+$" } },

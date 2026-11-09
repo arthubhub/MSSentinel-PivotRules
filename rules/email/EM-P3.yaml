@@ -1,16 +1,17 @@
 id: EM-P3
-name: Connexions réseau de l'utilisateur autour de T0
+name: Network connections of the user around T0
 indicators: [email]
 action: pivot
+targets: [device, process, url, ip]
 description: >
-  Connexions réseau Defender (DeviceNetworkEvents) initiées par des processus de l'utilisateur, par défaut 5 minutes
-  avant et après T0 (heure du clic par exemple). Le rapprochement se fait sur l'UPN du processus, ou à défaut sur
-  la partie locale de l'adresse (approximation quand le nom de compte Windows diffère). MachineRole donne le rôle
-  connu de la machine (un serveur RDS ou Citrix porte les sessions de nombreux utilisateurs).
+  Defender network connections (DeviceNetworkEvents) started by the user's processes, 5 minutes
+  before and after T0 by default (time of the click, for instance). The match uses the process UPN, or otherwise
+  the local part of the address (approximation when the Windows account name differs). MachineRole gives the known
+  role of the device (an RDS or Citrix server hosts sessions from many users).
 reading:
-  decisive: Connexion vers le domaine de l'e-mail ou du faux CAPTCHA, suivie d'une connexion d'un processus non navigateur.
-  context: Destinations publiques jamais vues ailleurs dans le parc.
-  noise: Trafic de fond du navigateur, de Teams et des agents de mise à jour.
+  decisive: Connection to the domain of the email or of the fake CAPTCHA, followed by a connection from a non-browser process.
+  context: Public destinations never seen elsewhere in the fleet.
+  noise: Background traffic from the browser, Teams and update agents.
 window: { before: 5m, after: 5m }
 uses: [roles]
 query: |

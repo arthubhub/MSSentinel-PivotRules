@@ -1,16 +1,17 @@
 id: HS-S1
-name: Prévalence du hash
+name: Hash prevalence
 indicators: [hash]
 action: statistics
+targets: [device]
 description: >
-  Présence du fichier (MD5, SHA1 ou SHA256) sur 30 jours, par source : fichiers écrits, processus lancés,
-  DLL chargées, événements Defender et pièces jointes d'e-mails (SHA256 seulement). Donne machines, noms
-  et chemins, et une ligne de total. Dans Sentinel, ajoute Sysmon (1, 7, 15, 23, 26, 29), les fichiers et processus normalisés ASIM et les
-  téléchargements vus par le proxy (ASimWebSessionLogs, CommonSecurityLog). Le contexte HOST restreint à une machine.
+  Presence of the file (MD5, SHA1 or SHA256) over 30 days, by source: files written, processes started,
+  DLLs loaded, Defender events and email attachments (SHA256 only). Gives devices, names
+  and paths, and a total row. In Sentinel, adds Sysmon (1, 7, 15, 23, 26, 29), ASIM normalized files and processes and
+  downloads seen by the proxy (ASimWebSessionLogs, CommonSecurityLog). The HOST context narrows the search to one device.
 reading:
-  decisive: Fichier vu sur une seule machine, sous un nom de logiciel connu, dans un dossier utilisateur.
-  context: Même hash reçu en pièce jointe puis exécuté sur plusieurs machines.
-  noise: Binaires de mises à jour récentes encore peu répandus.
+  decisive: File seen on a single device, under a known software name, in a user folder.
+  context: Same hash received as an attachment then executed on several devices.
+  noise: Binaries of recent updates, not yet widespread.
 window: { before: 30d, after: 1d }
 context: [HOST]
 uses: [sysmon]

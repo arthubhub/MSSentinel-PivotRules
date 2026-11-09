@@ -1,201 +1,155 @@
-# MSSentinel-PivotRules
+<p align="center">
+  <img src="docs/banner.svg" alt="PivotRules: KQL pivot rules for Microsoft Sentinel and Defender XDR" width="100%">
+</p>
 
-Ce répertoire contient des query KQL destinées à pivoter autour des indicateurs recensés lors d'investigations SOC sur Microsoft Sentinel.
+<p align="center">
+  <img alt="Rules" src="https://img.shields.io/badge/rules-86-4f8bff?style=for-the-badge">
+  <img alt="Defender variants" src="https://img.shields.io/badge/Defender%20variants-100%25-5c2d91?style=for-the-badge&logo=microsoft&logoColor=white">
+  <img alt="Scenarios" src="https://img.shields.io/badge/scenarios-13-8a5cff?style=for-the-badge">
+  <img alt="KQL validated" src="https://img.shields.io/badge/KQL-validated%20at%20build-2ea44f?style=for-the-badge">
+  <img alt="GPL-3.0 License" src="https://img.shields.io/badge/license-GPL--3.0-lightgrey?style=for-the-badge">
+</p>
 
-Le fichier de sortie dist/pivot-rules.flat.json est destiné à être utilisé dans une extension comme Tampermonkey.
+<p align="center">
+  <b>English</b> · <a href="README.fr.md">Français</a>
+</p>
 
-En créant de nouvelles règles dans le répertoire rules, vous pouvez contribuer au projet afin d'aider les utilisateurs à retrouver les informations essentielles en situation de crise.
-
-Pour construire le répertoire de règles à partir des données du repo, commencez par installer les dépendances, puis lancez `npm run build` comme indiqué ci-dessous :
+**PivotRules** is a library of KQL queries to pivot around the indicators of a SOC investigation on **Microsoft Sentinel** and **Defender XDR**. One rule is one YAML file; the build validates every query with the official Kusto language service and publishes a JSON catalog, read by the [EasyPivot](https://github.com/arthubhub/MicrosoftSentinel-EasyPivot) userscript (right-click a cell → pivot). Full catalog format: [docs/FORMAT.md](docs/FORMAT.md).
 
 ```
 npm install
-npm run build   # dist/pivot-rules.json, dist/pivot-rules.flat.json, dist/CATALOGUE.md
-npm test        # build strict + remplissage des paramètres + revalidation de chaque requête
+npm run build    # dist/pivot-rules.json, dist/pivot-rules.flat.json, dist/CATALOGUE.md
+npm test         # strict build + parameter filling + KQL revalidation of every query
+npm run assets   # README visuals (docs/*.svg)
 ```
 
-## Organisation
+## At a glance
 
-| Dossier | Contenu |
+<p align="center">
+  <img src="docs/coverage-en.svg" alt="Rules per indicator type" width="49%">
+  <img src="docs/matrix-en.svg" alt="Cross-pivot matrix" width="49%">
+</p>
+
+- **9 indicator types**: IP, account, e-mail, URL, domain, device, process, application, hash.
+- **Two variants per rule**: `query` for Sentinel (Log Analytics) and `queryDefender` for Defender XDR, built from a single YAML (`@sentinel-only` / `@defender-only` markers). Every rule has a Defender variant.
+- **Cross pivots**: each rule declares the indicator types its result contains (`targets`); the matrix above counts the rules from one type to another.
+- **Reading hints**: each rule says what decides, what gives context and what is noise (`reading`).
+- **Generated coverage and discovery rules**: which sources are fed, and where a value appears in tables the rules do not read yet.
+
+## Guided scenarios
+
+Rule chains EasyPivot walks through step by step, carrying a value from one step's result to the next (`carry`).
+
+```mermaid
+flowchart LR
+  A["IP-P6<br/>Nature of the IP"] --> B["IP-P2<br/>Accounts signed in"]
+  B -- "account" --> C["AC-S1<br/>Apps and countries"]
+  C --> D["AC-P3<br/>Admin actions"]
+  D --> E["AC-T1<br/>Timeline"]
+```
+<sub>S1 "Suspicious sign-in from an IP": the labeled arrow carries an account from IP-P2's result.</sub>
+
+| | Scenario | Starts from | Rules |
+| --- | --- | --- | --- |
+| S1 | Suspicious sign-in from an IP | IP | IP-P6 → IP-P2 ⟶ account → AC-S1 → AC-P3 → AC-T1 |
+| S2 | Compromised account | Account | AC-P5 → AC-P1 → AC-P4 → AC-P2 ⟶ device → MC-T1 |
+| S3 | Suspicious execution on a device | Device | MC-P5 → MC-P1 → MC-P4 ⟶ hash → HS-P1 ⟶ device → MC-P3 |
+| S4 | Phishing | E-mail | EM-P1 → EM-P4 ⟶ URL → DM-P1 ⟶ account → AC-T1 |
+| S5 | Malicious domain | Domain | DM-S2 → DM-P4 → DM-P3 ⟶ device → MC-T1 |
+| S6 | Lateral movement from a device | Device | MC-P1 ⟶ account → AC-P2 ⟶ device → MC-P6 → MC-T1 |
+| S7 | Malicious file | Hash | HS-S1 → HS-P2 → HS-P1 ⟶ device → MC-P3 → MC-T1 |
+| S8 | Malicious OAuth consent | App | AP-P1 → AP-P2 → AP-P3 ⟶ account → AC-P4 → AC-P3 |
+| S9 | Beaconing to a C2 server | IP | IP-P6 → IP-P4 ⟶ process → PR-P1 → PR-P4 → PR-T1 |
+| S10 | Password spray or brute force | IP | IP-S4 → IP-T3 → IP-P2 ⟶ account → AC-S2 → AC-P9 |
+| S11 | Account flagged at risk by Entra ID | Account | AC-P9 → AC-S1 → AC-P1 ⟶ IP → IP-P6 → IP-P2 |
+| S12 | Data exfiltration by an account | Account | AC-P6 → AC-P3 → AC-P7 → AC-P1 ⟶ IP → IP-P3 |
+| S13 | Suspicious outbound traffic from a device | Device | MC-P2 ⟶ domain → DM-S2 → DM-P3 ⟶ device → MC-T1 |
+
+The whole catalog (rule and scenario names, descriptions, reading hints) is written in English; the EasyPivot interface is available in English and French.
+
+## Repository layout
+
+| Folder | Content |
 | --- | --- |
-| `rules/<indicateur>/*.yaml` | Requètes KQL (une par fichier) |
-| `fragments/*.kql` | Fonctions KQL communes, insérées dans les requêtes qui les déclarent dans `uses` |
-| `fragments/indicators/*.kql` | Variables dérivées de la valeur sélectionnée (`ValueSam`, `ValueDomain`, `ValueShort`…) |
-| `fragments/roles.kql` | Rôles des machines, IP et comptes (voir [Rôles des entités](#rôles-des-entités)) |
-| `fragments/sysmon.kql` | `_Sysmon` : événements Sysmon normalisés, depuis `Event` (XML) ou `WindowsEvent` (JSON) |
-| `schema/tables.json` | Colonnes de 54 tables, générées depuis la référence officielle Azure Monitor |
-| `schema/overrides.json` | Compléments : `AzureDiagnostics` et tables propres à Defender XDR (`EntraIdSignInEvents`, `EntraIdSpnSignInEvents`, reprises du dépôt Azure-Sentinel), colonne `Timestamp` des tables Defender, tables tolérées dans la variante Defender (`defenderOptional`) |
-| `schema/sources.json` | Familles de sources : quelles tables voient quels événements, et lesquelles se remplacent (voir [Couverture des sources](#couverture-des-sources)) |
-| `watchlists/EasyPivotRoles.csv` | Modèle de la watchlist Sentinel des rôles (exemples fictifs) |
-| `schema/rule.schema.json` | Schéma d'une règle YAML |
-| `scripts/build.mjs` | Compilateur YAML -> JSON/md |
-| `scripts/kql-validator.cjs` | Validation par la librairie Kusto officielle (`@kusto/language-service-next`) |
-| `scripts/generate-win-security.mjs` | Génère `fragments/win_security.kql` |
-| `scripts/update-schemas.mjs` | Régénère `schema/tables.json` |
+| `rules/<indicator>/*.yaml` | KQL rules, one per file |
+| `scenarios/S<n>.yml` | Guided scenarios |
+| `fragments/*.kql` | Shared KQL functions, inserted in the rules that list them in `uses` (`_Signins`, `_IpEvents`, `_WinSecurity`, `_Sysmon`, roles…) |
+| `indicators/<type>/locations.yml` | Columns where each indicator type can appear (detection, discovery) |
+| `schema/` | Rule schema, columns of the standard tables, source families (`sources.json`), Defender XDR overrides |
+| `schemas/` | Versioned schemas of the standard tables (no custom `_CL` table) |
+| `scripts/` | Compiler (`build.mjs`), Kusto validator, tests, generators, README visuals |
+| `docs/FORMAT.md` | Published catalog format ([French version](docs/FORMAT.fr.md)) |
 
-## Format d'une règle
+## Rule format
 
 ```yaml
-id: IP-P2                      # préfixe d'indicateur + (S)tatistics/(P)ivot/(T)imeline + numéro
-name: Comptes connectés depuis l'IP
+id: IP-P2                      # indicator prefix + (S)tatistics/(P)ivot/(T)imeline + number
+name: Accounts signed in from the IP
 indicators: [ip]
 action: pivot                  # statistics | pivot | timeline
+targets: [account]             # indicator types present in the result (cross pivots)
 description: >
-  Ce que montre la requête.
-reading:                       # comment lire le résultat
-  decisive: ce qui permet de trancher
-  context: ce qui oriente sans conclure
-  noise: ce qui est du bruit en production saine
-v1: true                       # socle à livrer en premier
-window: { before: 24h, after: 1h }   # fenêtre par défaut autour de T0
-render: table                  # table | timechart | columnchart | barchart
-context: [HOST]                # paramètre de contexte facultatif
-uses: [signins, win_security]  # fragments nécessaires (leurs dépendances sont résolues)
+  What the query shows and from which sources.
+reading:
+  decisive: what settles the question
+  context: what points in a direction without settling it
+  noise: what is normal in a healthy environment
+window: { before: 24h, after: 1h }   # default window around T0
+uses: [signins, win_security]  # fragments (dependencies are resolved)
 query: |
   _Signins(StartTimestamp, EndTimestamp, Value, "")
   | ...
 ```
 
-Dans `query`, les variables suivantes sont disponibles : `Value`, `T0`, `StartTimestamp`, `EndTimestamp`, les variables de l'indicateur (`ValueUpn`, `ValueSam`, `ValueMail`, `ValueDomain`, `ValueShort`, `ValueFile`, `ValuePath`, `ValueHash`, `ValueApp`), `HostFilter` si `context: [HOST]`, et les fonctions des fragments déclarés.
+Inside `query`: `Value`, `T0`, `StartTimestamp`, `EndTimestamp`, indicator-derived variables (`ValueUpn`, `ValueSam`, `ValueDomain`, `ValueHash`…), and the functions of the declared fragments.
 
-La macro `XMLFIELD(expr, Nom)` est développée à la compilation en `extract(@'<Data Name="Nom">([^<]*)</Data>', 1, expr)`.
+**Sentinel and Defender from one file.** Lines between `// @sentinel-only:begin` and `// @sentinel-only:end` are removed from the Defender variant (branches reading tables Defender XDR does not have: ASIM, Syslog, SecurityEvent…). Lines between `// @defender-only:begin` and `// @defender-only:end` are kept only in the Defender variant (an XDR branch that would duplicate a Sentinel one). `TimeGenerated` becomes `Timestamp` for Defender. The build checks that each Defender variant reads only XDR tables.
 
-Les lignes comprises entre `// @sentinel-only:begin` et `// @sentinel-only:end` (dans une règle ou un fragment) sont retirées de la variante Defender (`queryDefender`). On y place les branches de `union` qui lisent une table absente de Defender XDR (ASIM, Syslog, SecurityEvent…) : la règle garde sa variante Defender et gagne la source dans Sentinel. Placer la virgule de séparation à l'intérieur du bloc (`, ( … )`) pour que la requête reste valide sans lui.
+## Source coverage and discovery
 
-## Couverture des sources
+A missing table raises no error (`union isfuzzy=true` skips it): the rule just returns fewer rows. So:
 
-Une table absente ne provoque aucune erreur : `union isfuzzy=true` ignore la branche, et la règle renvoie simplement moins de lignes. Trois mécanismes rendent ces trous visibles ou les comblent.
+- **Source families** (`schema/sources.json`) group tables (or channels and event IDs of a table) that see the same events. The build refuses a rule reading a table outside a family.
+- **Generated coverage rules** `XX-S0` check, on your workspace, each source the rules of an indicator actually read: present, fed, events collected, columns present, compensated by an equivalent source or not, and what to enable. Run them first on a new environment.
+- **Equivalent sources without duplicates**: `SigninLogs` / `EntraIdSignInEvents`, `AADServicePrincipalSignInLogs` / `EntraIdSpnSignInEvents`… the fallback table is read only for what the main one lacks.
+- **Generated discovery rules** `XX-S9` look for the value in every table (`union * | where * has`) and compare each location with the columns the rules read. A location "not read by the rules" is a source to add; EasyPivot can prefill the issue for you.
+- **Entity roles** (`fragments/roles.kql`): domain controllers detected automatically, IdentityInfo roles, and an optional `EasyPivotRoles` watchlist, so a DC, a NAT or a service account is labeled instead of misleading.
 
-1. **Familles de sources** (`schema/sources.json`). Une famille (« Authentifications Windows et Active Directory », « Fichiers, partages et bibliothèques »…) liste des **membres** qui voient les mêmes événements, ou des points de vue complémentaires. Un membre est :
-   - soit une table entière (`DeviceFileEvents`) ;
-   - soit une partie d'une table journalisée : un canal et des EventID (`SecurityEvent` canal `security` 4656, 4660, 4663, 4670 ; `Event` canal `sysmon` 11, 23, 26 ; `Event` canal `system` 7045), ou un filtre `where` libre.
+## Query parameters
 
-   Un membre peut porter son propre conseil de remédiation (stratégie d'audit, SACL, configuration Sysmon). Le build refuse une règle qui lit une table sans famille. Chaque règle publie ses familles dans `sources`, et les tables lues seulement pour annoter les rôles dans `enrichment`.
-2. **Règles de couverture générées** (`IP-S0`, `AC-S0`, `EM-S0`, `DM-S0`, `MC-S0`, `PR-S0`, `AP-S0`, `HS-S0`). Une par indicateur, produite par le build à partir des règles de l'indicateur. Elle contrôle chaque membre réellement lu : le build relève les EventID passés à `_WinSecurity` et `_Sysmon` par chaque règle. Pour chaque membre, elle indique :
-   - si la table existe, si elle est alimentée sur la fenêtre, et si les **événements du membre** sont collectés. Une table `SecurityEvent` alimentée sans aucun 4663 donne « Événements non collectés », avec la stratégie d'audit à activer ;
-   - s'il lui manque des colonnes que les règles utilisent. Le build les détermine avec le service de langage Kusto, et la règle les compare au résultat de `getschema` sur l'environnement ;
-   - si son absence est compensée par une autre table de la même famille, ou si la famille n'est plus couverte du tout, avec les règles touchées et le connecteur à activer.
+Each compiled query starts with `// [ID] name` and a header that stays valid KQL before substitution:
 
-   À lancer en premier sur un nouvel environnement.
-3. **Sources équivalentes, sans doublon**. Les fragments lisent les tables qui se remplacent l'une l'autre :
-   - `_Signins` : `SigninLogs` et `AADNonInteractiveUserSignInLogs`, ou `EntraIdSignInEvents` dans Defender XDR ;
-   - `_SpnSignins` : `AADServicePrincipalSignInLogs` et `AADManagedIdentitySignInLogs`, ou `EntraIdSpnSignInEvents` ;
-   - `AP-P1` : `AuditLogs`, ou `CloudAppEvents`.
-
-   La table de remplacement n'est lue que pour le type d'événement que la table principale ne fournit pas sur la période : pas de doublon dans le portail unifié. Les règles lisent aussi, quand l'événement s'y trouve :
-   - les tables ASIM (authentification, processus, fichiers, sessions réseau, web), Azure Firewall et Syslog (SSH) ;
-   - le DNS vu par Defender for Endpoint, Microsoft Graph et Defender for Identity (`IdentityQueryEvents`, `IdentityDirectoryEvents`) ;
-   - l'audit Windows de l'accès aux objets (fichiers 4656, 4660, 4663, 4670 ; partages 5140, 5145 ; registre 4657) ;
-   - Sysmon via `_Sysmon` (1, 3, 7, 11 à 15, 22, 23, 26, 29) et le journal Système (7045).
-
-`fragments/win_security.kql` et `fragments/sysmon.kql` sont entièrement `@sentinel-only`. Une règle qui les appelle hors d'un bloc `@sentinel-only` n'a pas de variante Defender : le build le détecte.
-
-## Découverte : où apparaît la valeur
-
-Le build génère aussi une règle par indicateur, `XX-S9` (`IP-S9`, `AC-S9`…). Elle cherche la valeur dans **toutes** les tables (`union * | where * has`), avec un terme adapté à l'indicateur :
-
-| Indicateur | Terme recherché |
-| --- | --- |
-| Compte | Nom SAM |
-| Machine | Nom court |
-| Processus | Nom de fichier |
-| URL | Domaine |
-
-Elle rend une ligne par table et par emplacement :
-- **`Path`** : la colonne, ou le chemin dans un JSON déplié sur 5 niveaux, par exemple `RawEventData['1']['parameters']['ip']` ;
-- **`Role`** : rôle probable (source ou destination), déduit du nom du chemin ;
-- **`ExactRows`** : valeur seule dans la cellule, ou noyée dans un texte ;
-- **statistiques de la table** : volume, période, heures actives, machines, comptes et actions les plus fréquentes ;
-- **`Status`** : comparaison avec les colonnes que les règles de l'indicateur lisent réellement (liste `Known` générée au build, avec les règles concernées).
-
-Un emplacement « Non lu par les règles » est une source à ajouter au modèle. La recherche parcourt tout l'espace de travail : fenêtre par défaut de 4 h avant et 1 h après T0.
-
-## Rôles des entités
-
-Une même machine ou un même compte n'a pas le même sens selon son rôle. Un contrôleur de domaine journalise l'authentification de tout le domaine. Une IP de NAT porte des centaines de comptes. Un compte de service ouvre des sessions partout. Le fragment `roles` fournit :
-
-| Fonction | Résultat |
-| --- | --- |
-| `_MachineRoles(at)` | `MachineKey` (nom court), `MachineRole`, `MachineRoleBasis` |
-| `_IpRoles(at)`, `_IpRoleOf(ip, at)` | Rôles d'une IP, plages CIDR comprises |
-| `_AccountRoles(at)` | `AccountKey` (SAM ou UPN), `AccountRole`, `AccountRoleBasis` |
-| `_AccountKind(sam)` | Catégorie déduite du nom : compte machine, système, krbtgt, synchronisation Entra Connect, administrateur intégré |
-| `_HostKey(h)`, `_SamOf(a)`, `_Labeled(nom, rôle)`, `_JoinRoles(a, b)` | Normalisation et annotation (`dc01 [DC]`) |
-
-Ces fonctions combinent trois sources :
-- **Contrôleurs de domaine détectés automatiquement** : machines qui émettent des 4768 (seul un KDC le fait), cibles LDAP vues par Defender for Identity, machines qui acceptent des connexions Kerberos sur le port 88 selon Defender for Endpoint.
-- **IdentityInfo** : rôles Entra ID, groupes AD privilégiés, comptes de service, comptes sensibles ou leurres.
-- **Watchlist Sentinel d'alias `EasyPivotRoles`**, facultative, avec les colonnes `Entity`, `Type` (`Machine`, `IP` ou `Compte`), `Role` et `Note`. Modèle : `watchlists/EasyPivotRoles.csv`. On y déclare ce qui ne se détecte pas : serveurs RDS, bastions, NAT, VPN, scanners, comptes de service, comptes d'administration.
-
-Dans les journaux Windows, `_WinSecurity` ajoute trois colonnes pour ne plus confondre la machine qui journalise avec la machine utilisée :
-- `TargetHost` : machine réellement visée (service demandé pour un 4769, serveur cible pour un 4648) ;
-- `AuthAuthority` : DC qui a validé les identifiants (4768, 4769, 4771, 4776) ;
-- `SourceHost` : poste d'origine.
-
-Les règles s'en servent ainsi :
-- `AC-P2` et `MC-P1` classent chaque ligne par nature du lien : session sur la machine, identifiants explicites, ticket Kerberos vu par le DC, poste d'origine, accès réseau au DC (GPO, SYSVOL) en dernier.
-- Les règles qui listent des machines ou des comptes annotent leur rôle.
-- `IP-P6`, `AC-P5` et `MC-P5` décrivent l'entité elle-même avant de pivoter dessus.
-
-## Paramètres des requêtes compilées
-
-Chaque requête commence par un en-tête de paramètres. Avant substitution, la requête reste du KQL valide et s'exécute avec T0 = `now()` et la fenêtre par défaut.
-
-| Paramètre | Contenu | Si vide ou non remplacé |
+| Parameter | Replaced by | Default |
 | --- | --- | --- |
-| `{{VALUE}}` | La sélection, dans une chaîne `@"…"` | — |
-| `{{T0}}` | ISO 8601, idéalement le `TimeGenerated` de la ligne sélectionnée | `now()` |
-| `{{BEFORE_MIN}}`, `{{AFTER_MIN}}` | Fenêtre avant et après T0, en minutes | `window` de la règle |
-| `{{HOST}}` | Machine de la même ligne (règles Processus et Hash) | toutes les machines |
+| `{{VALUE}}` | The pivoted value, in a verbatim string `@"…"` | — |
+| `{{T0}}` | ISO 8601 time of the event | `now()` |
+| `{{BEFORE_MIN}}`, `{{AFTER_MIN}}` | Window in minutes | the rule's `window` |
+| `{{HOST}}` | Device of the row (process and hash rules) | all devices |
 
-`scripts/fill-query.mjs` fait la substitution, et `matchesIndicator()` vérifie la sélection contre les motifs de `indicators.<type>.patterns`.
+## Contributing
 
-## Sortie
+One rule = one YAML file.
 
-- `dist/pivot-rules.json` contient `indicators` (libellés et motifs de détection), `actions`, `placeholders`, `sources` (familles de sources) et `rules`. Chaque règle porte `id`, `name`, `category`, `indicators`, `action`, `description`, `reading`, `scenarios`, `v1`, `window`, `render`, `tables`, `sources`, `enrichment` (tables lues seulement pour les rôles), `platforms`, `placeholders`, `query` et, si elle peut tourner dans Defender XDR seul, `queryDefender` : sans les blocs `@sentinel-only`, avec `Timestamp` au lieu de `TimeGenerated`.
-- `dist/pivot-rules.flat.json` reprend le format historique de l'userscript : `[{ name, category, description, query }]`.
-- `dist/CATALOGUE.md` est le catalogue lisible des règles.
+1. Fork, branch, `npm ci`.
+2. Add a file following the format above; the `id` is unique and is the file name (`rules/ip/IP-P10.yaml`). `XX-S0` and `XX-S9` are reserved.
+3. Fill `reading` and `targets`, reuse fragments, put Sentinel-only branches in `@sentinel-only` blocks, add any new table to a family in `schema/sources.json`.
+4. `npm test` must print 0 error and 0 warning; check your rule in `dist/CATALOGUE.md`.
+5. Open a pull request describing the investigation scenario. Never put real data (values, customers, tenants) in queries or examples; custom `_CL` tables are not accepted.
 
-## Contribution
+A missing log source can be reported with the "Missing log source" issue form, which EasyPivot prefills from a discovery result (type, table, column, platform only).
 
-Les contributions sont les bienvenues : une règle = un fichier YAML.
+## Getting the output
 
-1. Forkez le dépôt, puis créez une branche (`git checkout -b regle-IP-P7`).
-2. Installez les dépendances : `npm ci`.
-3. Ajoutez ou modifiez un fichier en suivant le [format d'une règle](#format-dune-règle).
-   - L'`id` est unique : préfixe de l'indicateur, lettre de l'action (`S` statistics, `P` pivot, `T` timeline) et numéro suivant. Le fichier porte le nom de l'`id` (`rules/ip/IP-P7.yaml`). Les identifiants `XX-S0` sont réservés aux règles de couverture générées.
-   - Une nouvelle table doit être ajoutée à une famille dans `schema/sources.json` (le build le vérifie).
-   - Quand la règle liste des machines ou des comptes, annotez leur rôle avec le fragment `roles`. Dans les journaux Windows, utilisez `TargetHost` et `AuthAuthority` plutôt que `Computer`.
-   - Remplissez `reading` (`decisive`, `context`, `noise`) afin d'aider l'analyste à interpréter le résultat.
-   - Réutilisez les fragments (`uses`) et les variables (`Value`, `ValueSam`, `StartTimestamp`, `EndTimestamp`) afin d'éviter de dupliquer du KQL.
-   - Les colonnes utilisées doivent exister dans `schema/tables.json` (ou override).
-4. Vérifiez en local :
-   ```
-   node scripts/build.mjs --strict   # schéma YAML + validation KQL, doit afficher 0 erreur et 0 avertissement
-   ```
-   Consultez `dist/CATALOGUE.md` pour voir le rendu de votre règle.
-5. **Ouvrez une Pull Request** vers `master` en décrivant le scénario d'investigation couvert. Ne mettez pas de donnée réelle dans les requêtes ni dans les exemples.
+Each push to `master` builds and publishes a release:
 
-> À la fusion sur `master`, la CI reconstruit tout et publie une nouvelle release.
-
-## Récupération de la sortie
-
-Chaque push sur `master` déclenche le workflow [`Build & Release`](.github/workflows/release.yml), la release contient :
-
-| Fichier | Usage |
+| File | Use |
 | --- | --- |
-| `pivot-rules.flat.json` | Format de l'userscript Tampermonkey : `[{ name, category, description, query }]` |
-| `pivot-rules.json` | Format complet : indicateurs, motifs de détection, actions, paramètres, lecture des résultats, requêtes Sentinel et Defender XDR |
-| `CATALOGUE.md` | Catalogue lisible des règles |
-
-Les URL ci-dessous pointent toujours vers la dernière version :
+| `pivot-rules.json` | Full catalog: indicators, patterns, actions, parameters, reading hints, locations, scenarios, Sentinel and Defender XDR queries |
+| `pivot-rules.flat.json` | Legacy format `[{ name, category, description, query }]` |
+| `CATALOGUE.md` | Human-readable catalog, with the cross-pivot matrix and the scenarios |
 
 ```
-https://github.com/arthubhub/MSSentinel-PivotRules/releases/latest/download/pivot-rules.flat.json
 https://github.com/arthubhub/MSSentinel-PivotRules/releases/latest/download/pivot-rules.json
+https://github.com/arthubhub/MSSentinel-PivotRules/releases/latest/download/pivot-rules.flat.json
 https://github.com/arthubhub/MSSentinel-PivotRules/releases/latest/download/CATALOGUE.md
 ```
-
-Par exemple, en ligne de commande : `curl -L -O https://github.com/arthubhub/MSSentinel-PivotRules/releases/latest/download/pivot-rules.flat.json`.
-
-Pour générer les fichiers vous-même : `npm ci && npm run build`, la sortie est dans `dist/`.

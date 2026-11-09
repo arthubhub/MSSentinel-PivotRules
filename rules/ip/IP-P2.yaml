@@ -1,17 +1,18 @@
 id: IP-P2
-name: Comptes connectés depuis l'IP
+name: Accounts signed in from the IP
 indicators: [ip]
 action: pivot
+targets: [account]
 description: >
-  Comptes et identités qui ont tenté de s'authentifier depuis l'IP : Entra ID (utilisateurs, applications et identités
-  managées), Windows (4624, 4625, 4648, 4768, 4769, 4771, 4776 via SecurityEvent et WindowsEvent), Defender for Endpoint,
-  Defender for Identity, journaux d'authentification ASIM et connexions SSH Linux (Syslog). Donne tentatives, succès, échecs,
-  premier succès, les machines réellement visées (Targets, avec leur rôle) séparées des contrôleurs de domaine qui ont
-  seulement validé les identifiants (ValidatedBy), et le rôle connu du compte.
+  Accounts and identities that tried to authenticate from the IP: Entra ID (users, applications and managed
+  identities), Windows (4624, 4625, 4648, 4768, 4769, 4771, 4776 via SecurityEvent and WindowsEvent), Defender for Endpoint,
+  Defender for Identity, ASIM authentication logs and Linux SSH logons (Syslog). Gives attempts, successes, failures,
+  first success, the devices actually targeted (Targets, with their role) apart from the domain controllers that only
+  validated the credentials (ValidatedBy), and the known role of the account.
 reading:
-  decisive: Un succès précédé d'échecs sur de nombreux comptes depuis la même IP (spray réussi), ou un compte privilégié parmi eux.
-  context: Plusieurs comptes d'une même campagne de phishing connectés depuis la même IP ; ticket 4769 vers un serveur inhabituel.
-  noise: IP de NAT, de VPN ou de serveur Citrix qui porte des centaines de comptes légitimes (voir IP-P6).
+  decisive: A success preceded by failures on many accounts from the same IP (successful spray), or a privileged account among them.
+  context: Several accounts from the same phishing campaign signed in from the same IP; 4769 ticket to an unusual server.
+  noise: NAT, VPN or Citrix server IP that carries hundreds of legitimate accounts (see IP-P6).
 v1: true
 window: { before: 24h, after: 1h }
 uses: [signins, spn_signins, win_security, roles]
@@ -27,6 +28,7 @@ query: |
       | project TimeGenerated, Account = tolower(ServicePrincipalName), Source = strcat("Entra ID ", SignInType),
           Success = Succeeded, Target = "", AuthBy = "", App = ResourceDisplayName, Detail = strcat(Credential, " ", ResultType)
   ),
+  // @sentinel-only:begin
   (
       _WinSecurity(StartTimestamp, EndTimestamp, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776]), Value)
       | where IpAddress == Value
@@ -34,6 +36,7 @@ query: |
           Source = SourceTable, Success = EventID !in (4625, 4771) and Status in ("", "-", "0x0"),
           Target = TargetHost, AuthBy = AuthAuthority, App = "", Detail = strcat(tostring(EventID), " ", LogonTypeName, " ", Status)
   ),
+  // @sentinel-only:end
   (
       DeviceLogonEvents
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
@@ -48,8 +51,9 @@ query: |
       | project TimeGenerated, Account = tolower(coalesce(AccountUpn, AccountName)), Source = "IdentityLogonEvents",
           Success = ActionType == "LogonSuccess", Target = tolower(TargetDeviceName), AuthBy = tolower(DestinationDeviceName),
           App = Application, Detail = strcat(Protocol, " ", FailureReason)
-  ),
-  (
+  )
+  // @sentinel-only:begin
+  , (
       ASimAuthenticationEventLogs
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where SrcIpAddr == Value
@@ -65,6 +69,7 @@ query: |
       | project TimeGenerated, Account = tolower(User), Source = "Syslog (sshd)", Success = SyslogMessage startswith "Accepted",
           Target = tolower(Computer), AuthBy = "", App = "SSH", Detail = substring(SyslogMessage, 0, 200)
   )
+  // @sentinel-only:end
   | where isnotempty(Account) and Account !endswith "$"
   | extend MachineKey = _HostKey(Target), AccountKey = _SamOf(Account)
   | lookup kind=leftouter (_MachineRoles(EndTimestamp)) on MachineKey

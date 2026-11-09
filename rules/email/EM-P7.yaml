@@ -1,14 +1,15 @@
 id: EM-P7
-name: Messages Teams impliquant l'adresse
+name: Teams messages involving the address
 indicators: [email]
 action: pivot
+targets: [email]
 description: >
-  Messages et conversations Teams envoyés par l'adresse ou qui l'incluent : MessageEvents (Defender for Office 365,
-  si disponible), audit Teams d'OfficeActivity et CloudAppEvents. Indique si le fil est externe.
+  Teams messages and chats sent by the address or including it: MessageEvents (Defender for Office 365,
+  if available), Teams audit from OfficeActivity and CloudAppEvents. Shows whether the thread is external.
 reading:
-  decisive: Expéditeur d'un tenant externe se présentant comme support, qui contacte plusieurs employés dans l'heure.
-  context: Premier échange avec cet expéditeur, nom affiché générique (Help Desk, IT Support).
-  noise: Conversations avec des partenaires et éditeurs connus.
+  decisive: Sender from an external tenant posing as the help desk, contacting several employees within the hour.
+  context: First exchange with this sender, generic display name (Help Desk, IT Support).
+  noise: Chats with known partners and vendors.
 window: { before: 4h, after: 1h }
 query: |
   union isfuzzy=true
@@ -20,6 +21,7 @@ query: |
           Recipients = tostring(RecipientDetails), Subject = coalesce(MessageSubject, Subject), Thread = ThreadName,
           ExternalThread = tostring(IsExternalThread), Action = DeliveryAction, ThreatTypes
   ),
+  // @sentinel-only:begin
   (
       OfficeActivity
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
@@ -29,6 +31,7 @@ query: |
           Recipients = tostring(Members), Subject = ChatName, Thread = ChatThreadId, ExternalThread = "",
           Action = Operation, ThreatTypes = ""
   ),
+  // @sentinel-only:end
   (
       CloudAppEvents
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)

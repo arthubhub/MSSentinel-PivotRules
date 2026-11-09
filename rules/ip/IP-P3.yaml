@@ -1,15 +1,16 @@
 id: IP-P3
-name: Services cloud accédés depuis l'IP
+name: Cloud services accessed from the IP
 indicators: [ip]
 action: pivot
+targets: [application, account]
 description: >
-  Services et opérations cloud vus depuis l'IP : connexions Entra ID des utilisateurs et des applications (service
-  principals, identités managées), opérations d'annuaire Entra ID (AuditLogs), Microsoft Graph, Microsoft 365
-  (OfficeActivity, CloudAppEvents), Azure Resource Manager, Key Vault et stockage Blob.
+  Cloud services and operations seen from the IP: Entra ID sign-ins of users and applications (service
+  principals, managed identities), Entra ID directory operations (AuditLogs), Microsoft Graph and legacy Azure AD Graph, Microsoft 365
+  (OfficeActivity, CloudAppEvents), Azure Resource Manager, Key Vault and Blob storage.
 reading:
-  decisive: Lecture de secrets Key Vault, attribution de rôle Azure ou listing de stockage depuis une IP jamais vue.
-  context: Accès Graph ou Exchange Online depuis une IP d'hébergeur.
-  noise: Accès légitimes depuis le proxy de sortie de l'entreprise.
+  decisive: Key Vault secret reads, Azure role assignment or storage listing from a never-seen IP.
+  context: Graph or Exchange Online access from a hosting provider IP.
+  noise: Legitimate access from the corporate egress proxy.
 v1: true
 window: { before: 24h, after: 1h }
 uses: [signins, spn_signins]
@@ -17,19 +18,20 @@ query: |
   union isfuzzy=true
   (
       _Signins(StartTimestamp, EndTimestamp, Value, "")
-      | project TimeGenerated, Service = "Entra ID", Operation = strcat("Connexion à ", AppDisplayName), Target = ResourceDisplayName,
-          Account = tolower(UserPrincipalName), Result = iff(Succeeded, "Succès", strcat("Échec ", ResultType))
+      | project TimeGenerated, Service = "Entra ID", Operation = strcat("Sign-in to ", AppDisplayName), Target = ResourceDisplayName,
+          Account = tolower(UserPrincipalName), Result = iff(Succeeded, "Success", strcat("Failed ", ResultType))
   ),
   (
       _SpnSignins(StartTimestamp, EndTimestamp, "", Value)
-      | project TimeGenerated, Service = strcat("Entra ID (", SignInType, ")"), Operation = strcat("Connexion à ", ResourceDisplayName),
-          Target = ResourceDisplayName, Account = tolower(ServicePrincipalName), Result = iff(Succeeded, "Succès", strcat("Échec ", ResultType))
+      | project TimeGenerated, Service = strcat("Entra ID (", SignInType, ")"), Operation = strcat("Sign-in to ", ResourceDisplayName),
+          Target = ResourceDisplayName, Account = tolower(ServicePrincipalName), Result = iff(Succeeded, "Success", strcat("Failed ", ResultType))
   ),
+  // @sentinel-only:begin
   (
       AuditLogs
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where tostring(InitiatedBy.user.ipAddress) == Value or tostring(InitiatedBy.app.ipAddress) == Value
-      | project TimeGenerated, Service = "Annuaire Entra ID", Operation = OperationName, Target = tostring(TargetResources[0].displayName),
+      | project TimeGenerated, Service = "Entra ID directory", Operation = OperationName, Target = tostring(TargetResources[0].displayName),
           Account = tolower(coalesce(tostring(InitiatedBy.user.userPrincipalName), tostring(InitiatedBy.app.displayName))), Result
   ),
   (
@@ -41,13 +43,23 @@ query: |
           Target = "", Account = coalesce(UserId, ServicePrincipalId), Result = tostring(ResponseStatusCode)
   ),
   (
+      AADGraphActivityLogs
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where CallerIpAddress == Value
+      | project TimeGenerated, Service = "Azure AD Graph",
+          Operation = strcat(RequestMethod, " ", replace_regex(tostring(parse_url(RequestUri).Path), @"[0-9a-fA-F-]{36}", "{id}")),
+          Target = AppId, Account = coalesce(UserId, ServicePrincipalId), Result = tostring(ResponseStatusCode)
+  ),
+  // @sentinel-only:end
+  (
       CloudAppEvents
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where IPAddress == Value
       | project TimeGenerated, Service = Application, Operation = ActionType, Target = ObjectName,
           Account = tolower(coalesce(tostring(RawEventData.UserId), AccountDisplayName)), Result = ""
-  ),
-  (
+  )
+  // @sentinel-only:begin
+  , (
       OfficeActivity
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where ClientIP has Value
@@ -81,9 +93,10 @@ query: |
       StorageBlobLogs
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where CallerIpAddress startswith strcat(Value, ":") or CallerIpAddress == Value
-      | project TimeGenerated, Service = strcat("Stockage Blob ", AccountName), Operation = OperationName, Target = ObjectKey,
+      | project TimeGenerated, Service = strcat("Blob storage ", AccountName), Operation = OperationName, Target = ObjectKey,
           Account = tolower(coalesce(RequesterUpn, RequesterObjectId, AuthenticationType)), Result = StatusText
   )
+  // @sentinel-only:end
   | summarize Events = count(), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
       Accounts = make_set(Account, 10), Targets = make_set(Target, 10), Results = make_set(Result, 5) by Service, Operation
   | sort by Service asc, Events desc

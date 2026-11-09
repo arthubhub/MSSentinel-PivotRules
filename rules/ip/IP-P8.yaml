@@ -1,0 +1,29 @@
+id: IP-P8
+name: Emails sent from the IP
+indicators: [ip]
+action: pivot
+targets: [email]
+description: >
+  Messages received by Defender for Office 365 whose sending server has this IP (EmailEvents, SenderIPv4 or
+  SenderIPv6), one row per sender: envelope and header addresses, domains, recipients, subjects,
+  detected threats and delivery actions. Used to go from a sending server IP (headers, phishing
+  alert) to the senders and recipients to pivot on next (EM-P1, EM-P5).
+reading:
+  decisive: Several different senders or header domains from the same IP, with detected threats or a first contact (IsFirstContact).
+  context: Envelope address (SenderMailFromAddress) different from the header address (SenderFromAddress); messages delivered despite a detection.
+  noise: IPs of shared mail gateways (Exchange Online, bulk email providers, newsletters).
+window: { before: 7d, after: 1d }
+query: |
+  EmailEvents
+  | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+  | where SenderIPv4 == Value or SenderIPv6 == Value
+  | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Messages = dcount(NetworkMessageId), Events = count(),
+      Recipients = dcount(RecipientEmailAddress), RecipientSample = make_set(tolower(RecipientEmailAddress), 10),
+      EnvelopeSenders = make_set(tolower(SenderMailFromAddress), 5), Subjects = make_set(Subject, 5),
+      Threats = make_set_if(ThreatTypes, isnotempty(ThreatTypes), 5), Delivered = countif(DeliveryAction == "Delivered"),
+      Blocked = countif(DeliveryAction in ("Blocked", "Junked", "Replaced")), FirstContact = countif(IsFirstContact),
+      Directions = make_set(EmailDirection)
+      by SenderFromAddress = tolower(SenderFromAddress), SenderFromDomain = tolower(SenderFromDomain)
+  | extend ThreatRank = iff(array_length(Threats) > 0, 0, 1)
+  | sort by ThreatRank asc, Delivered desc, Messages desc
+  | project-away ThreatRank

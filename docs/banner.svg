@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320" role="img" aria-label="MSSentinel-PivotRules: KQL pivot rules for Microsoft Sentinel and Defender XDR">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#101626"/>
+      <stop offset="1" stop-color="#1d2b4a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="320" rx="24" fill="url(#bg)"/>
+  <g font-family="Consolas, Menlo, monospace" font-size="15" fill="#7f93b8" opacity="0.55">
+    <text x="760" y="70">union isfuzzy=true</text>
+    <text x="760" y="96">  ( DeviceNetworkInfo | where IPAddresses has Value ),</text>
+    <text x="760" y="122">  // @sentinel-only:begin</text>
+    <text x="760" y="148">  , ( Heartbeat | where ComputerIP == Value )</text>
+    <text x="760" y="174">  // @sentinel-only:end</text>
+    <text x="760" y="200">| summarize FirstSeen = min(TimeGenerated),</text>
+    <text x="760" y="226">    Sources = make_set(Source) by Machine</text>
+    <text x="760" y="252">| lookup kind=leftouter (_MachineRoles(EndTimestamp))</text>
+  </g>
+  <g font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif">
+    <text x="72" y="132" font-size="62" font-weight="700" fill="#ffffff">PivotRules</text>
+    <text x="74" y="178" font-size="24" fill="#b9c7e6">KQL pivots for SOC investigations, as YAML.</text>
+    <text x="74" y="212" font-size="24" fill="#b9c7e6">One source of truth for Sentinel and Defender XDR.</text>
+    <g font-size="15" font-weight="600">
+      <rect x="74" y="244" width="120" height="32" rx="16" fill="#2b6cff" fill-opacity="0.2" stroke="#4f8bff"/>
+      <text x="134" y="265" fill="#d5e3ff" text-anchor="middle">86 rules</text>
+      <rect x="206" y="244" width="176" height="32" rx="16" fill="#2b6cff" fill-opacity="0.2" stroke="#4f8bff"/>
+      <text x="294" y="265" fill="#d5e3ff" text-anchor="middle">9 indicator types</text>
+      <rect x="394" y="244" width="148" height="32" rx="16" fill="#8a5cff" fill-opacity="0.2" stroke="#a585ff"/>
+      <text x="468" y="265" fill="#e6dcff" text-anchor="middle">13 scenarios</text>
+    </g>
+  </g>
+</svg>

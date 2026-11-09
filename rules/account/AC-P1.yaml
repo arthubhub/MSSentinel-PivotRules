@@ -1,32 +1,71 @@
 id: AC-P1
-name: IP et appareils utilisés par le compte
+name: IPs and devices used by the account
 indicators: [account]
 action: pivot
+targets: [ip, device]
 description: >
-  IP, pays, opérateur (ASN), appareil, système et navigateur des connexions Entra ID du compte, comparés aux
-  30 jours qui précèdent la fenêtre : chaque ligne indique si l'IP, le pays, l'ASN ou l'appareil sont nouveaux.
+  IP, country, provider (ASN), device, OS and browser of the account's Entra ID sign-ins, compared with the
+  30 days before the window: each row shows whether the IP, country, ASN or device is new.
+  Completed by Active Directory authentications seen by Defender for Identity (IdentityLogonEvents, excluding
+  Entra ID: IP and name of the source workstation, country and provider, protocol) and by Defender for Cloud Apps cloud
+  activity (CloudAppEvents: IP, country, city, provider, device type, OS and user agent; linked to the account by
+  its object ID or its UPN). For these two sources, the device is compared by name (no Entra ID device ID)
+  and SignIns counts authentications or actions. ISPs and Sources are added.
 reading:
-  decisive: Connexion réussie depuis une IP, un ASN et un appareil tous nouveaux, peu après un clic ou un spray.
-  context: Appareil non géré ou non conforme, agent utilisateur d'outil en ligne de commande ou de script.
-  noise: Nouvelle IP résidentielle (télétravail), partage de connexion mobile, nouveau poste.
+  decisive: Successful sign-in from an IP, ASN and device that are all new, shortly after a click or a spray; cloud activity from an IP missing from Entra ID sign-ins (replayed token).
+  context: Unmanaged or non-compliant device, command-line tool or script user agent; Active Directory authentication from a workstation never seen for this account.
+  noise: New residential IP (remote work), mobile tethering, new workstation; IP of a proxy or a Microsoft service in CloudAppEvents.
 v1: true
 window: { before: 24h, after: 1h }
 uses: [signins]
 query: |
-  let Baseline = _Signins(StartTimestamp - 30d, StartTimestamp, "", ValueUpn)
+  let UserIds = _Signins(StartTimestamp - 30d, EndTimestamp, "", ValueUpn) | where isnotempty(UserId) | distinct UserId;
+  // Entra ID sign-ins, Active Directory authentications (Defender for Identity) and cloud activity, normalized
+  let _Access = (start:datetime, end:datetime) {
+      union isfuzzy=true
+      (
+          _Signins(start, end, "", ValueUpn)
+          | project TimeGenerated, IPAddress, Location, City, AutonomousSystemNumber, DeviceName, DeviceId, OperatingSystem, Browser,
+              IsManaged, IsCompliant, Succeeded, AppDisplayName, ClientAppUsed, UserAgent, Isp = "", Source = SourceTable, ByName = false
+      ),
+      (
+          IdentityLogonEvents
+          | where TimeGenerated between (start .. end)
+          | where AccountUpn =~ ValueUpn or AccountName =~ ValueSam
+          | where Application !in~ ("Azure Active Directory", "Microsoft Entra ID")
+          | project TimeGenerated, IPAddress, Location, City = "", AutonomousSystemNumber = "", DeviceName = tolower(DeviceName), DeviceId = "",
+              OperatingSystem = OSPlatform, Browser = "", IsManaged = "", IsCompliant = "", Succeeded = ActionType == "LogonSuccess",
+              AppDisplayName = strcat(Application, " (", Protocol, ")"), ClientAppUsed = LogonType, UserAgent = "", Isp = ISP,
+              Source = "IdentityLogonEvents", ByName = true
+      ),
+      (
+          CloudAppEvents
+          | where TimeGenerated between (start .. end)
+          | where AccountObjectId in (UserIds) or (RawEventData has ValueUpn and tostring(RawEventData.UserId) =~ ValueUpn)
+          | project TimeGenerated, IPAddress, Location = CountryCode, City, AutonomousSystemNumber = "",
+              DeviceName = iff(isnotempty(DeviceType), strcat("(", DeviceType, ")"), ""), DeviceId = "", OperatingSystem = OSPlatform,
+              Browser = "", IsManaged = "", IsCompliant = "", Succeeded = true, AppDisplayName = Application, ClientAppUsed = "", UserAgent,
+              Isp = ISP, Source = "CloudAppEvents", ByName = true
+      )
+  };
+  let Baseline = _Access(StartTimestamp - 30d, StartTimestamp)
       | summarize KnownIPs = make_set(IPAddress, 2000), KnownCountries = make_set(Location, 200),
-          KnownAsn = make_set(AutonomousSystemNumber, 500), KnownDevices = make_set(DeviceId, 200)
+          KnownAsn = make_set(AutonomousSystemNumber, 500), KnownDevices = make_set(DeviceId, 200),
+          KnownDeviceNames = make_set_if(DeviceName, ByName and isnotempty(DeviceName) and DeviceName !startswith "(", 500)
       | extend JoinKey = 1;
-  _Signins(StartTimestamp, EndTimestamp, "", ValueUpn)
+  _Access(StartTimestamp, EndTimestamp)
   | summarize SignIns = count(), Successes = countif(Succeeded), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
-      Apps = make_set(AppDisplayName, 10), ClientApps = make_set(ClientAppUsed, 5), UserAgents = make_set(UserAgent, 5)
-      by IPAddress, Location, City, AutonomousSystemNumber, DeviceName, DeviceId, OperatingSystem, Browser, IsManaged, IsCompliant
+      Apps = make_set(AppDisplayName, 10), ClientApps = make_set(ClientAppUsed, 5), UserAgents = make_set(UserAgent, 5),
+      ISPs = make_set_if(Isp, isnotempty(Isp), 5), Sources = make_set(Source)
+      by IPAddress, Location, City, AutonomousSystemNumber, DeviceName, DeviceId, OperatingSystem, Browser, IsManaged, IsCompliant, ByName
   | extend JoinKey = 1
   | join kind=leftouter (Baseline) on JoinKey
   | extend NewIP = not(set_has_element(KnownIPs, IPAddress)),
       NewCountry = not(set_has_element(KnownCountries, Location)),
       NewASN = not(set_has_element(KnownAsn, AutonomousSystemNumber)),
-      UnknownDevice = isempty(DeviceId) or not(set_has_element(KnownDevices, DeviceId))
+      UnknownDevice = iff(ByName, isempty(DeviceName) or DeviceName startswith "(" or not(set_has_element(KnownDeviceNames, DeviceName)),
+          isempty(DeviceId) or not(set_has_element(KnownDevices, DeviceId)))
   | project FirstSeen, LastSeen, IPAddress, NewIP, Location, NewCountry, City, AutonomousSystemNumber, NewASN,
-      DeviceName, UnknownDevice, OperatingSystem, Browser, IsManaged, IsCompliant, SignIns, Successes, Apps, ClientApps, UserAgents
+      DeviceName, UnknownDevice, OperatingSystem, Browser, IsManaged, IsCompliant, SignIns, Successes, Apps, ClientApps, UserAgents,
+      ISPs, Sources
   | sort by FirstSeen asc

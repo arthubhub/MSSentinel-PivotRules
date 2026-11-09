@@ -1,0 +1,13 @@
+id: S6
+name: Lateral movement from a device
+description: >
+  A compromised device is the starting point: who logged on to it, which other devices that account went to next,
+  what it read or wrote there, and the timeline of the device reached.
+indicator: device
+steps:
+  - ruleId: MC-P1     # accounts that logged on to the device
+    carry: account
+  - ruleId: AC-P2     # devices where the account logged on
+    carry: device
+  - ruleId: MC-P6     # files and shares accessed on the device reached
+  - ruleId: MC-T1     # timeline of the device reached

@@ -1,4 +1,4 @@
-// Clés de registre et actions Defender associées à la persistance.
+// Registry keys and Defender actions associated with persistence.
 let _PersistenceKeys = dynamic([
     @"\CurrentVersion\Run", @"\CurrentVersion\RunOnce", @"\CurrentVersion\RunServices",
     @"\Policies\Explorer\Run", @"\CurrentVersion\Winlogon", @"\Image File Execution Options",

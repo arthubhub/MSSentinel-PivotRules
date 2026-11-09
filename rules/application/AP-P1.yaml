@@ -1,27 +1,33 @@
 id: AP-P1
-name: Consentements, permissions et secrets de l'application
+name: Application consents, permissions and secrets
 indicators: [application]
 action: pivot
+targets: [account, ip]
 description: >
-  Événements d'audit Entra ID qui concernent l'application : consentements (utilisateur ou administrateur),
-  permissions déléguées et rôles d'application accordés, ajout de propriétaires, de secrets et de certificats.
-  Extrait le type de consentement et les étendues (scopes). Complété par les mêmes opérations vues par Defender for
-  Cloud Apps (CloudAppEvents) quand AuditLogs n'est pas collecté.
+  Entra ID audit events about the application: consents (user or admin),
+  delegated permissions and app roles granted, owners, secrets and certificates added.
+  Extracts the consent type and the scopes. Completed by the same operations seen by Defender for
+  Cloud Apps (CloudAppEvents) when AuditLogs is not collected. Service principal sign-ins (one row per
+  resource, IP and result) show whether the application used its permissions after the consent.
 reading:
-  decisive: Consentement utilisateur à une application multi-tenant inconnue avec Mail.Read, Files.ReadWrite.All ou offline_access.
-  context: Nouveau secret ajouté à une application existante par un compte qui n'en est pas propriétaire.
-  noise: Consentements d'applications d'entreprise validées (visioconférence, CRM, signature électronique).
+  decisive: User consent to an unknown multi-tenant application with Mail.Read, Files.ReadWrite.All or offline_access.
+  context: New secret added to an existing application by an account that does not own it.
+  noise: Consents to approved enterprise applications (video conferencing, CRM, e-signature).
 window: { before: 30d, after: 1d }
+uses: [spn_signins]
 query: |
   let Ops = dynamic(["Consent to application", "Add delegated permission grant", "Add app role assignment grant to user",
       "Add app role assignment to service principal", "Add service principal", "Add service principal credentials",
       "Add owner to application", "Add owner to service principal", "Update application", "Add application"]);
-  // CloudAppEvents ne sert que si AuditLogs manque sur la période : les mêmes opérations y figurent sinon en double
+  // CloudAppEvents is used only when AuditLogs is missing for the period: otherwise the same operations would appear twice
   let HasAudit = toscalar(union isfuzzy=true
+      // @sentinel-only:begin
       (AuditLogs | where TimeGenerated between ((StartTimestamp - 1d) .. EndTimestamp) | take 1 | project Present = 1),
+      // @sentinel-only:end
       (print Present = 0)
       | summarize max(Present)) == 1;
   union isfuzzy=true
+  // @sentinel-only:begin
   (
       AuditLogs
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
@@ -37,6 +43,7 @@ query: |
           Scopes = extract_all(@"Scope: ([^,\]]+)", Changes),
           Changes = substring(Changes, 0, 1500)
   ),
+  // @sentinel-only:end
   (
       CloudAppEvents
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
@@ -50,5 +57,14 @@ query: |
           IsAdminConsent = extract(@"IsAdminConsent[^A-Za-z]+(True|False)", 1, Changes),
           Scopes = extract_all(@"Scope: ([^,\]]+)", Changes),
           Changes = substring(Changes, 0, 1500)
+  ),
+  (
+      _SpnSignins(StartTimestamp, EndTimestamp, ValueApp, "")
+      | summarize arg_min(TimeGenerated, ServicePrincipalName, Credential, SourceTable), Signins = count(), LastSeen = max(TimeGenerated)
+          by ResourceDisplayName, IPAddress, Succeeded
+      | project TimeGenerated, Source = SourceTable, OperationName = strcat("Service principal sign-in to ", ResourceDisplayName),
+          Result = iff(Succeeded, "Success", "Failed"), Initiator = ServicePrincipalName, InitiatorIP = IPAddress, Target = ResourceDisplayName,
+          ConsentType = "", IsAdminConsent = "", Scopes = dynamic([]),
+          Changes = strcat(Signins, " sign-in(s) until ", format_datetime(LastSeen, "yyyy-MM-dd HH:mm"), " · ", Credential)
   )
   | sort by TimeGenerated asc

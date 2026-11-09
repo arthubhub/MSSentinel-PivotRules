@@ -1,4 +1,4 @@
-// Validation syntaxique du KQL avec la lib officielle Kusto : (@kusto/language-service-next).
+// KQL syntax validation with the official Kusto library (@kusto/language-service-next).
 'use strict';
 const path = require('node:path');
 const fs = require('node:fs');
@@ -29,7 +29,7 @@ function makeGlobals(tables) {
     syms.push(S.TableSymbol.From(`(${decl})`).WithName(name));
   }
   const db = new S.DatabaseSymbol.$ctor2('workspace', null, syms);
-  // Colonne déclarée -> table, pour retrouver les colonnes qu'une requête lit réellement dans chaque table
+  // Declared column -> table, to find the columns a query actually reads in each table
   const owner = new Map();
   for (const t of syms) for (let i = 0; i < t.Columns.Count; i++) owner.set(t.Columns.getItem(i), t.Name);
   return { globals: K.GlobalState.Default.WithDatabase(db), owner };
@@ -47,7 +47,7 @@ function createValidator(root) {
     tables,
     xdrTables,
     defenderOptional,
-    // { Table: Set(colonnes) } : colonnes des tables effectivement référencées (résolution par le service de langage Kusto)
+    // { Table: Set(columns) }: columns of the tables actually referenced (resolved by the Kusto language service)
     columnsUsed(query) {
       const code = K.KustoCode.ParseAndAnalyze(query, globals);
       const used = {};

@@ -1,17 +1,17 @@
 id: MC-S1
-name: Volume de journaux de la machine par jour et par table
+name: Device log volume per day and table
 indicators: [device]
 action: statistics
 description: >
-  Nombre d'événements de la machine par jour et par table : tables Defender for Endpoint (processus, réseau,
-  fichiers, ouvertures de session, registre, événements, chargements de DLL, inventaire), journaux Windows
-  (SecurityEvent, WindowsEvent, Event), Linux (Syslog), agent Azure Monitor (Heartbeat), Defender for Identity
-  (machine source ou cible), tables ASIM et pare-feu CEF qui la nomment. Révèle un trou de collecte, un pic d'activité
-  ou un agent arrêté, et montre quelles sources couvrent réellement cette machine.
+  Number of events of the device per day and per table: Defender for Endpoint tables (process, network, file, logon,
+  registry, events, DLL loads, inventory), Windows logs (SecurityEvent, WindowsEvent, Event), Linux (Syslog), Azure
+  Monitor agent (Heartbeat), Defender for Identity (source or target device), ASIM tables and CEF firewalls that name
+  it. Reveals a collection gap, an activity spike or a stopped agent, and shows which sources actually cover this
+  device.
 reading:
-  decisive: Arrêt brutal de la télémétrie Defender ou de l'agent juste après l'alerte (agent désactivé ou altéré).
-  context: Pic d'événements réseau ou fichiers inhabituel pour la machine ; machine visible seulement par Defender for Identity.
-  noise: Mises à jour Windows, déploiements logiciels, analyses antivirus planifiées.
+  decisive: Sudden stop of Defender or agent telemetry right after the alert (agent disabled or tampered with).
+  context: Unusual spike of network or file events for the device; device visible only to Defender for Identity.
+  noise: Windows updates, software deployments, scheduled antivirus scans.
 window: { before: 7d, after: 1d }
 render: timechart
 query: |
@@ -24,6 +24,7 @@ query: |
       | where _IsHost(DeviceName)
       | project TimeGenerated, Source
   ),
+  // @sentinel-only:begin
   (
       union isfuzzy=true withsource=Source SecurityEvent, WindowsEvent, Event, Syslog, Heartbeat
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
@@ -31,14 +32,16 @@ query: |
       | where _IsHost(Computer)
       | project TimeGenerated, Source
   ),
+  // @sentinel-only:end
   (
       union isfuzzy=true withsource=Source IdentityLogonEvents, IdentityQueryEvents, IdentityDirectoryEvents
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where DeviceName has ValueShort or TargetDeviceName has ValueShort or DestinationDeviceName has ValueShort
       | where _IsHost(DeviceName) or _IsHost(TargetDeviceName) or _IsHost(DestinationDeviceName)
       | project TimeGenerated, Source
-  ),
-  (
+  )
+  // @sentinel-only:begin
+  , (
       union isfuzzy=true withsource=Source ASimAuthenticationEventLogs, ASimProcessEventLogs, ASimFileEventLogs
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where DvcHostname startswith ValueShort
@@ -52,5 +55,6 @@ query: |
       | where _IsHost(SourceHostName) or _IsHost(DestinationHostName)
       | project TimeGenerated, Source = strcat("CommonSecurityLog (", DeviceVendor, ")")
   )
+  // @sentinel-only:end
   | summarize Events = count() by bin(TimeGenerated, 1d), Source
   | render timechart

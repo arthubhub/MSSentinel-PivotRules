@@ -1,0 +1,79 @@
+id: IP-P7
+name: Domains and URLs linked to the IP
+indicators: [ip]
+action: pivot
+targets: [domain, url, device]
+description: >
+  Domain names and URLs associated with the IP, one row per domain: workstation connections to the IP with the requested
+  URL (DeviceNetworkEvents), DNS responses that returned the IP seen by Defender for Endpoint (DeviceEvents,
+  DnsQueryResponse) and, in Sentinel, by Windows DNS servers (DnsEvents), ASIM normalized DNS logs
+  (ASimDnsActivityLogs) and Sysmon 22, plus web requests to the IP seen by the proxy or firewall
+  (ASimWebSessionLogs, CommonSecurityLog). Used to go from a destination IP (alert, firewall) to the domains to
+  pivot on next (DM-P1 to DM-P4), and to spot other domains hosted on the same IP.
+reading:
+  decisive: Recent, typosquatted or unrelated domain, resolved to the IP by only one or two workstations.
+  context: Many distinct domains on the same IP (shared hosting, phishing infrastructure); URL with a download path.
+  noise: CDN or public cloud IP (Azure, AWS, Akamai, Cloudflare) shared by hundreds of legitimate domains.
+window: { before: 24h, after: 1h }
+uses: [web_functions, sysmon]
+query: |
+  union isfuzzy=true
+  (
+      DeviceNetworkEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where RemoteIP == Value and isnotempty(RemoteUrl)
+      | project TimeGenerated, Domain = _Host(RemoteUrl), Url = iff(RemoteUrl contains "/", RemoteUrl, ""),
+          Client = tolower(DeviceName), Source = "DeviceNetworkEvents"
+  ),
+  (
+      DeviceEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where ActionType == "DnsQueryResponse"
+      | where AdditionalFields has Value
+      | extend AF = parse_json(tostring(AdditionalFields))
+      | where tostring(AF.DnsQueryResult) has Value
+      | project TimeGenerated, Domain = tolower(trim_end(@"\.", tostring(AF.DnsQueryString))), Url = "",
+          Client = tolower(DeviceName), Source = "DeviceEvents (DNS)"
+  )
+  // @sentinel-only:begin
+  , (
+      DnsEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where SubType == "LookupQuery"
+      | where IPAddresses has Value
+      | project TimeGenerated, Domain = tolower(trim_end(@"\.", Name)), Url = "", Client = ClientIP, Source = "DnsEvents"
+  ),
+  (
+      ASimDnsActivityLogs
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where DnsResponseName has Value
+      | project TimeGenerated, Domain = tolower(trim_end(@"\.", DnsQuery)), Url = "", Client = tolower(coalesce(SrcHostname, SrcIpAddr)),
+          Source = strcat("ASimDnsActivityLogs (", EventProduct, ")")
+  ),
+  (
+      _Sysmon(StartTimestamp, EndTimestamp, dynamic([22]), Value)
+      | where QueryResults has Value
+      | project TimeGenerated, Domain = tolower(trim_end(@"\.", QueryName)), Url = "", Client = tolower(Computer), Source = "Sysmon 22"
+  ),
+  (
+      ASimWebSessionLogs
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where DstIpAddr == Value
+      | project TimeGenerated, Domain = coalesce(_Host(Url), tolower(HttpHost), tolower(DstHostname)), Url,
+          Client = tolower(coalesce(SrcHostname, SrcIpAddr)), Source = strcat("ASimWebSessionLogs (", EventProduct, ")")
+  ),
+  (
+      CommonSecurityLog
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where DestinationIP == Value
+      | where isnotempty(RequestURL) or isnotempty(DestinationHostName)
+      | project TimeGenerated, Domain = coalesce(_Host(RequestURL), tolower(DestinationHostName)), Url = RequestURL,
+          Client = tolower(coalesce(SourceHostName, SourceIP)), Source = strcat("CommonSecurityLog (", DeviceVendor, ")")
+  )
+  // @sentinel-only:end
+  | where isnotempty(Domain) and Domain != Value
+  | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count(),
+      Urls = make_set_if(Url, isnotempty(Url), 10), ClientCount = dcount(Client), Clients = make_set(Client, 10),
+      Sources = make_set(Source) by Domain
+  | sort by ClientCount asc, FirstSeen asc
+  | project Domain, FirstSeen, LastSeen, Events, ClientCount, Clients, Urls, Sources

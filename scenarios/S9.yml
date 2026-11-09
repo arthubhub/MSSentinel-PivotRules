@@ -1,0 +1,13 @@
+id: S9
+name: Beaconing to a C2 server
+description: >
+  An external IP contacted at regular intervals: its nature, the process calling it (and how regular the
+  connections are), its parent/child chain, what it changed to persist and its timeline.
+indicator: ip
+steps:
+  - ruleId: IP-P6     # nature and role of the IP
+  - ruleId: IP-P4     # processes that contacted the IP (median gap between connections)
+    carry: process
+  - ruleId: PR-P1     # process parents and children
+  - ruleId: PR-P4     # registry, tasks and services modified
+  - ruleId: PR-T1     # process timeline

@@ -1,0 +1,13 @@
+id: S11
+name: Account flagged at risk by Entra ID
+description: >
+  An Identity Protection alert: detections and risk state, sign-in habits, IPs used, then the nature of the
+  suspicious IP and the other accounts using it.
+indicator: account
+steps:
+  - ruleId: AC-P9     # Entra risk and anomalies
+  - ruleId: AC-S1     # usual applications and countries
+  - ruleId: AC-P1     # IPs and devices used
+    carry: ip
+  - ruleId: IP-P6     # nature and role of the IP
+  - ruleId: IP-P2     # other accounts signed in from the IP

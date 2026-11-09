@@ -1,32 +1,178 @@
 id: MC-P2
-name: Destinations sortantes rares
+name: Rare outbound destinations
 indicators: [device]
 action: pivot
+targets: [domain, ip, process]
 description: >
-  Destinations publiques (URL ou IP) contactées par la machine, gardées seulement si 3 machines au plus du parc
-  les ont contactées sur les 7 derniers jours. Indique les processus et ports concernés.
+  Public destinations (URL, resolved name or IP) contacted by the device, kept only if at most 3 devices of the
+  tenant contacted them over the last 7 days. Shows processes, ports and sources. Sources: Defender for Endpoint
+  connections (DeviceNetworkEvents) and DNS responses seen by Defender (DeviceEvents, DnsQueryResponse, with at least
+  one public IP returned). In Sentinel, proxies and firewalls (ASimWebSessionLogs, ASimNetworkSessionLogs,
+  CommonSecurityLog, AZFWApplicationRule, AZFWNetworkRule) and DNS servers (DnsEvents, ASimDnsActivityLogs) are added,
+  linked to the device by its name when the log carries it, otherwise by its private IPs over the period
+  (DeviceNetworkInfo, DeviceNetworkEvents, Heartbeat, as in MC-P7). Prevalence is counted source by source (distinct
+  devices seen by each log), and the highest is kept. DnsLookups counts resolutions, Connections counts connections
+  and requests.
 reading:
-  decisive: Destination contactée par cette seule machine, depuis un processus non navigateur, à intervalles réguliers.
-  context: Destination récente contactée par quelques machines du même service.
-  noise: Services cloud de niche utilisés par une seule équipe, mises à jour de logiciels rares.
+  decisive: Destination contacted by this device only, from a non-browser process, at regular intervals; name resolved with no connection visible to Defender but seen by the proxy or the firewall.
+  context: Recent destination contacted by a few devices of the same team; destination seen only by DNS (DnsLookups without Connections) or only by a firewall.
+  noise: Niche cloud services used by a single team, rare software updates; private IP reassigned by DHCP during the period (firewall logs linked to another device).
 window: { before: 24h, after: 1h }
+uses: [web_functions]
 query: |
-  let Dest = DeviceNetworkEvents
-      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
-      | where DeviceName startswith ValueShort
-      | where _IsHost(DeviceName)
-      | where RemoteIPType == "Public"
-      | extend Destination = iff(isnotempty(RemoteUrl), tolower(RemoteUrl), RemoteIP)
-      | summarize Connections = count(), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
-          Processes = make_set(InitiatingProcessFileName, 10), Ports = make_set(RemotePort, 10), IPs = make_set(RemoteIP, 10) by Destination;
-  let Prevalence = DeviceNetworkEvents
-      | where TimeGenerated between ((T0 - 7d) .. EndTimestamp)
-      | where RemoteIPType == "Public"
-      | extend Destination = iff(isnotempty(RemoteUrl), tolower(RemoteUrl), RemoteIP)
-      | where Destination in ((Dest | project Destination))
-      | summarize TenantDevices = dcount(DeviceId) by Destination;
+  let _IsPublicIp = (ip:string) { isnotempty(ip) and not(coalesce(ipv4_is_private(ip), false)) and not(ip startswith "127.")
+      and not(ip startswith "169.254.") and ip !in ("0.0.0.0", "::", "::1") and not(ip startswith "fe80:") };
+  // @sentinel-only:begin
+  // Private IPs of the device over the period: link the proxy, firewall and DNS logs that do not carry its name
+  let MachineIps = union isfuzzy=true
+      (
+          DeviceNetworkInfo
+          | where TimeGenerated between ((StartTimestamp - 1d) .. EndTimestamp)
+          | where DeviceName startswith ValueShort
+          | where _IsHost(DeviceName)
+          | mv-expand IpEntry = IPAddresses
+          | project Ip = tostring(IpEntry.IPAddress)
+      ),
+      (
+          DeviceNetworkEvents
+          | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+          | where DeviceName startswith ValueShort
+          | where _IsHost(DeviceName)
+          | project Ip = LocalIP
+      ),
+      (
+          Heartbeat
+          | where TimeGenerated between ((StartTimestamp - 1d) .. EndTimestamp)
+          | where Computer startswith ValueShort
+          | where _IsHost(Computer)
+          | extend Ips = array_concat(pack_array(ComputerIP), iff(isnull(ComputerPrivateIPs), dynamic([]), ComputerPrivateIPs))
+          | mv-expand Ip = Ips to typeof(string)
+          | project Ip
+      )
+      | where coalesce(ipv4_is_private(Ip), false)
+      | distinct Ip;
+  // @sentinel-only:end
+  // Normalized outbound events: studied device only (onMachine), or the whole tenant for the given destinations
+  let _Outbound = (start:datetime, end:datetime, onMachine:bool, dests:dynamic) {
+      union isfuzzy=true
+      (
+          DeviceNetworkEvents
+          | where TimeGenerated between (start .. end)
+          | where not(onMachine) or (DeviceName startswith ValueShort and _IsHost(DeviceName))
+          | where RemoteIPType == "Public"
+          | extend Destination = iff(isnotempty(RemoteUrl), tolower(RemoteUrl), RemoteIP)
+          | where onMachine or Destination in (dests)
+          | project TimeGenerated, Destination, Source = "DeviceNetworkEvents", Client = DeviceId, Process = InitiatingProcessFileName,
+              Port = toint(RemotePort), Ip = RemoteIP, IsDns = false
+      ),
+      (
+          DeviceEvents
+          | where TimeGenerated between (start .. end)
+          | where ActionType == "DnsQueryResponse"
+          | where not(onMachine) or (DeviceName startswith ValueShort and _IsHost(DeviceName))
+          | extend AF = parse_json(tostring(AdditionalFields))
+          | extend Destination = tolower(trim_end(@"\.", tostring(AF.DnsQueryString)))
+          | where isnotempty(Destination) and (onMachine or Destination in (dests))
+          | mv-apply A = extract_all(@"\b((?:\d{1,3}\.){3}\d{1,3})\b", tostring(AF.DnsQueryResult)) to typeof(string) on (
+              where _IsPublicIp(A)
+              | summarize PublicIps = make_set(A, 10))
+          | where array_length(PublicIps) > 0
+          | project TimeGenerated, Destination, Source = "DeviceEvents (DNS)", Client = DeviceId, Process = InitiatingProcessFileName,
+              Port = int(null), Ip = tostring(PublicIps[0]), IsDns = true
+      )
+      // @sentinel-only:begin
+      , (
+          ASimWebSessionLogs
+          | where TimeGenerated between (start .. end)
+          | where not(onMachine) or (SrcHostname startswith ValueShort and _IsHost(SrcHostname)) or SrcIpAddr in (MachineIps)
+          | where isempty(DstIpAddr) or _IsPublicIp(DstIpAddr)
+          | extend Destination = tolower(coalesce(iff(isnotempty(Url), _Host(Url), ""), DstFQDN, DstHostname, HttpHost, DstIpAddr))
+          | where isnotempty(Destination) and (onMachine or Destination in (dests))
+          | project TimeGenerated, Destination, Source = strcat("ASimWebSessionLogs (", EventProduct, ")"),
+              Client = tolower(coalesce(SrcHostname, SrcIpAddr)), Process = SrcProcessName, Port = toint(DstPortNumber), Ip = DstIpAddr, IsDns = false
+      ),
+      (
+          ASimNetworkSessionLogs
+          | where TimeGenerated between (start .. end)
+          | where not(onMachine) or (SrcHostname startswith ValueShort and _IsHost(SrcHostname)) or SrcIpAddr in (MachineIps)
+          | where _IsPublicIp(DstIpAddr)
+          | extend Destination = tolower(coalesce(DstFQDN, DstIpAddr))
+          | where onMachine or Destination in (dests)
+          | project TimeGenerated, Destination, Source = strcat("ASimNetworkSessionLogs (", EventProduct, ")"),
+              Client = tolower(coalesce(SrcHostname, SrcIpAddr)), Process = tostring(split(replace_string(SrcAppName, "/", @"\"), @"\")[-1]),
+              Port = toint(DstPortNumber), Ip = DstIpAddr, IsDns = false
+      ),
+      (
+          CommonSecurityLog
+          | where TimeGenerated between (start .. end)
+          | where not(onMachine) or (SourceHostName startswith ValueShort and _IsHost(SourceHostName)) or SourceIP in (MachineIps)
+          | where isempty(DestinationIP) or _IsPublicIp(DestinationIP)
+          | extend Destination = tolower(coalesce(iff(isnotempty(RequestURL), _Host(RequestURL), ""), DestinationHostName, DestinationIP))
+          | where isnotempty(Destination) and (onMachine or Destination in (dests))
+          | project TimeGenerated, Destination, Source = strcat("CommonSecurityLog (", DeviceVendor, ")"),
+              Client = tolower(coalesce(SourceHostName, SourceIP)), Process = SourceProcessName, Port = toint(DestinationPort), Ip = DestinationIP,
+              IsDns = false
+      ),
+      (
+          AZFWApplicationRule
+          | where TimeGenerated between (start .. end)
+          | where not(onMachine) or SourceIp in (MachineIps)
+          | extend Destination = tolower(coalesce(Fqdn, iff(isnotempty(TargetUrl), _Host(TargetUrl), "")))
+          | where isnotempty(Destination) and (onMachine or Destination in (dests))
+          | project TimeGenerated, Destination, Source = "AZFWApplicationRule", Client = SourceIp, Process = "", Port = toint(DestinationPort),
+              Ip = "", IsDns = false
+      ),
+      (
+          AZFWNetworkRule
+          | where TimeGenerated between (start .. end)
+          | where not(onMachine) or SourceIp in (MachineIps)
+          | where _IsPublicIp(DestinationIp)
+          | extend Destination = DestinationIp
+          | where onMachine or Destination in (dests)
+          | project TimeGenerated, Destination, Source = "AZFWNetworkRule", Client = SourceIp, Process = "", Port = toint(DestinationPort),
+              Ip = DestinationIp, IsDns = false
+      ),
+      (
+          DnsEvents
+          | where TimeGenerated between (start .. end)
+          | where SubType == "LookupQuery"
+          | where not(onMachine) or ClientIP in (MachineIps)
+          | extend Destination = tolower(trim_end(@"\.", Name))
+          | where isnotempty(Destination) and (onMachine or Destination in (dests))
+          | mv-apply A = extract_all(@"\b((?:\d{1,3}\.){3}\d{1,3})\b", IPAddresses) to typeof(string) on (
+              where _IsPublicIp(A)
+              | summarize PublicIps = make_set(A, 10))
+          | where array_length(PublicIps) > 0
+          | project TimeGenerated, Destination, Source = "DnsEvents", Client = ClientIP, Process = "", Port = int(null),
+              Ip = tostring(PublicIps[0]), IsDns = true
+      ),
+      (
+          ASimDnsActivityLogs
+          | where TimeGenerated between (start .. end)
+          | where not(onMachine) or (SrcHostname startswith ValueShort and _IsHost(SrcHostname)) or SrcIpAddr in (MachineIps)
+          | extend Destination = tolower(trim_end(@"\.", DnsQuery))
+          | where isnotempty(Destination) and (onMachine or Destination in (dests))
+          | mv-apply A = extract_all(@"\b((?:\d{1,3}\.){3}\d{1,3})\b", DnsResponseName) to typeof(string) on (
+              where _IsPublicIp(A)
+              | summarize PublicIps = make_set(A, 10))
+          | where array_length(PublicIps) > 0
+          | project TimeGenerated, Destination, Source = strcat("ASimDnsActivityLogs (", EventProduct, ")"),
+              Client = tolower(coalesce(SrcHostname, SrcIpAddr)), Process = SrcProcessName, Port = int(null), Ip = tostring(PublicIps[0]), IsDns = true
+      )
+      // @sentinel-only:end
+  };
+  let Dest = materialize(_Outbound(StartTimestamp, EndTimestamp, true, dynamic([]))
+      | summarize Connections = countif(not(IsDns)), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
+          Processes = make_set_if(Process, isnotempty(Process), 10), Ports = make_set(Port, 10), IPs = make_set_if(Ip, isnotempty(Ip), 10),
+          DnsLookups = countif(IsDns), Sources = make_set(Source) by Destination);
+  let DestList = toscalar(Dest | summarize make_set(Destination, 10000));
+  // Prevalence: distinct devices per source (the same workstation can be seen by its name in one log and by its IP in another)
+  let Prevalence = _Outbound(T0 - 7d, EndTimestamp, false, DestList)
+      | summarize Clients = dcount(Client) by Destination, Source
+      | summarize TenantDevices = max(Clients) by Destination;
   Dest
   | join kind=leftouter (Prevalence) on Destination
   | project-away Destination1
   | where TenantDevices <= 3
   | sort by TenantDevices asc, FirstSeen asc
+  | project Destination, Connections, FirstSeen, LastSeen, Processes, Ports, IPs, TenantDevices, DnsLookups, Sources

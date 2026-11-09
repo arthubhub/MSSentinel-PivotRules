@@ -1,14 +1,14 @@
 id: EM-S2
-name: Prévalence de l'expéditeur
+name: Sender prevalence
 indicators: [email]
 action: statistics
 description: >
-  Historique de l'adresse et de son domaine comme expéditeurs sur 30 jours : premier et dernier message,
-  volume, destinataires, jours actifs, sujets, IP d'envoi, résultats SPF, DKIM et DMARC, menaces détectées.
+  History of the address and its domain as senders over 30 days: first and last message,
+  volume, recipients, active days, subjects, sending IPs, SPF, DKIM and DMARC results, detected threats.
 reading:
-  decisive: Premier message du domaine dans la fenêtre, envoyé à plusieurs destinataires, avec authentification en échec.
-  context: Domaine récent dont le nom ressemble à celui d'un partenaire ou d'un éditeur.
-  noise: Nouvelles newsletters, nouveaux fournisseurs SaaS, notifications de plateformes.
+  decisive: First message from the domain in the window, sent to several recipients, with failed authentication.
+  context: Recent domain whose name looks like that of a partner or vendor.
+  noise: New newsletters, new SaaS providers, platform notifications.
 v1: true
 window: { before: 30d, after: 1d }
 query: |
@@ -16,8 +16,8 @@ query: |
   | where TimeGenerated between (StartTimestamp .. EndTimestamp)
   | where SenderFromDomain =~ ValueMailDomain or SenderMailFromDomain =~ ValueMailDomain
   | extend Scopes = iff(SenderFromAddress =~ ValueMail or SenderMailFromAddress =~ ValueMail,
-      pack_array(strcat("Adresse ", ValueMail), strcat("Domaine ", ValueMailDomain)),
-      pack_array(strcat("Domaine ", ValueMailDomain)))
+      pack_array(strcat("Address ", ValueMail), strcat("Domain ", ValueMailDomain)),
+      pack_array(strcat("Domain ", ValueMailDomain)))
   | mv-expand Scope = Scopes to typeof(string)
   | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Mails = count(),
       Recipients = dcount(RecipientEmailAddress), ActiveDays = dcount(bin(TimeGenerated, 1d)),

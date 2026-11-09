@@ -1,37 +1,38 @@
-// Rôles des entités (machines, IP, comptes) : distingue « où l'événement est journalisé » de « où l'entité est utilisée »
-// et signale les entités qui faussent un pivot (contrôleur de domaine, NAT, proxy, compte de service…).
-// Trois sources, combinées :
-// 1. détection automatique des contrôleurs de domaine (DC) : émetteurs de 4768 (seul un KDC en produit), cibles LDAP vues par
-//    Defender for Identity, machines qui acceptent des connexions Kerberos (port 88) selon Defender for Endpoint ;
-// 2. watchlist Sentinel « EasyPivotRoles » (colonnes Entity, Type, Role, Note), modèle dans watchlists/EasyPivotRoles.csv ;
-// 3. comptes : IdentityInfo (rôles Entra ID, groupes AD privilégiés, compte de service, étiquettes Defender for Identity)
-//    et noms réservés (compte machine, compte système, krbtgt, synchronisation Entra Connect).
-// Chaque fonction prend l'instant de référence `at` et regarde la journée qui précède (14 jours pour IdentityInfo).
-// Les blocs « @sentinel-only » sont retirés de la variante Defender XDR (tables absentes de Defender).
+// Entity roles (devices, IPs, accounts): separates "where the event is logged" from "where the entity is used"
+// and flags entities that skew a pivot (domain controller, NAT, proxy, service account...).
+// Three combined sources:
+// 1. automatic domain controller (DC) detection: hosts emitting 4768 (only a KDC does), LDAP targets seen by
+//    Defender for Identity, devices accepting Kerberos connections (port 88) according to Defender for Endpoint;
+// 2. Sentinel watchlist "EasyPivotRoles" (columns Entity, Type, Role, Note), template in watchlists/EasyPivotRoles.csv;
+//    Type values (case-insensitive): Machine/Host/Device, IP/CIDR/Subnet, Account/User (French values still accepted);
+// 3. accounts: IdentityInfo (Entra ID roles, privileged AD groups, service account, Defender for Identity tags)
+//    and reserved names (machine account, system account, krbtgt, Entra Connect sync).
+// Each function takes the reference time `at` and looks at the preceding day (14 days for IdentityInfo).
+// "@sentinel-only" blocks are removed from the Defender XDR variant (tables missing in Defender).
 //
-// _HostKey(h) : nom court en minuscules (FQDN, NetBIOS, compte machine « PC01$ » → « pc01 ») ; vide pour une adresse IP.
+// _HostKey(h): lowercase short name (FQDN, NetBIOS, machine account "PC01$" -> "pc01"); empty for an IP address.
 let _HostKey = (h:string) {
     iff(isnotnull(parse_ipv4(h)) or h contains ":", "", tolower(tostring(split(trim_end(@"\$", trim(@"[\s\\]+", h)), ".")[0])))
 };
-// _SamOf(a) : nom SAM d'un compte, depuis « DOMAINE\nom », « nom@domaine » ou « nom ».
+// _SamOf(a): SAM name of an account, from "DOMAIN\name", "name@domain" or "name".
 let _SamOf = (a:string) { tolower(tostring(split(tostring(split(a, "@")[0]), @"\")[-1])) };
-// _Labeled(nom, rôle) : « dc01 [DC] », pour annoter les listes (make_set) sans ajouter de colonne.
+// _Labeled(name, role): "dc01 [DC]", to annotate lists (make_set) without adding a column.
 let _Labeled = (name:string, role:string) { iff(isempty(role), name, strcat(name, " [", role, "]")) };
-// _JoinRoles(a, b) : concatène deux libellés de rôle en ignorant les vides.
+// _JoinRoles(a, b): joins two role labels, skipping empty ones.
 let _JoinRoles = (a:string, b:string) { strcat_array(set_difference(pack_array(a, b), dynamic([""])), ", ") };
-// _AccountKind(nom SAM) : catégorie déduite du nom seul.
+// _AccountKind(SAM name): category inferred from the name alone.
 let _AccountKind = (sam:string) {
     case(
-        sam endswith "$", "Compte machine",
+        sam endswith "$", "Machine account",
         sam in ("system", "local system", "local service", "network service", "anonymous logon", "iusr", "-")
-            or sam startswith "dwm-" or sam startswith "umfd-", "Compte système",
-        sam == "krbtgt", "Compte KDC (krbtgt)",
+            or sam startswith "dwm-" or sam startswith "umfd-", "System account",
+        sam == "krbtgt", "KDC account (krbtgt)",
         sam startswith "msol_" or sam startswith "sync_" or sam startswith "aad_" or sam startswith "adtoaadsyncserviceaccount",
-            "Synchronisation Entra Connect",
-        sam in ("administrator", "administrateur"), "Administrateur intégré",
+            "Entra Connect sync",
+        sam in ("administrator", "administrateur"), "Built-in administrator",
         "")
 };
-// _DcEvidence(at) : machines (et IP) qui se comportent comme des contrôleurs de domaine.
+// _DcEvidence(at): devices (and IPs) that behave like domain controllers.
 let _DcEvidence = (at:datetime) {
     union isfuzzy=true
     (
@@ -43,14 +44,14 @@ let _DcEvidence = (at:datetime) {
         | where TimeGenerated between ((at - 1d) .. at)
         | where EventID == 4768
         | summarize by Computer
-        | project Machine = Computer, Ip = "", Basis = "Émet des 4768 (KDC)"
+        | project Machine = Computer, Ip = "", Basis = "Emits 4768 events (KDC)"
     ),
     (
         WindowsEvent
         | where TimeGenerated between ((at - 1d) .. at)
         | where Provider == "Microsoft-Windows-Security-Auditing" and EventID == 4768
         | summarize by Computer
-        | project Machine = Computer, Ip = "", Basis = "Émet des 4768 (KDC)"
+        | project Machine = Computer, Ip = "", Basis = "Emits 4768 events (KDC)"
     ),
     // @sentinel-only:end
     (
@@ -58,17 +59,17 @@ let _DcEvidence = (at:datetime) {
         | where TimeGenerated between ((at - 1d) .. at)
         | where Protocol =~ "Ldap" and isnotempty(DestinationDeviceName)
         | summarize by DestinationDeviceName, DestinationIPAddress
-        | project Machine = DestinationDeviceName, Ip = DestinationIPAddress, Basis = "Cible LDAP (Defender for Identity)"
+        | project Machine = DestinationDeviceName, Ip = DestinationIPAddress, Basis = "LDAP target (Defender for Identity)"
     ),
     (
         DeviceNetworkEvents
         | where TimeGenerated between ((at - 1d) .. at)
         | where LocalPort == 88 and ActionType in ("InboundConnectionAccepted", "ListeningConnectionCreated")
         | summarize by DeviceName, LocalIP
-        | project Machine = DeviceName, Ip = LocalIP, Basis = "Accepte Kerberos sur le port 88 (Defender for Endpoint)"
+        | project Machine = DeviceName, Ip = LocalIP, Basis = "Accepts Kerberos on port 88 (Defender for Endpoint)"
     )
 };
-// _MachineRoles(at) : MachineKey (nom court), MachineRole (« DC, Serveur de fichiers »), MachineRoleBasis (preuves).
+// _MachineRoles(at): MachineKey (short name), MachineRole ("DC, File server"), MachineRoleBasis (evidence).
 let _MachineRoles = (at:datetime) {
     union isfuzzy=true
     (
@@ -91,7 +92,7 @@ let _MachineRoles = (at:datetime) {
     | summarize MachineRoles = make_set(Role), MachineRoleBasis = make_set(Basis, 5) by MachineKey
     | project MachineKey, MachineRole = strcat_array(MachineRoles, ", "), MachineRoleBasis
 };
-// _IpRoles(at) : Ip (adresse exacte ou plage CIDR), IpRole, IpRoleBasis.
+// _IpRoles(at): Ip (exact address or CIDR range), IpRole, IpRoleBasis.
 let _IpRoles = (at:datetime) {
     union isfuzzy=true
     (
@@ -115,13 +116,13 @@ let _IpRoles = (at:datetime) {
     | summarize IpRoles = make_set(Role), IpRoleBasis = make_set(Basis, 5) by Ip
     | project Ip, IpRole = strcat_array(IpRoles, ", "), IpRoleBasis
 };
-// _IpRoleOf(ip, at) : rôles connus d'une adresse, y compris par appartenance à une plage CIDR de la watchlist.
+// _IpRoleOf(ip, at): known roles of an address, including membership in a watchlist CIDR range.
 let _IpRoleOf = (ip:string, at:datetime) {
     toscalar(_IpRoles(at)
         | where Ip == ip or (Ip has "/" and ipv4_is_in_range(ip, Ip))
         | summarize Roles = strcat_array(make_set(IpRole), ", "))
 };
-// _AccountRoles(at) : AccountKey (nom SAM ou UPN, en minuscules), AccountRole, AccountRoleBasis.
+// _AccountRoles(at): AccountKey (lowercase SAM name or UPN), AccountRole, AccountRoleBasis.
 let _AccountRoles = (at:datetime) {
     union isfuzzy=true
     (
@@ -139,13 +140,13 @@ let _AccountRoles = (at:datetime) {
         | where isnotempty(Sam)
         | summarize arg_max(TimeGenerated, Upn, EntraRoles, Groups, IsSvc, IdTags) by Sam
         | extend Roles = pack_array(
-            iff(EntraRoles in ("", "[]", "null"), "", "Rôle Entra ID attribué"),
+            iff(EntraRoles in ("", "[]", "null"), "", "Entra ID role assigned"),
             iff(Groups has_any ("Domain Admins", "Enterprise Admins", "Schema Admins", "Account Operators", "Backup Operators",
                     "Server Operators", "Admins du domaine", "Administrateurs de l'entreprise", "Administrateurs du schéma",
-                    "Opérateurs de compte", "Opérateurs de sauvegarde", "Opérateurs de serveur"), "Groupe AD privilégié", ""),
-            iff(IsSvc, "Compte de service", ""),
-            iff(IdTags has_any ("Sensitive", "Sensible"), "Compte sensible", ""),
-            iff(IdTags has "Honeytoken", "Compte leurre", ""))
+                    "Opérateurs de compte", "Opérateurs de sauvegarde", "Opérateurs de serveur"), "Privileged AD group", ""),
+            iff(IsSvc, "Service account", ""),
+            iff(IdTags has_any ("Sensitive", "Sensible"), "Sensitive account", ""),
+            iff(IdTags has "Honeytoken", "Honeytoken account", ""))
         | mv-expand Role = Roles to typeof(string)
         | where isnotempty(Role)
         | mv-expand AccountKey = pack_array(Sam, Upn) to typeof(string)

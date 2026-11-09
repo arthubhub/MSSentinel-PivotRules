@@ -1,14 +1,15 @@
 id: EM-P2
-name: Clics sur des liens autour de T0
+name: Link clicks around T0
 indicators: [email]
 action: pivot
+targets: [url, ip, email]
 description: >
-  Clics enregistrés par la protection des liens pour l'adresse (UrlClickEvents), par défaut 30 minutes avant et
-  après T0, rapprochés de l'e-mail d'origine (expéditeur, sujet, heure de réception).
+  Clicks recorded by link protection for the address (UrlClickEvents), 30 minutes before and
+  after T0 by default, matched with the source email (sender, subject, time received).
 reading:
-  decisive: Clic autorisé (ClickAllowed) ou forcé malgré l'avertissement (IsClickedThrough) sur l'URL du message suspect.
-  context: Clic depuis Teams ou Office plutôt que depuis Outlook.
-  noise: Clics de scanners de sécurité quelques secondes après la livraison, depuis des IP de centre de données.
+  decisive: Allowed click (ClickAllowed) or click forced through the warning (IsClickedThrough) on the URL of the suspicious message.
+  context: Click from Teams or Office rather than from Outlook.
+  noise: Clicks by security scanners a few seconds after delivery, from datacenter IPs.
 window: { before: 30m, after: 30m }
 query: |
   UrlClickEvents

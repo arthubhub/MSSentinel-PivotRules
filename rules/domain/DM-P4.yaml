@@ -1,21 +1,23 @@
 id: DM-P4
-name: Résolutions DNS et IP associées
+name: DNS resolutions and related IPs
 indicators: [domain, url]
 action: pivot
+targets: [ip, domain, device]
 description: >
-  Noms résolus dans le domaine et adresses IP obtenues : serveurs DNS Windows (DnsEvents), journaux DNS
-  normalisés ASIM (ASimDnsActivityLogs), réponses DNS vues par Defender for Endpoint (DeviceEvents), requêtes DNS des
-  postes vues par Sysmon 22 (avec le processus qui résout) et IP
-  effectivement contactées par Defender (DeviceNetworkEvents).
-  Donne les IP à pivoter ensuite (IP-P1, IP-P4).
+  Names resolved in the domain and IP addresses returned: Windows DNS servers (DnsEvents), ASIM normalized DNS logs
+  (ASimDnsActivityLogs), DNS responses seen by Defender for Endpoint (DeviceEvents), workstation DNS queries seen by
+  Sysmon 22 (with the resolving process), queries through the Azure Firewall DNS proxy (AZFWDnsQuery: type and
+  response code, without the returned IPs) and IPs actually contacted according to Defender (DeviceNetworkEvents).
+  Gives the IPs to pivot on next (IP-P1, IP-P4).
 reading:
-  decisive: IP de destination partagée avec d'autres domaines malveillants connus, ou hébergeur récent.
-  context: Nombreux sous-domaines distincts résolus (génération algorithmique, tunnel DNS).
-  noise: Résolutions de CDN qui renvoient des dizaines d'IP changeantes.
+  decisive: Destination IP shared with other known malicious domains, or recent hosting provider.
+  context: Many distinct subdomains resolved (algorithmic generation, DNS tunnel).
+  noise: CDN resolutions returning dozens of changing IPs.
 window: { before: 7d, after: 1d }
 uses: [web_functions, sysmon]
 query: |
   union isfuzzy=true
+  // @sentinel-only:begin
   (
       DnsEvents
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
@@ -32,6 +34,7 @@ query: |
       | project TimeGenerated, Source = "ASimDnsActivityLogs", Query = tolower(trim_end(@"\.", DnsQuery)), Answer = DnsResponseName,
           Client = coalesce(SrcHostname, SrcIpAddr)
   ),
+  // @sentinel-only:end
   (
       DeviceEvents
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
@@ -48,13 +51,34 @@ query: |
       | where RemoteUrl has ValueDomain
       | where _InDomain(_Host(RemoteUrl), ValueDomain)
       | project TimeGenerated, Source = "DeviceNetworkEvents", Query = _Host(RemoteUrl), Answer = RemoteIP, Client = tolower(DeviceName)
-  ),
-  (
+  )
+  // @defender-only:begin
+  // Defender XDR: DnsEvents equivalent, DNS queries received by domain controllers (Defender for Identity, no response)
+  , (
+      IdentityQueryEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where Protocol =~ "Dns" and QueryTarget has ValueDomain
+      | extend Query = tolower(trim_end(@"\.", QueryTarget))
+      | where _InDomain(Query, ValueDomain)
+      | project TimeGenerated, Source = "IdentityQueryEvents (DNS)", Query, Answer = "", Client = tolower(coalesce(DeviceName, IPAddress))
+  )
+  // @defender-only:end
+  // @sentinel-only:begin
+  , (
       _Sysmon(StartTimestamp, EndTimestamp, dynamic([22]), ValueDomain)
       | extend Query = tolower(trim_end(@"\.", QueryName))
       | where _InDomain(Query, ValueDomain)
       | project TimeGenerated, Source = "Sysmon 22", Query, Answer = QueryResults, Client = tolower(Computer)
+  ),
+  (
+      AZFWDnsQuery
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where QueryName has ValueDomain
+      | extend Query = tolower(trim_end(@"\.", QueryName))
+      | where _InDomain(Query, ValueDomain)
+      | project TimeGenerated, Source = "AZFWDnsQuery", Query, Answer = strcat(QueryType, " · ", ResponseCode), Client = SourceIp
   )
+  // @sentinel-only:end
   | summarize Lookups = count(), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
       ClientCount = dcount(Client), Clients = make_set(Client, 20) by Source, Query, Answer
   | sort by FirstSeen asc

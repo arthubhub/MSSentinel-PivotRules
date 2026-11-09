@@ -1,18 +1,19 @@
 id: MC-P5
-name: Rôle et identité de la machine
+name: Device role and identity
 indicators: [device]
 action: pivot
+targets: [ip, account]
 description: >
-  Dit ce qu'est la machine avant de pivoter dessus : rôle connu (contrôleur de domaine détecté par ses 4768, ses
-  requêtes LDAP vues par Defender for Identity ou son écoute Kerberos, rôle déclaré dans la watchlist EasyPivotRoles),
-  inventaire Defender for Endpoint (système, type, groupe, exposition, criticité, jonction, utilisateurs connectés, IP
-  publique), adresses IP, agent Azure Monitor (Heartbeat) et tables qui la voient sur la fenêtre. Un contrôleur de
-  domaine ou un serveur d'infrastructure apparaît dans les journaux de presque tous les comptes : les pivots MC-P1 et
-  AC-P2 le signalent, cette règle explique pourquoi.
+  Tells what the device is before pivoting on it: known role (domain controller detected by its 4768 events, its LDAP
+  queries seen by Defender for Identity or its Kerberos listener, role declared in the EasyPivotRoles watchlist),
+  Defender for Endpoint inventory (OS, type, group, exposure, asset value, join type, logged-on users, public IP), IP
+  addresses, Azure Monitor agent (Heartbeat) and tables that see it over the window. A domain controller or an
+  infrastructure server shows up in the logs of almost every account: pivots MC-P1 and AC-P2 flag it, this rule
+  explains why.
 reading:
-  decisive: Machine critique (DC, serveur sensible, exposée à Internet) impliquée dans l'alerte.
-  context: Machine sans inventaire Defender (non intégrée) ou sans agent, donc visible seulement par d'autres sources.
-  noise: Serveurs d'infrastructure (DC, fichiers, supervision) qui ressortent dans tous les pivots.
+  decisive: Critical device (DC, sensitive server, Internet-facing) involved in the alert.
+  context: Device without Defender inventory (not onboarded) or without agent, so visible only through other sources.
+  noise: Infrastructure servers (DC, file, monitoring) that show up in every pivot.
 v1: true
 window: { before: 7d, after: 1d }
 uses: [roles]
@@ -27,16 +28,20 @@ query: |
   let Ips = union isfuzzy=true
       (datatable(Ip:string)[]),
       (DeviceNetworkInfo | where TimeGenerated between (StartTimestamp .. EndTimestamp) | where DeviceName startswith ValueShort and _IsHost(DeviceName)
-          | mv-expand A = IPAddresses | project Ip = tostring(A.IPAddress)),
-      (Heartbeat | where TimeGenerated between (StartTimestamp .. EndTimestamp) | where Computer startswith ValueShort and _IsHost(Computer)
+          | mv-expand A = IPAddresses | project Ip = tostring(A.IPAddress))
+      // @sentinel-only:begin
+      , (Heartbeat | where TimeGenerated between (StartTimestamp .. EndTimestamp) | where Computer startswith ValueShort and _IsHost(Computer)
           | project Ip = ComputerIP)
+      // @sentinel-only:end
       | where isnotempty(Ip) and Ip !startswith "127." and Ip != "::1" and Ip !startswith "fe80:"
       | summarize Ips = make_set(Ip, 20);
+  // @sentinel-only:begin
   let Agent = Heartbeat
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where Computer startswith ValueShort and _IsHost(Computer)
       | summarize LastHeartbeat = max(TimeGenerated), AgentOS = take_any(strcat(OSType, " ", OSName, " ", OSMajorVersion)),
           AgentCategory = take_any(Category);
+  // @sentinel-only:end
   let Seen = union isfuzzy=true withsource=Table DeviceProcessEvents, DeviceNetworkEvents, DeviceLogonEvents
       // @sentinel-only:begin
       , SecurityEvent, WindowsEvent, Syslog
@@ -48,16 +53,26 @@ query: |
       | summarize Tables = make_set(Table);
   print Machine = ValueHost
   | extend KnownRole = toscalar(Roles | project MachineRole), RoleBasis = toscalar(Roles | project MachineRoleBasis)
-  | extend I = toscalar(Inventory | project pack_all()), A = toscalar(Agent | project pack_all())
+  | extend I = toscalar(Inventory | project pack_all())
+  // @sentinel-only:begin
+      , A = toscalar(Agent | project pack_all())
+  // @sentinel-only:end
   | extend Ips = toscalar(Ips), SeenIn = toscalar(Seen)
   | extend Assessment = case(
-      isnotempty(KnownRole), strcat("Rôle connu : ", KnownRole),
-      tostring(I.DeviceType) == "Server", "Serveur sans rôle connu : le déclarer dans la watchlist EasyPivotRoles si c'est un serveur d'infrastructure",
-      isempty(tostring(I.DeviceId)) and isnull(A.LastHeartbeat), "Ni inventaire Defender ni agent Azure Monitor : machine vue seulement par d'autres sources",
-      "Poste ou machine sans rôle particulier connu")
+      isnotempty(KnownRole), strcat("Known role: ", KnownRole),
+      tostring(I.DeviceType) == "Server", "Server with no known role: declare it in the EasyPivotRoles watchlist if it is an infrastructure server",
+      isempty(tostring(I.DeviceId))
+      // @sentinel-only:begin
+          and isnull(A.LastHeartbeat)
+      // @sentinel-only:end
+          , "Neither Defender inventory nor Azure Monitor agent: device seen only through other sources",
+      "Workstation or device with no particular known role")
   | project Machine, Assessment, KnownRole, RoleBasis, DeviceName = tostring(I.DeviceName), OS = strcat(tostring(I.OSPlatform), " ", tostring(I.OSVersion)),
       DeviceType = tostring(I.DeviceType), MachineGroup = tostring(I.MachineGroup), ExposureLevel = tostring(I.ExposureLevel),
       AssetValue = tostring(I.AssetValue), IsInternetFacing = tostring(I.IsInternetFacing), JoinType = tostring(I.JoinType),
       OnboardingStatus = tostring(I.OnboardingStatus), SensorHealthState = tostring(I.SensorHealthState), PublicIP = tostring(I.PublicIP),
-      LoggedOnUsers = I.LoggedOnUsers, LastInventory = todatetime(I.LastInventory), Ips, LastHeartbeat = todatetime(A.LastHeartbeat),
-      AgentOS = tostring(A.AgentOS), SeenIn
+      LoggedOnUsers = I.LoggedOnUsers, LastInventory = todatetime(I.LastInventory), Ips,
+      // @sentinel-only:begin
+      LastHeartbeat = todatetime(A.LastHeartbeat), AgentOS = tostring(A.AgentOS),
+      // @sentinel-only:end
+      SeenIn

@@ -1,0 +1,61 @@
+id: AP-P3
+name: Devices and accounts using the application
+indicators: [application]
+action: pivot
+targets: [account, device, ip]
+description: >
+  Users of the application and the devices they sign in from, one row per account and
+  device pair: Entra ID sign-ins to the application (_Signins fragment: SigninLogs, AADNonInteractiveUserSignInLogs or
+  EntraIdSignInEvents, filtered on AppId or display name; device taken from DeviceDetail: name, OS, managed,
+  compliant) and activity recorded by Defender for Cloud Apps (CloudAppEvents, filtered on OAuthAppId or application
+  name; device type and OS only). In Sentinel, adds the Microsoft Graph calls made
+  with the application on behalf of a user (MicrosoftGraphActivityLogs, filtered on AppId: account and device found
+  in the sign-ins by their identifiers, otherwise the raw object ID), which show a token being used without a
+  new sign-in. Gives the IPs, failures and sources. Complements AP-P2 (sign-ins of the service principal
+  itself) on the delegated user side.
+reading:
+  decisive: Account using the application for the first time right after a consent (AP-P1), from an unmanaged device or an unknown IP.
+  context: Application used by a single account; many non-interactive sign-ins (refresh token reused); delegated Graph calls from an IP absent from the sign-ins.
+  noise: Microsoft and line-of-business applications used by the whole tenant (Teams, Outlook, Office); prefer the AppId of a third-party application.
+window: { before: 7d, after: 1d }
+uses: [signins]
+query: |
+  let AppSignins = materialize(_Signins(StartTimestamp, EndTimestamp, "", "") | where AppId =~ ValueApp or AppDisplayName =~ ValueApp);
+  union isfuzzy=true
+  (
+      AppSignins
+      | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count(), Failures = countif(not(Succeeded)),
+          Ips = make_set(IPAddress, 10), Details = make_set(strcat(OperatingSystem, " · ", Browser, " · managed ", IsManaged, " · compliant ", IsCompliant), 5),
+          Kinds = make_set(SignInType), Sources = make_set(SourceTable)
+          by Account = tolower(UserPrincipalName), Device = tolower(iff(isnotempty(DeviceName), DeviceName, strcat("(unnamed device) ", OperatingSystem)))
+  ),
+  (
+      CloudAppEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where OAuthAppId =~ ValueApp or Application =~ ValueApp
+      | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count(), Failures = long(0),
+          Ips = make_set(IPAddress, 10), Details = make_set(ActionType, 5), Kinds = make_set(Application), Sources = pack_array("CloudAppEvents")
+          by Account = tolower(coalesce(tostring(RawEventData.UserId), AccountDisplayName)),
+          Device = tolower(strcat("(", DeviceType, ") ", OSPlatform))
+  )
+  // @sentinel-only:begin
+  , (
+      // Delegated Microsoft Graph calls made with the application (user tokens): account and device found in the
+      // sign-ins to the application by their Entra ID object and device IDs
+      MicrosoftGraphActivityLogs
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where AppId =~ ValueApp
+      | where isnotempty(UserId)
+      | lookup kind=leftouter (AppSignins | where isnotempty(UserId) | summarize Upn = take_any(UserPrincipalName) by UserId) on UserId
+      | lookup kind=leftouter (AppSignins | where isnotempty(DeviceId) | summarize DevName = take_any(DeviceName) by DeviceId) on DeviceId
+      | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count(), Failures = countif(ResponseStatusCode >= 400),
+          Ips = make_set(IPAddress, 10),
+          Details = make_set(strcat(RequestMethod, " ", replace_regex(tostring(parse_url(RequestUri).Path), @"[0-9a-fA-F-]{36}", "{id}")), 5)
+          by Account = tolower(coalesce(Upn, UserId)),
+          Device = tolower(case(isnotempty(DevName), DevName, isnotempty(DeviceId), strcat("(Entra ID device) ", DeviceId), "(Graph call)"))
+      | extend Kinds = pack_array("Delegated Graph calls"), Sources = pack_array("MicrosoftGraphActivityLogs")
+  )
+  // @sentinel-only:end
+  | extend Unnamed = Device startswith "("
+  | sort by Unnamed asc, Events desc
+  | project Account, Device, FirstSeen, LastSeen, Events, Failures, Ips, Details, Kinds, Sources

@@ -1,14 +1,15 @@
 id: DM-P2
-name: E-mails contenant le domaine
+name: Emails containing the domain
 indicators: [domain, url]
 action: pivot
+targets: [email, url]
 description: >
-  E-mails dont une URL pointe vers le domaine (EmailUrlInfo + EmailEvents), regroupés par message :
-  expéditeur, sujet, destinataires, livraison et menaces détectées.
+  Emails with a URL pointing to the domain (EmailUrlInfo + EmailEvents), grouped by message: sender, subject,
+  recipients, delivery and detected threats.
 reading:
-  decisive: Même message livré en boîte de réception à de nombreux destinataires.
-  context: Expéditeur externe nouveau, sujet qui imite une marque (Booking, DocuSign, Microsoft).
-  noise: Newsletters légitimes qui citent le domaine.
+  decisive: Same message delivered to the inbox of many recipients.
+  context: New external sender, subject imitating a brand (Booking, DocuSign, Microsoft).
+  noise: Legitimate newsletters that mention the domain.
 window: { before: 7d, after: 1d }
 uses: [web_functions]
 query: |

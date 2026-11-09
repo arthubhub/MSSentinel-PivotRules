@@ -1,0 +1,112 @@
+id: AC-P9
+name: Entra risk and account anomalies
+indicators: [account]
+action: pivot
+targets: [ip, device]
+description: >
+  What Entra ID Protection and UEBA already know about the account: current risk state (AADRiskyUsers), risk
+  detections (AADUserRiskEvents: type, level, state, IP, country, real-time or offline detection), sign-ins flagged
+  as risky (RiskLevelDuringSignIn in Entra ID sign-ins), Sentinel UEBA behavior anomalies
+  (BehaviorAnalytics, non-zero InvestigationPriority, with the "first time" and rare-use insights raised), risk
+  level carried by the IdentityInfo record, and Defender XDR alerts where the account is evidence (AlertEvidence, title,
+  severity and techniques from AlertInfo, IPs and devices from the other evidence of the alert). In the Defender XDR variant,
+  risky sign-ins (EntraIdSignInEvents), the IdentityInfo record and alerts are read. One row per detection, sign-in or anomaly,
+  most recent first.
+reading:
+  decisive: High-level "atRisk" account, or offline detection of type leakedCredentials, anomalousToken, tokenIssuerAnomaly, mcasSuspiciousInboxManipulationRules, followed by a successful sign-in from the same IP.
+  context: Defender XDR alert where the account appears, especially as compromised account or as origin of the activity; high-priority UEBA anomalies (first country, first ISP, first device, application rare among peers) in the incident window; recent "remediated" or "dismissed" risk.
+  noise: unfamiliarFeatures and atypicalTravel caused by VPN, remote work or a new workstation; low-priority UEBA anomalies on very active accounts.
+window: { before: 30d, after: 1d }
+uses: [signins]
+query: |
+  union isfuzzy=true
+  (
+      _Signins(StartTimestamp, EndTimestamp, "", ValueUpn)
+      | where RiskLevelDuringSignIn in~ ("low", "medium", "high")
+      | project TimeGenerated, Source = SourceTable, Kind = "Risky sign-in", RiskLevel = tolower(RiskLevelDuringSignIn),
+          RiskState = iff(Succeeded, "successful sign-in", strcat("failed ", ResultType)), Title = AppDisplayName,
+          Detail = strcat(SignInType, " · ", ConditionalAccessStatus, " · ", OperatingSystem, " ", Browser),
+          IPAddress, Country = Location, Device = DeviceName
+  ),
+  (
+      IdentityInfo
+      | where TimeGenerated between ((T0 - 14d) .. EndTimestamp)
+      | extend Sam = tolower(coalesce(tostring(column_ifexists("SAMAccountName", "")), AccountName)),
+          Upn = tolower(coalesce(tostring(column_ifexists("AccountUPN", "")), tostring(column_ifexists("AccountUpn", ""))))
+      | where Sam == ValueSam or Upn == ValueUpn
+      | summarize arg_max(TimeGenerated, *) by Sam
+      | extend Risk = tolower(tostring(column_ifexists("RiskLevel", ""))), State = tostring(column_ifexists("RiskState", "")),
+          Priority = tostring(column_ifexists("InvestigationPriority", "")), Blast = tostring(column_ifexists("BlastRadius", ""))
+      | where isnotempty(Risk) or isnotempty(State) or isnotempty(Priority)
+      | project TimeGenerated, Source = "IdentityInfo", Kind = "Account record", RiskLevel = Risk, RiskState = State,
+          Title = AccountDisplayName,
+          Detail = strcat(iff(isnotempty(Priority), strcat("UEBA investigation priority ", Priority), ""),
+              iff(isnotempty(Blast), strcat(" · blast radius ", Blast), ""),
+              iff(isnotempty(tostring(column_ifexists("RiskLevelDetails", ""))), strcat(" · ", tostring(column_ifexists("RiskLevelDetails", ""))), "")),
+          IPAddress = "", Country = "", Device = ""
+  ),
+  (
+      // Defender XDR alerts where the account is evidence; IPs and devices taken from the other evidence of the alert
+      AlertEvidence
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where AlertId in ((AlertEvidence
+          | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+          | where EntityType == "User"
+          | where AccountUpn =~ ValueUpn or AccountName =~ ValueSam
+          | distinct AlertId))
+      | extend IsAccount = EntityType == "User" and (AccountUpn =~ ValueUpn or AccountName =~ ValueSam), EvIp = coalesce(RemoteIP, LocalIP)
+      | summarize TimeGenerated = min(TimeGenerated), AccountRole = take_anyif(EvidenceRole, IsAccount),
+          Ips = make_set_if(EvIp, isnotempty(EvIp), 5), Devices = make_set_if(tolower(DeviceName), isnotempty(DeviceName), 5),
+          EvTitle = take_any(Title), EvSeverity = take_any(Severity), EvSource = take_any(DetectionSource) by AlertId
+      | join kind=leftouter (AlertInfo
+          | where TimeGenerated between ((StartTimestamp - 1d) .. EndTimestamp)
+          | summarize arg_max(TimeGenerated, Title, Severity, Category, DetectionSource, ServiceSource, AttackTechniques) by AlertId
+          | project AlertId, Title, Severity, Category, DetectionSource, ServiceSource, AttackTechniques) on AlertId
+      | project TimeGenerated, Source = "AlertEvidence", Kind = "Defender XDR alert", RiskLevel = tolower(coalesce(Severity, EvSeverity)),
+          RiskState = strcat("account ", AccountRole), Title = coalesce(Title, EvTitle),
+          Detail = strcat(Category, " · ", coalesce(ServiceSource, ""), " / ", coalesce(DetectionSource, EvSource),
+              iff(isnotempty(AttackTechniques) and AttackTechniques != "[]", strcat(" · ", AttackTechniques), ""),
+              iff(array_length(Devices) > 0, strcat(" · devices: ", strcat_array(Devices, ", ")), ""),
+              iff(array_length(Ips) > 1, strcat(" · IPs: ", strcat_array(Ips, ", ")), "")),
+          IPAddress = tostring(Ips[0]), Country = "", Device = tostring(Devices[0])
+  )
+  // @sentinel-only:begin
+  , (
+      // Current risk state: last known update, even before the window
+      AADRiskyUsers
+      | where TimeGenerated between ((T0 - 90d) .. EndTimestamp)
+      | where UserPrincipalName =~ ValueUpn
+      | summarize arg_max(TimeGenerated, *) by Id
+      | project TimeGenerated = coalesce(RiskLastUpdatedDateTime, TimeGenerated), Source = "AADRiskyUsers", Kind = "Account risk state",
+          RiskLevel = tolower(RiskLevel), RiskState, Title = UserDisplayName,
+          Detail = strcat(RiskDetail, iff(IsDeleted, " · account deleted", ""), iff(IsProcessing, " · processing", "")),
+          IPAddress = "", Country = "", Device = ""
+  ),
+  (
+      AADUserRiskEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where UserPrincipalName =~ ValueUpn
+      | summarize arg_max(TimeGenerated, *) by Id
+      | extend DetectedBy = Source
+      | project TimeGenerated = coalesce(ActivityDateTime, DetectedDateTime, TimeGenerated), Source = "AADUserRiskEvents",
+          Kind = strcat("Risk detection (", DetectionTimingType, ")"), RiskLevel = tolower(RiskLevel), RiskState, Title = RiskEventType,
+          Detail = strcat(DetectedBy, " · ", Activity, iff(isnotempty(RiskDetail) and RiskDetail != "none", strcat(" · ", RiskDetail), ""),
+              " · ", tostring(Location.city)),
+          IPAddress = IpAddress, Country = tostring(Location.countryOrRegion), Device = ""
+  ),
+  (
+      BehaviorAnalytics
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where UserPrincipalName =~ ValueUpn or UserName =~ ValueSam
+      | where InvestigationPriority > 0
+      | mv-apply Key = bag_keys(ActivityInsights) to typeof(string) on (
+          where tostring(ActivityInsights[Key]) =~ "True"
+          | summarize Insights = make_set(Key, 10))
+      | project TimeGenerated, Source = "BehaviorAnalytics", Kind = "UEBA anomaly",
+          RiskLevel = strcat("priority ", tostring(InvestigationPriority)), RiskState = ActionType,
+          Title = strcat(ActivityType, " · ", EventSource),
+          Detail = strcat(strcat_array(Insights, ", "), iff(isnotempty(TargetName), strcat(" · target ", TargetName), "")),
+          IPAddress = SourceIPAddress, Country = SourceIPLocation, Device = tolower(coalesce(SourceDevice, DestinationDevice))
+  )
+  // @sentinel-only:end
+  | sort by TimeGenerated desc

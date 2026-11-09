@@ -1,18 +1,19 @@
 id: IP-P1
-name: Machines liées à l'IP
+name: Devices linked to the IP
 indicators: [ip]
 action: pivot
+targets: [device]
 description: >
-  Retrouve le nom de la ou des machines derrière une IP : adresse attribuée à une carte réseau
-  (DeviceNetworkInfo), IP de l'agent Azure Monitor (Heartbeat) ou d'une machine Linux (Syslog), IP locale de connexions
-  (DeviceNetworkEvents), IP publique de sortie (DeviceInfo), poste source vu par les contrôleurs de domaine et serveurs
-  (4624, 4625, 4648, 4768, 4769, 4771, 4776 dans SecurityEvent et WindowsEvent), poste distant vu par Defender
-  (DeviceLogonEvents), Defender for Identity, et noms de machine portés par les journaux normalisés ASIM (authentification,
-  sessions réseau). Indique le rôle connu de chaque machine et celui de l'IP elle-même (DC, NAT, proxy, VPN…).
+  Finds the device or devices behind an IP: address assigned to a network adapter
+  (DeviceNetworkInfo), Azure Monitor agent IP (Heartbeat) or Linux device IP (Syslog), local IP of connections
+  (DeviceNetworkEvents), public egress IP (DeviceInfo), source workstation seen by domain controllers and servers
+  (4624, 4625, 4648, 4768, 4769, 4771, 4776 in SecurityEvent and WindowsEvent), remote workstation seen by Defender
+  (DeviceLogonEvents), Defender for Identity, and device names carried by ASIM normalized logs (authentication,
+  network sessions). Shows the known role of each device and of the IP itself (DC, NAT, proxy, VPN…).
 reading:
-  decisive: Une IP attribuée par DeviceNetworkInfo ou Heartbeat sur la période donne le nom de la machine avec certitude.
-  context: Un poste source vu seulement dans les événements 4624 ou 4776 (champ WorkstationName, déclaratif).
-  noise: IP de NAT, de VPN ou de serveur de rebond qui ramène plusieurs dizaines de machines (colonne IpRole renseignée).
+  decisive: An IP assigned by DeviceNetworkInfo or Heartbeat during the period gives the device name with certainty.
+  context: A source workstation seen only in 4624 or 4776 events (WorkstationName field, self-reported).
+  noise: NAT, VPN or jump server IP that returns dozens of devices (IpRole column filled).
 v1: true
 window: { before: 24h, after: 1h }
 uses: [win_security, roles]
@@ -26,82 +27,95 @@ query: |
       | mv-expand Ip = IPAddresses
       | where tostring(Ip.IPAddress) == Value
       | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
-          by Machine = tolower(DeviceName), Evidence = strcat("IP attribuée à ", NetworkAdapterName, " (", MacAddress, ")"), Source = "DeviceNetworkInfo"
+          by Machine = tolower(DeviceName), Evidence = strcat("IP assigned to ", NetworkAdapterName, " (", MacAddress, ")"), Source = "DeviceNetworkInfo"
   ),
+  // @sentinel-only:begin
   (
       Heartbeat
       | where TimeGenerated between ((StartTimestamp - 1d) .. EndTimestamp)
       | where ComputerIP == Value or ComputerPrivateIPs has Value
       | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
-          by Machine = tolower(Computer), Evidence = iff(ComputerIP == Value, "IP de l'agent Azure Monitor", "IP privée de l'agent Azure Monitor"), Source = "Heartbeat"
+          by Machine = tolower(Computer), Evidence = iff(ComputerIP == Value, "Azure Monitor agent IP", "Azure Monitor agent private IP"), Source = "Heartbeat"
   ),
   (
       Syslog
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where HostIP == Value
       | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
-          by Machine = tolower(Computer), Evidence = "IP de la machine Linux (Syslog)", Source = "Syslog"
+          by Machine = tolower(Computer), Evidence = "Linux device IP (Syslog)", Source = "Syslog"
   ),
+  // @sentinel-only:end
   (
       DeviceNetworkEvents
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where LocalIP == Value
       | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
-          by Machine = tolower(DeviceName), Evidence = "IP locale de connexions réseau", Source = "DeviceNetworkEvents"
+          by Machine = tolower(DeviceName), Evidence = "Local IP of network connections", Source = "DeviceNetworkEvents"
   ),
   (
       DeviceInfo
       | where TimeGenerated between ((StartTimestamp - 1d) .. EndTimestamp)
       | where PublicIP == Value
       | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
-          by Machine = tolower(DeviceName), Evidence = "IP publique de sortie", Source = "DeviceInfo"
+          by Machine = tolower(DeviceName), Evidence = "Public egress IP", Source = "DeviceInfo"
   ),
+  // @sentinel-only:begin
   (
       _WinSecurity(StartTimestamp, EndTimestamp, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776]), Value)
       | where IpAddress == Value and isnotempty(WorkstationName)
       | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
-          by Machine = tolower(WorkstationName), Evidence = strcat("Poste source déclaré, vu par ", tolower(Computer)), Source = SourceTable
+          by Machine = tolower(WorkstationName), Evidence = strcat("Self-reported source workstation, seen by ", tolower(Computer)), Source = SourceTable
   ),
+  // @sentinel-only:end
   (
       DeviceLogonEvents
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where RemoteIP == Value and isnotempty(RemoteDeviceName)
       | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
-          by Machine = tolower(RemoteDeviceName), Evidence = strcat("Poste distant vu par ", tolower(DeviceName)), Source = "DeviceLogonEvents"
+          by Machine = tolower(RemoteDeviceName), Evidence = strcat("Remote workstation seen by ", tolower(DeviceName)), Source = "DeviceLogonEvents"
   ),
   (
       IdentityLogonEvents
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where IPAddress == Value and isnotempty(DeviceName)
       | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
-          by Machine = tolower(DeviceName), Evidence = strcat("Source ", Protocol, " vers ", Application), Source = "IdentityLogonEvents"
-  ),
-  (
+          by Machine = tolower(DeviceName), Evidence = strcat("Source ", Protocol, " to ", Application), Source = "IdentityLogonEvents"
+  )
+  // @sentinel-only:begin
+  , (
       ASimAuthenticationEventLogs
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where SrcIpAddr == Value and isnotempty(SrcHostname)
       | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
-          by Machine = tolower(SrcHostname), Evidence = strcat("Poste source (", EventProduct, ")"), Source = "ASimAuthenticationEventLogs"
+          by Machine = tolower(SrcHostname), Evidence = strcat("Source workstation (", EventProduct, ")"), Source = "ASimAuthenticationEventLogs"
   ),
   (
       ASimNetworkSessionLogs
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where (SrcIpAddr == Value and isnotempty(SrcHostname)) or (DstIpAddr == Value and isnotempty(DstHostname))
       | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
-          by Machine = tolower(iff(SrcIpAddr == Value, SrcHostname, DstHostname)), Evidence = strcat("Nom de machine du flux (", EventProduct, ")"), Source = "ASimNetworkSessionLogs"
+          by Machine = tolower(iff(SrcIpAddr == Value, SrcHostname, DstHostname)), Evidence = strcat("Device name in the flow (", EventProduct, ")"), Source = "ASimNetworkSessionLogs"
   )
+  // @sentinel-only:end
   | summarize FirstSeen = min(FirstSeen), LastSeen = max(LastSeen), Events = sum(Events),
       Evidence = make_set(Evidence, 10), Sources = make_set(Source) by Machine
   | extend MachineKey = _HostKey(Machine)
   | lookup kind=leftouter (_MachineRoles(EndTimestamp)) on MachineKey
   | extend ConfidenceRank = case(
-      set_has_element(Sources, "DeviceNetworkInfo") or set_has_element(Sources, "Heartbeat") or set_has_element(Sources, "DeviceNetworkEvents")
-          or set_has_element(Sources, "Syslog"), 1,
+      set_has_element(Sources, "DeviceNetworkInfo")
+      // @sentinel-only:begin
+          or set_has_element(Sources, "Heartbeat")
+      // @sentinel-only:end
+          or set_has_element(Sources, "DeviceNetworkEvents")
+      // @sentinel-only:begin
+          or set_has_element(Sources, "Syslog")
+      // @sentinel-only:end
+          , 1,
       array_length(Sources) > 1, 2,
       3)
-  | extend Confidence = case(ConfidenceRank == 1, "Élevée : IP portée par la machine",
-      ConfidenceRank == 2, "Moyenne : plusieurs sources concordantes",
-      "Faible : nom déclaré par une seule source")
+  | extend Confidence = case(ConfidenceRank == 1, "High: IP held by the device",
+      ConfidenceRank == 2, "Medium: several matching sources",
+      "Low: name reported by a single source")
   | extend IpRole
   | sort by ConfidenceRank asc, LastSeen desc
   | project Machine, MachineRole, Confidence, IpRole, FirstSeen, LastSeen, Events, Evidence, Sources

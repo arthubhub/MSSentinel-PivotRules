@@ -1,0 +1,13 @@
+id: S4
+name: Phishing
+description: >
+  A reported message: the sender's messages, their URLs and attachments, the users who clicked, then what the
+  first of them did.
+indicator: email
+steps:
+  - ruleId: EM-P1     # messages involving the address
+  - ruleId: EM-P4     # URLs and attachments
+    carry: url
+  - ruleId: DM-P1     # users who clicked
+    carry: account
+  - ruleId: AC-T1     # account timeline

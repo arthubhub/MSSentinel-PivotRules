@@ -1,0 +1,14 @@
+id: S3
+name: Suspicious execution on a device
+description: >
+  A flagged device: role and identity, accounts that logged on, files downloaded then executed, presence of the
+  file elsewhere in the tenant, persistence installed.
+indicator: device
+steps:
+  - ruleId: MC-P5     # device role and identity
+  - ruleId: MC-P1     # accounts that logged on
+  - ruleId: MC-P4     # files downloaded then executed
+    carry: hash
+  - ruleId: HS-P1     # other devices and paths of the file
+    carry: device
+  - ruleId: MC-P3     # persistence installed

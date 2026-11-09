@@ -1,0 +1,13 @@
+id: S12
+name: Data exfiltration by an account
+description: >
+  A departing employee or an account suspected of leaking data: files and shares read, actions on cloud files,
+  messages sent, IPs used, then the cloud services reached from the most unusual IP.
+indicator: account
+steps:
+  - ruleId: AC-P6     # files and shares accessed
+  - ruleId: AC-P3     # admin and file actions (SharePoint, OneDrive)
+  - ruleId: AC-P7     # messages and clicks of the account
+  - ruleId: AC-P1     # IPs and devices
+    carry: ip
+  - ruleId: IP-P3     # cloud services accessed from the IP

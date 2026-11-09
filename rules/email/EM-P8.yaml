@@ -1,0 +1,66 @@
+id: EM-P8
+name: Account behind the address
+indicators: [email]
+action: pivot
+targets: [account, device, ip]
+description: >
+  Account holding the email address, then devices where this account signed in or logged on, one row per entity.
+  The account is found in IdentityInfo by UPN, primary address or alias (MailAddress,
+  EmailAddress, AdditionalMailAddresses and AccountUPN columns read with column_ifexists: they differ between Sentinel and
+  Defender XDR), otherwise the address is used as UPN. Devices come from Entra ID sign-ins (fragment
+  _Signins: SigninLogs, AADNonInteractiveUserSignInLogs or EntraIdSignInEvents, DeviceDetail field) and Windows
+  devices from logons seen by Defender for Endpoint (DeviceLogonEvents). Used to go from an
+  address (phishing recipient) to the account and the workstations to examine.
+reading:
+  decisive: Account found in IdentityInfo whose UPN differs from the address (alias); unmanaged or non-compliant device used right after the message was received.
+  context: Several accounts for the same address (admin account, synced account and cloud account); sign-ins from an unnamed device.
+  noise: Shared mailboxes and distribution lists, which have no sign-in account of their own; RDS or Citrix servers shared by many users.
+window: { before: 7d, after: 1d }
+uses: [signins, roles]
+query: |
+  let Ids = union isfuzzy=true
+      (datatable(Sam:string, Upn:string, DisplayName:string, TimeGenerated:datetime)[]),
+      (
+          IdentityInfo
+          | where TimeGenerated between ((T0 - 14d) .. EndTimestamp)
+          | extend Upn = tolower(coalesce(tostring(column_ifexists("AccountUPN", "")), tostring(column_ifexists("AccountUpn", "")))),
+              Mail = tolower(coalesce(tostring(column_ifexists("MailAddress", "")), tostring(column_ifexists("EmailAddress", "")))),
+              Extra = tolower(tostring(column_ifexists("AdditionalMailAddresses", dynamic([]))))
+          | where Upn == ValueMail or Mail == ValueMail or Extra has ValueMail
+          | project Sam = tolower(coalesce(tostring(column_ifexists("SAMAccountName", "")), AccountName)), Upn,
+              DisplayName = AccountDisplayName, TimeGenerated
+      );
+  let MainUpn = toscalar(Ids | where isnotempty(Upn) | summarize arg_max(TimeGenerated, Upn) | project Upn);
+  let SignUpn = iff(isempty(MainUpn), ValueMail, MainUpn);
+  let Sams = toscalar(Ids | where isnotempty(Sam) | summarize make_set(Sam, 5));
+  let LogonSams = iff(array_length(Sams) > 0, Sams, pack_array(ValueMailLocal));
+  union isfuzzy=true
+  (
+      Ids
+      | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count(),
+          Details = make_set(DisplayName, 3) by Entity = iff(isnotempty(Upn), Upn, Sam), Account = Sam
+      | extend Kind = "Account (IdentityInfo)", Sources = pack_array("IdentityInfo")
+  ),
+  (
+      _Signins(StartTimestamp, EndTimestamp, "", SignUpn)
+      | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count(),
+          Details = make_set(strcat(OperatingSystem, " · ", Browser, " · managed ", IsManaged, " · compliant ", IsCompliant), 5),
+          Ips = make_set(IPAddress, 10), Sources = make_set(SourceTable)
+          by Entity = tolower(iff(isnotempty(DeviceName), DeviceName, strcat("(unnamed device) ", OperatingSystem))), Account = tolower(UserPrincipalName)
+      | extend Kind = "Entra ID device (sign-in)"
+  ),
+  (
+      DeviceLogonEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where tolower(AccountName) in (LogonSams)
+      | where ActionType == "LogonSuccess"
+      | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count(),
+          Details = make_set(LogonType, 5), Ips = make_set_if(RemoteIP, isnotempty(RemoteIP), 10)
+          by Entity = tolower(DeviceName), Account = tolower(strcat(AccountDomain, @"\", AccountName))
+      | extend Kind = "Device (logon)", Sources = pack_array("DeviceLogonEvents")
+  )
+  | extend MachineKey = iff(Kind startswith "Account", "", _HostKey(Entity))
+  | lookup kind=leftouter (_MachineRoles(EndTimestamp)) on MachineKey
+  | extend Rank = case(Kind startswith "Account", 0, Kind startswith "Device", 1, 2)
+  | sort by Rank asc, LastSeen desc
+  | project Kind, Entity, Account, MachineRole, FirstSeen, LastSeen, Events, Details, Ips, Sources

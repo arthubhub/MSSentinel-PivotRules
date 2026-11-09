@@ -1,35 +1,48 @@
 id: AC-P3
-name: Actions d'administration et de fichiers du compte
+name: Admin and file actions of the account
 indicators: [account]
 action: pivot
+targets: [ip, application]
 description: >
-  Opérations réalisées par le compte, ou qui le visent : audit Entra ID (AuditLogs), Microsoft 365
-  (OfficeActivity et CloudAppEvents, qui se recoupent selon les connecteurs activés), Azure Resource Manager et appels
-  Microsoft Graph (MicrosoftGraphActivityLogs, rattachés au compte par son identifiant d'objet trouvé dans ses connexions).
+  Operations performed by the account, or targeting it: Entra ID audit (AuditLogs), Microsoft 365
+  (OfficeActivity and CloudAppEvents, which overlap depending on the enabled connectors), Azure Resource Manager, and
+  Microsoft Graph and legacy Azure AD Graph calls (MicrosoftGraphActivityLogs, AADGraphActivityLogs, linked to the account by
+  its object ID found in its sign-ins), and on-premises Active Directory seen by Defender for Identity
+  (IdentityDirectoryEvents: group, password, attribute and delegation changes made by the account or
+  targeting it; the actor is read from ACTOR.ACCOUNT, the target from TargetAccountUpn or the group involved).
 reading:
-  decisive: Ajout d'une méthode MFA, attribution de rôle, lecture massive de fichiers ou de secrets juste après une connexion suspecte.
-  context: Opérations sur des ressources hors du périmètre habituel du compte.
-  noise: Synchronisation OneDrive, opérations d'administration planifiées, comptes d'automatisation.
+  decisive: MFA method added, role assigned, bulk read of files or secrets right after a suspicious sign-in; account added to a privileged Active Directory group or password reset made by the account.
+  context: Operations on resources outside the account's usual scope.
+  noise: OneDrive sync, scheduled admin operations, automation accounts.
 v1: true
 window: { before: 4h, after: 4h }
 uses: [signins]
 query: |
   let UserIds = _Signins(StartTimestamp - 1d, EndTimestamp, "", ValueUpn) | where isnotempty(UserId) | distinct UserId;
   union isfuzzy=true
+  // @sentinel-only:begin
   (
       MicrosoftGraphActivityLogs
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where UserId in (UserIds)
       | project TimeGenerated, Source = "MicrosoftGraphActivityLogs", Operation = strcat(RequestMethod, " ",
               replace_regex(tostring(parse_url(RequestUri).Path), @"[0-9a-fA-F-]{36}", "{id}")),
-          Role = "Auteur", Target = AppId, Result = tostring(ResponseStatusCode), IP = IPAddress
+          Role = "Actor", Target = AppId, Result = tostring(ResponseStatusCode), IP = IPAddress
+  ),
+  (
+      AADGraphActivityLogs
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where UserId in (UserIds)
+      | project TimeGenerated, Source = "AADGraphActivityLogs", Operation = strcat(RequestMethod, " ",
+              replace_regex(tostring(parse_url(RequestUri).Path), @"[0-9a-fA-F-]{36}", "{id}")),
+          Role = "Actor", Target = AppId, Result = tostring(ResponseStatusCode), IP = CallerIpAddress
   ),
   (
       AuditLogs
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where InitiatedBy has ValueUpn or TargetResources has ValueUpn
       | project TimeGenerated, Source = "AuditLogs (Entra ID)", Operation = OperationName,
-          Role = iff(tostring(InitiatedBy.user.userPrincipalName) =~ ValueUpn, "Auteur", "Cible"),
+          Role = iff(tostring(InitiatedBy.user.userPrincipalName) =~ ValueUpn, "Actor", "Target"),
           Target = coalesce(tostring(TargetResources[0].userPrincipalName), tostring(TargetResources[0].displayName)),
           Result, IP = tostring(InitiatedBy.user.ipAddress)
   ),
@@ -37,23 +50,39 @@ query: |
       OfficeActivity
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where UserId =~ ValueUpn
-      | project TimeGenerated, Source = strcat("OfficeActivity (", OfficeWorkload, ")"), Operation, Role = "Auteur",
+      | project TimeGenerated, Source = strcat("OfficeActivity (", OfficeWorkload, ")"), Operation, Role = "Actor",
           Target = coalesce(OfficeObjectId, SourceFileName), Result = ResultStatus, IP = ClientIP
   ),
+  // @sentinel-only:end
   (
       CloudAppEvents
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where tostring(RawEventData.UserId) =~ ValueUpn
-      | project TimeGenerated, Source = strcat("CloudAppEvents (", Application, ")"), Operation = ActionType, Role = "Auteur",
+      | project TimeGenerated, Source = strcat("CloudAppEvents (", Application, ")"), Operation = ActionType, Role = "Actor",
           Target = ObjectName, Result = "", IP = IPAddress
   ),
   (
+      // On-premises Active Directory (Defender for Identity): account, group and attribute changes made by the
+      // account or targeting it; the actor is in AdditionalFields["ACTOR.ACCOUNT"]
+      IdentityDirectoryEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | extend Actor = tolower(tostring(AdditionalFields["ACTOR.ACCOUNT"]))
+      | where AccountUpn =~ ValueUpn or AccountName =~ ValueSam or TargetAccountUpn =~ ValueUpn or Actor == ValueSam or Actor == ValueUpn
+      | project TimeGenerated, Source = strcat("IdentityDirectoryEvents (", Application, ")"), Operation = ActionType,
+          Role = iff(Actor in (ValueSam, ValueUpn), "Actor", "Target"),
+          Target = coalesce(TargetAccountUpn, TargetAccountDisplayName, TargetDeviceName, tostring(AdditionalFields["TO.GROUP"]),
+              tostring(AdditionalFields["FROM.GROUP"]), AccountUpn, AccountName),
+          Result = "", IP = IPAddress
+  )
+  // @sentinel-only:begin
+  , (
       AzureActivity
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where Caller =~ ValueUpn
-      | project TimeGenerated, Source = "AzureActivity", Operation = OperationNameValue, Role = "Auteur",
+      | project TimeGenerated, Source = "AzureActivity", Operation = OperationNameValue, Role = "Actor",
           Target = _ResourceId, Result = ActivityStatusValue, IP = CallerIpAddress
   )
+  // @sentinel-only:end
   | summarize Events = count(), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
       Targets = make_set(Target, 10), IPs = make_set(IP, 5), Results = make_set(Result, 5) by Source, Operation, Role
   | sort by Events desc

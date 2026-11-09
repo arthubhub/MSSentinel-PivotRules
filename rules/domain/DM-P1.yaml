@@ -1,23 +1,79 @@
 id: DM-P1
-name: Utilisateurs qui ont cliqué
+name: Users who clicked
 indicators: [domain, url]
 action: pivot
+targets: [account, url, ip, device]
 description: >
-  Clics vers le domaine enregistrés par la protection des liens (UrlClickEvents), par utilisateur : clics
-  autorisés, bloqués, forcés malgré l'avertissement, URL, applications (Outlook, Teams, Office) et IP.
+  Clicks to the domain recorded by link protection (UrlClickEvents), per user: allowed clicks, blocked clicks,
+  clicks through the warning, URLs, applications (Outlook, Teams, Office) and IPs. Completed by visits seen on
+  workstations: browser connections to the domain (DeviceNetworkEvents, process account) and browser launches on a
+  URL of the domain from another application, Outlook or Teams for instance (DeviceEvents, BrowserLaunchedToOpenUrl).
+  In Sentinel, requests seen by the proxy are added (ASimWebSessionLogs, CommonSecurityLog: user authenticated by the
+  proxy, IP and workstation name). Clicks, Allowed, Blocked and ClickedThrough only count UrlClickEvents;
+  BrowserConnections, BrowserLaunches and ProxyRequests count the other sources.
 reading:
-  decisive: Clics autorisés ou forcés (IsClickedThrough) par plusieurs utilisateurs de la même campagne.
-  context: Clic depuis une IP différente de celle du poste habituel (téléphone personnel).
-  noise: Clics bloqués seulement, clics de scanners automatiques.
+  decisive: Allowed or clicked-through clicks (IsClickedThrough) by several users of the same campaign; browser opened on the URL from Outlook or Teams, followed by connections to the domain.
+  context: Click from an IP other than that of the usual workstation (personal phone); visit seen only by the proxy or the workstation (copied link, message outside Defender for Office 365).
+  noise: Only blocked clicks, clicks by automated scanners; proxy requests without a user (empty account); third-party resources loaded by a page.
 v1: true
 window: { before: 7d, after: 1d }
 uses: [web_functions]
 query: |
-  UrlClickEvents
-  | where TimeGenerated between (StartTimestamp .. EndTimestamp)
-  | where Url has ValueDomain
-  | where _InDomain(_Host(Url), ValueDomain)
-  | summarize Clicks = count(), Allowed = countif(ActionType == "ClickAllowed"), Blocked = countif(ActionType has "Blocked"),
-      ClickedThrough = countif(IsClickedThrough), FirstClick = min(TimeGenerated), LastClick = max(TimeGenerated),
-      Urls = make_set(Url, 10), Workloads = make_set(Workload), IPs = make_set(IPAddress, 5) by AccountUpn
+  let Browsers = dynamic(["msedge.exe", "chrome.exe", "firefox.exe", "iexplore.exe", "brave.exe", "opera.exe", "vivaldi.exe", "safari"]);
+  union isfuzzy=true
+  (
+      UrlClickEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where Url has ValueDomain
+      | where _InDomain(_Host(Url), ValueDomain)
+      | project TimeGenerated, AccountUpn = tolower(AccountUpn), Kind = "click", ActionType, IsClickedThrough, Url, Workload,
+          Ip = IPAddress, Device = "", Process = "", Source = "UrlClickEvents"
+  ),
+  (
+      DeviceNetworkEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where RemoteUrl has ValueDomain
+      | where tolower(InitiatingProcessFileName) in (Browsers)
+      | where _InDomain(_Host(RemoteUrl), ValueDomain)
+      | project TimeGenerated, AccountUpn = tolower(coalesce(InitiatingProcessAccountUpn, InitiatingProcessAccountName)), Kind = "browser",
+          ActionType, IsClickedThrough = false, Url = RemoteUrl, Workload = "", Ip = "", Device = tolower(DeviceName),
+          Process = tolower(InitiatingProcessFileName), Source = "DeviceNetworkEvents"
+  ),
+  (
+      DeviceEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where ActionType == "BrowserLaunchedToOpenUrl"
+      | where RemoteUrl has ValueDomain
+      | where _InDomain(_Host(RemoteUrl), ValueDomain)
+      | project TimeGenerated, AccountUpn = tolower(coalesce(InitiatingProcessAccountUpn, InitiatingProcessAccountName)), Kind = "launch",
+          ActionType, IsClickedThrough = false, Url = RemoteUrl, Workload = "", Ip = "", Device = tolower(DeviceName),
+          Process = tolower(InitiatingProcessFileName), Source = "DeviceEvents (BrowserLaunchedToOpenUrl)"
+  )
+  // @sentinel-only:begin
+  , (
+      ASimWebSessionLogs
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where Url has ValueDomain or DstHostname has ValueDomain or HttpHost has ValueDomain
+      | where _InDomain(_Host(Url), ValueDomain) or _InDomain(tolower(DstHostname), ValueDomain) or _InDomain(tolower(HttpHost), ValueDomain)
+      | project TimeGenerated, AccountUpn = tolower(SrcUsername), Kind = "proxy", ActionType = DvcAction, IsClickedThrough = false,
+          Url = coalesce(Url, HttpHost, DstHostname), Workload = "", Ip = SrcIpAddr, Device = tolower(SrcHostname), Process = "",
+          Source = strcat("ASimWebSessionLogs (", EventProduct, ")")
+  ),
+  (
+      CommonSecurityLog
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where RequestURL has ValueDomain or DestinationHostName has ValueDomain
+      | where _InDomain(_Host(RequestURL), ValueDomain) or _InDomain(tolower(DestinationHostName), ValueDomain)
+      | project TimeGenerated, AccountUpn = tolower(SourceUserName), Kind = "proxy", ActionType = DeviceAction, IsClickedThrough = false,
+          Url = coalesce(RequestURL, DestinationHostName), Workload = "", Ip = SourceIP, Device = tolower(SourceHostName), Process = "",
+          Source = strcat("CommonSecurityLog (", DeviceVendor, ")")
+  )
+  // @sentinel-only:end
+  | summarize Clicks = countif(Kind == "click"), Allowed = countif(Kind == "click" and ActionType == "ClickAllowed"),
+      Blocked = countif(Kind == "click" and ActionType has "Blocked"), ClickedThrough = countif(Kind == "click" and IsClickedThrough),
+      FirstClick = min(TimeGenerated), LastClick = max(TimeGenerated),
+      Urls = make_set(Url, 10), Workloads = make_set_if(Workload, isnotempty(Workload)), IPs = make_set_if(Ip, isnotempty(Ip), 5),
+      BrowserConnections = countif(Kind == "browser"), BrowserLaunches = countif(Kind == "launch"), ProxyRequests = countif(Kind == "proxy"),
+      Devices = make_set_if(Device, isnotempty(Device), 10), Processes = make_set_if(Process, isnotempty(Process), 10), Sources = make_set(Source)
+      by AccountUpn
   | sort by Allowed desc, FirstClick asc

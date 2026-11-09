@@ -1,15 +1,16 @@
 id: EM-T1
-name: Timeline e-mail, clic, téléchargement, réseau, processus
+name: Email, click, download, network, process timeline
 indicators: [email]
 action: timeline
+targets: [device, url, ip]
 description: >
-  Chaîne complète autour de T0 pour l'utilisateur : e-mails reçus, clics, fichiers téléchargés, premier contact
-  avec chaque destination publique et processus lancés depuis l'explorateur, un navigateur ou Office. Host porte le
-  rôle connu de la machine (DC, serveur RDS déclaré…).
+  Full chain around T0 for the user: received emails, clicks, downloaded files, first contact
+  with each public destination and processes started from Explorer, a browser or Office. Host carries the
+  known role of the device (DC, declared RDS server…).
 reading:
-  decisive: E-mail → clic → téléchargement ou commande collée → processus (powershell, mshta, script) → connexion sortante.
-  context: Délai court (moins de 5 minutes) entre le clic et le premier processus inhabituel.
-  noise: Navigation ordinaire, ouverture de documents Office depuis Outlook.
+  decisive: Email → click → download or pasted command → process (powershell, mshta, script) → outbound connection.
+  context: Short delay (under 5 minutes) between the click and the first unusual process.
+  noise: Ordinary browsing, Office documents opened from Outlook.
 window: { before: 30m, after: 30m }
 uses: [roles]
 query: |
@@ -21,14 +22,14 @@ query: |
       EmailEvents
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where RecipientEmailAddress =~ ValueMail
-      | project TimeGenerated, Source = "EmailEvents", Host = "", Account = ValueMail, Action = "E-mail reçu",
+      | project TimeGenerated, Source = "EmailEvents", Host = "", Account = ValueMail, Action = "Email received",
           Detail = strcat(SenderFromAddress, " · ", Subject, " · ", DeliveryAction, " ", ThreatTypes)
   ),
   (
       UrlClickEvents
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where AccountUpn =~ ValueMail
-      | project TimeGenerated, Source = "UrlClickEvents", Host = "", Account = ValueMail, Action = strcat("Clic ", ActionType), Detail = Url
+      | project TimeGenerated, Source = "UrlClickEvents", Host = "", Account = ValueMail, Action = strcat("Click ", ActionType), Detail = Url
   ),
   (
       DeviceFileEvents
@@ -36,7 +37,7 @@ query: |
       | where IsUser(InitiatingProcessAccountUpn, InitiatingProcessAccountName)
       | where isnotempty(FileOriginUrl) or FolderPath has @"\Downloads\"
       | project TimeGenerated, Source = "DeviceFileEvents", Host = tolower(DeviceName), Account = ValueMail,
-          Action = strcat("Fichier ", ActionType), Detail = strcat(FolderPath, " ← ", FileOriginUrl, " · ", InitiatingProcessFileName)
+          Action = strcat("File ", ActionType), Detail = strcat(FolderPath, " ← ", FileOriginUrl, " · ", InitiatingProcessFileName)
   ),
   (
       DeviceProcessEvents
@@ -44,7 +45,7 @@ query: |
       | where IsUser(AccountUpn, AccountName)
       | where InitiatingProcessFileName in~ (Launchers)
       | project TimeGenerated, Source = "DeviceProcessEvents", Host = tolower(DeviceName), Account = ValueMail,
-          Action = strcat("Processus ", FileName), Detail = strcat(InitiatingProcessFileName, " → ", ProcessCommandLine)
+          Action = strcat("Process ", FileName), Detail = strcat(InitiatingProcessFileName, " → ", ProcessCommandLine)
   ),
   (
       DeviceNetworkEvents
@@ -53,7 +54,7 @@ query: |
       | where RemoteIPType == "Public"
       | summarize TimeGenerated = min(TimeGenerated) by DeviceName, InitiatingProcessFileName, Destination = coalesce(RemoteUrl, RemoteIP), RemotePort
       | project TimeGenerated, Source = "DeviceNetworkEvents", Host = tolower(DeviceName), Account = ValueMail,
-          Action = strcat("Premier contact · ", InitiatingProcessFileName), Detail = strcat(Destination, ":", tostring(RemotePort))
+          Action = strcat("First contact · ", InitiatingProcessFileName), Detail = strcat(Destination, ":", tostring(RemotePort))
   )
   | extend MachineKey = _HostKey(Host)
   | lookup kind=leftouter (_MachineRoles(EndTimestamp)) on MachineKey

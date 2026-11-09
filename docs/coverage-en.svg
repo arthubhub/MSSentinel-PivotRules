@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="810" height="446" viewBox="0 0 810 446" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif">
+<rect width="810" height="446" rx="16" fill="#101626"/>
+<text x="24" y="40" font-size="20" font-weight="700" fill="#ffffff">Rules per indicator type</text>
+<rect x="150" y="54" width="14" height="14" rx="3" fill="#8764b8"/><text x="170" y="66" font-size="13" fill="#b9c7e6">Statistics</text>
+<rect x="280" y="54" width="14" height="14" rx="3" fill="#4f8bff"/><text x="300" y="66" font-size="13" fill="#b9c7e6">Pivot</text>
+<rect x="410" y="54" width="14" height="14" rx="3" fill="#e8833a"/><text x="430" y="66" font-size="13" fill="#b9c7e6">Timeline</text>
+<text x="138" y="100" font-size="14" fill="#b9c7e6" text-anchor="end">IP</text>
+<rect x="150" y="80" width="184.66666666666666" height="30" rx="5" fill="#8764b8"/>
+<text x="242.33333333333331" y="100" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">6</text>
+<rect x="336.66666666666663" y="80" width="278" height="30" rx="5" fill="#4f8bff"/>
+<text x="475.66666666666663" y="100" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">9</text>
+<rect x="616.6666666666666" y="80" width="91.33333333333333" height="30" rx="5" fill="#e8833a"/>
+<text x="662.3333333333333" y="100" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">3</text>
+<text x="138" y="142" font-size="14" fill="#b9c7e6" text-anchor="end">Account</text>
+<rect x="150" y="122" width="122.44444444444444" height="30" rx="5" fill="#8764b8"/>
+<text x="211.22222222222223" y="142" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">4</text>
+<rect x="274.44444444444446" y="122" width="278" height="30" rx="5" fill="#4f8bff"/>
+<text x="413.44444444444446" y="142" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">9</text>
+<rect x="554.4444444444445" y="122" width="29.11111111111111" height="30" rx="5" fill="#e8833a"/>
+<text x="569" y="142" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">1</text>
+<text x="138" y="184" font-size="14" fill="#b9c7e6" text-anchor="end">E-mail</text>
+<rect x="150" y="164" width="122.44444444444444" height="30" rx="5" fill="#8764b8"/>
+<text x="211.22222222222223" y="184" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">4</text>
+<rect x="274.44444444444446" y="164" width="246.88888888888889" height="30" rx="5" fill="#4f8bff"/>
+<text x="397.8888888888889" y="184" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">8</text>
+<rect x="523.3333333333334" y="164" width="29.11111111111111" height="30" rx="5" fill="#e8833a"/>
+<text x="537.8888888888889" y="184" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">1</text>
+<text x="138" y="226" font-size="14" fill="#b9c7e6" text-anchor="end">Domain / URL</text>
+<rect x="150" y="206" width="122.44444444444444" height="30" rx="5" fill="#8764b8"/>
+<text x="211.22222222222223" y="226" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">4</text>
+<rect x="274.44444444444446" y="206" width="153.55555555555554" height="30" rx="5" fill="#4f8bff"/>
+<text x="351.22222222222223" y="226" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">5</text>
+<rect x="430" y="206" width="29.11111111111111" height="30" rx="5" fill="#e8833a"/>
+<text x="444.55555555555554" y="226" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">1</text>
+<text x="138" y="268" font-size="14" fill="#b9c7e6" text-anchor="end">Device</text>
+<rect x="150" y="248" width="122.44444444444444" height="30" rx="5" fill="#8764b8"/>
+<text x="211.22222222222223" y="268" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">4</text>
+<rect x="274.44444444444446" y="248" width="215.77777777777777" height="30" rx="5" fill="#4f8bff"/>
+<text x="382.33333333333337" y="268" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">7</text>
+<rect x="492.22222222222223" y="248" width="29.11111111111111" height="30" rx="5" fill="#e8833a"/>
+<text x="506.77777777777777" y="268" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">1</text>
+<text x="138" y="310" font-size="14" fill="#b9c7e6" text-anchor="end">Process</text>
+<rect x="150" y="290" width="91.33333333333333" height="30" rx="5" fill="#8764b8"/>
+<text x="195.66666666666666" y="310" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">3</text>
+<rect x="243.33333333333331" y="290" width="122.44444444444444" height="30" rx="5" fill="#4f8bff"/>
+<text x="304.55555555555554" y="310" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">4</text>
+<rect x="367.77777777777777" y="290" width="29.11111111111111" height="30" rx="5" fill="#e8833a"/>
+<text x="382.3333333333333" y="310" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">1</text>
+<text x="138" y="352" font-size="14" fill="#b9c7e6" text-anchor="end">App</text>
+<rect x="150" y="332" width="91.33333333333333" height="30" rx="5" fill="#8764b8"/>
+<text x="195.66666666666666" y="352" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">3</text>
+<rect x="243.33333333333331" y="332" width="91.33333333333333" height="30" rx="5" fill="#4f8bff"/>
+<text x="289" y="352" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">3</text>
+<text x="138" y="394" font-size="14" fill="#b9c7e6" text-anchor="end">Hash</text>
+<rect x="150" y="374" width="91.33333333333333" height="30" rx="5" fill="#8764b8"/>
+<text x="195.66666666666666" y="394" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">3</text>
+<rect x="243.33333333333331" y="374" width="60.22222222222222" height="30" rx="5" fill="#4f8bff"/>
+<text x="273.4444444444444" y="394" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">2</text>
+</svg>

@@ -1,6 +1,6 @@
-// Tous les journaux qui impliquant un domaine, avec mise en commun des colonnes : TimeGenerated, Source, Host, Account, Url, Action.
-// Sources : UrlClickEvents, URL d'e-mails et de messages Teams, connexions réseau, origine des fichiers téléchargés,
-// DNS (serveurs DNS Windows, ASIM, réponses DNS vues par Defender for Endpoint, Sysmon 22), connexions Sysmon 3, proxy et pare-feu (CEF, ASIM web,
+// All logs involving a domain, mapped to common columns: TimeGenerated, Source, Host, Account, Url, Action.
+// Sources: UrlClickEvents, URLs in emails and Teams messages, network connections, origin of downloaded files,
+// DNS (Windows DNS servers, ASIM, DNS responses seen by Defender for Endpoint, Sysmon 22), Sysmon 3 connections, proxy and firewall (CEF, ASIM web,
 // Azure Firewall).
 // @requires: web_functions, sysmon
 let _DomainHits = (start:datetime, end:datetime, d:string) {
@@ -10,7 +10,7 @@ let _DomainHits = (start:datetime, end:datetime, d:string) {
         | where TimeGenerated between (start .. end)
         | where Url has d
         | where _InDomain(_Host(Url), d)
-        | project TimeGenerated, Source = "UrlClickEvents", Host = "", Account = tolower(AccountUpn), Url, Action = strcat("Clic ", ActionType)
+        | project TimeGenerated, Source = "UrlClickEvents", Host = "", Account = tolower(AccountUpn), Url, Action = strcat("Click ", ActionType)
     ),
     (
         EmailUrlInfo
@@ -22,14 +22,14 @@ let _DomainHits = (start:datetime, end:datetime, d:string) {
             | where TimeGenerated between (start .. end)
             | project NetworkMessageId, RecipientEmailAddress
             ) on NetworkMessageId
-        | project TimeGenerated, Source = "EmailUrlInfo", Host = "", Account = tolower(RecipientEmailAddress), Url, Action = strcat("URL dans un e-mail (", UrlLocation, ")")
+        | project TimeGenerated, Source = "EmailUrlInfo", Host = "", Account = tolower(RecipientEmailAddress), Url, Action = strcat("URL in an email (", UrlLocation, ")")
     ),
     (
         MessageUrlInfo
         | where TimeGenerated between (start .. end)
         | where UrlDomain has d
         | where _InDomain(tolower(UrlDomain), d)
-        | project TimeGenerated, Source = "MessageUrlInfo", Host = "", Account = "", Url, Action = "URL dans un message Teams"
+        | project TimeGenerated, Source = "MessageUrlInfo", Host = "", Account = "", Url, Action = "URL in a Teams message"
     ),
     (
         DeviceNetworkEvents
@@ -45,8 +45,9 @@ let _DomainHits = (start:datetime, end:datetime, d:string) {
         | where FileOriginUrl has d or FileOriginReferrerUrl has d
         | where _InDomain(_Host(FileOriginUrl), d) or _InDomain(_Host(FileOriginReferrerUrl), d)
         | project TimeGenerated, Source = "DeviceFileEvents", Host = tolower(DeviceName), Account = tolower(InitiatingProcessAccountName),
-            Url = iff(_InDomain(_Host(FileOriginUrl), d), FileOriginUrl, FileOriginReferrerUrl), Action = strcat("Téléchargement ", FileName)
+            Url = iff(_InDomain(_Host(FileOriginUrl), d), FileOriginUrl, FileOriginReferrerUrl), Action = strcat("Download ", FileName)
     ),
+    // @sentinel-only:begin
     (
         DnsEvents
         | where TimeGenerated between (start .. end)
@@ -63,6 +64,7 @@ let _DomainHits = (start:datetime, end:datetime, d:string) {
         | project TimeGenerated, Source = "ASimDnsActivityLogs", Host = tolower(coalesce(SrcHostname, SrcIpAddr)), Account = tolower(SrcUsername),
             Url = DnsQuery, Action = strcat("DNS ", DnsQueryTypeName)
     ),
+    // @sentinel-only:end
     (
         DeviceEvents
         | where TimeGenerated between (start .. end)
@@ -72,8 +74,9 @@ let _DomainHits = (start:datetime, end:datetime, d:string) {
         | where _InDomain(Q, d)
         | project TimeGenerated, Source = "DeviceEvents (DNS)", Host = tolower(DeviceName), Account = tolower(InitiatingProcessAccountName),
             Url = Q, Action = strcat("DNS · ", InitiatingProcessFileName)
-    ),
-    (
+    )
+    // @sentinel-only:begin
+    , (
         ASimWebSessionLogs
         | where TimeGenerated between (start .. end)
         | where Url has d or DstHostname has d or HttpHost has d
@@ -89,12 +92,22 @@ let _DomainHits = (start:datetime, end:datetime, d:string) {
         | project TimeGenerated, Source = "AZFWApplicationRule", Host = SourceIp, Account = "", Url = coalesce(TargetUrl, Fqdn),
             Action = strcat("Azure Firewall ", Action)
     ),
+    // Azure Firewall DNS proxy (Sentinel only)
+    (
+        AZFWDnsQuery
+        | where TimeGenerated between (start .. end)
+        | where QueryName has d
+        | extend Q = tolower(trim_end(@"\.", QueryName))
+        | where _InDomain(Q, d)
+        | project TimeGenerated, Source = "AZFWDnsQuery", Host = SourceIp, Account = "", Url = Q,
+            Action = strcat("DNS ", QueryType, " · ", ResponseCode, " (Azure Firewall DNS proxy)")
+    ),
     (
         _Sysmon(start, end, dynamic([3, 22]), d)
         | extend Q = tolower(trim_end(@"\.", iff(EventID == 22, QueryName, DestinationHostname)))
         | where _InDomain(Q, d)
         | project TimeGenerated, Source = strcat("Sysmon ", tostring(EventID)), Host = tolower(Computer), Account = UserSam, Url = Q,
-            Action = strcat(iff(EventID == 22, "DNS · ", "Connexion · "), ProcessFile)
+            Action = strcat(iff(EventID == 22, "DNS · ", "Connection · "), ProcessFile)
     ),
     (
         CommonSecurityLog
@@ -104,4 +117,5 @@ let _DomainHits = (start:datetime, end:datetime, d:string) {
         | project TimeGenerated, Source = strcat("CommonSecurityLog (", DeviceVendor, ")"), Host = tolower(coalesce(SourceHostName, SourceIP)),
             Account = tolower(SourceUserName), Url = coalesce(RequestURL, DestinationHostName), Action = coalesce(DeviceAction, Activity)
     )
+    // @sentinel-only:end
 };

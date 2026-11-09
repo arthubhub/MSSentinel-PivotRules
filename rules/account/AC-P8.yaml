@@ -1,0 +1,64 @@
+id: AC-P8
+name: Files run and created by the account
+indicators: [account]
+action: pivot
+targets: [hash, process, device]
+description: >
+  Programs started and executables written by the account, one row per file (hash, or file name when the hash
+  is missing): processes created under the account (DeviceProcessEvents, AccountName or AccountUpn), executable files,
+  scripts and archives created or modified by a process of the account (DeviceFileEvents, InitiatingProcessAccountName or
+  InitiatingProcessAccountUpn) and, in Sentinel, Sysmon 1 (with hash) and Windows audit 4688 (without hash) when
+  Defender for Endpoint is not deployed. Shows whether the file was both written and started by the account, the
+  devices, folders and command lines. Non-executable files are excluded from creations (volume): see AC-P6
+  for access to documents and shares.
+reading:
+  decisive: Executable or script written then started by the account from a user folder (Downloads, AppData, Temp), or unexpected admin tool (psexec, rclone, procdump, AdFind).
+  context: File present on a single device; interpreter (powershell.exe, cmd.exe, mshta.exe) with an encoded command line.
+  noise: Business applications, browsers, automatic updates and system binaries started at every logon.
+window: { before: 24h, after: 1h }
+uses: [win_security, sysmon]
+query: |
+  let ExecExt = @"(?i)\.(exe|dll|scr|com|ps1|psm1|bat|cmd|vbs|vbe|js|jse|hta|wsf|msi|lnk|iso|img|zip|7z|rar)$";
+  union isfuzzy=true
+  (
+      DeviceProcessEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where AccountName =~ ValueSam or AccountUpn =~ ValueUpn
+      | project TimeGenerated, Hash = tolower(SHA256), FileName = tolower(FileName), FolderPath, Machine = tolower(DeviceName),
+          Act = "Executed", Detail = substring(ProcessCommandLine, 0, 300), Source = "DeviceProcessEvents"
+  ),
+  (
+      DeviceFileEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where InitiatingProcessAccountName =~ ValueSam or InitiatingProcessAccountUpn =~ ValueUpn
+      | where ActionType in ("FileCreated", "FileModified", "FileRenamed")
+      | where FileName matches regex ExecExt
+      | project TimeGenerated, Hash = tolower(SHA256), FileName = tolower(FileName), FolderPath, Machine = tolower(DeviceName),
+          Act = "Written", Detail = strcat("Written by ", InitiatingProcessFileName, iff(isnotempty(FileOriginUrl), strcat(" from ", FileOriginUrl), "")),
+          Source = "DeviceFileEvents"
+  )
+  // @sentinel-only:begin
+  , (
+      _Sysmon(StartTimestamp, EndTimestamp, dynamic([1]), ValueSam)
+      | where UserSam == ValueSam
+      | project TimeGenerated, Hash = SHA256, FileName = ProcessFile, FolderPath = Image, Machine = tolower(Computer),
+          Act = "Executed", Detail = substring(CommandLine, 0, 300), Source = "Sysmon 1"
+  ),
+  (
+      _WinSecurity(StartTimestamp, EndTimestamp, dynamic([4688]), ValueSam)
+      | where SubjectSam == ValueSam
+      | project TimeGenerated, Hash = "", FileName = tolower(tostring(split(NewProcessName, @"\")[-1])), FolderPath = NewProcessName,
+          Machine = tolower(Computer), Act = "Executed", Detail = substring(CommandLine, 0, 300), Source = SourceTable
+  )
+  // @sentinel-only:end
+  | where isnotempty(FileName)
+  | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count(), Acts = make_set(Act),
+      Hashes = make_set_if(Hash, isnotempty(Hash), 3), Folders = make_set(FolderPath, 5), MachineCount = dcount(Machine),
+      Machines = make_set(Machine, 10), Details = make_set(Detail, 5), Sources = make_set(Source)
+      by Key = coalesce(Hash, FileName), FileName
+  | extend WrittenAndRun = set_has_element(Acts, "Written") and set_has_element(Acts, "Executed"),
+      UserFolder = tostring(Folders) matches regex @"(?i)\\(users|temp|appdata|downloads|programdata|public)\\"
+  | extend Rank = case(WrittenAndRun, 0, UserFolder, 1, MachineCount == 1, 2, 3)
+  | sort by Rank asc, FirstSeen asc
+  | project FileName, SHA256 = tostring(Hashes[0]), Acts, WrittenAndRun, UserFolder, FirstSeen, LastSeen, Events, MachineCount, Machines,
+      Folders, Details, Sources

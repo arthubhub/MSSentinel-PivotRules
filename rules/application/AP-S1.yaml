@@ -1,17 +1,18 @@
 id: AP-S1
-name: Usage de l'application par IP
+name: Application usage by IP
 indicators: [application]
 action: statistics
+targets: [ip, account]
 description: >
-  Connexions et appels de l'application (AppId, identifiant de service principal ou nom) sur 14 jours, par
-  source et par IP : service principal, identité managée, utilisateurs via l'application, Microsoft Graph.
-  Établit la base des IP habituelles (CI, serveurs) et signale les IP apparues dans les deux derniers jours.
-  Les connexions d'applications viennent de Sentinel ou, à défaut, de EntraIdSpnSignInEvents (Defender XDR) ;
-  AppOrigin dit si l'application est éditée par Microsoft, par le tenant ou par un autre tenant.
+  Sign-ins and calls of the application (AppId, service principal ID or name) over 14 days, by
+  source and by IP: service principal, managed identity, users through the application, Microsoft Graph and legacy Azure AD Graph (AADGraphActivityLogs).
+  Builds the baseline of usual IPs (CI, servers) and flags the IPs that appeared in the last two days.
+  Application sign-ins come from Sentinel or, failing that, from EntraIdSpnSignInEvents (Defender XDR);
+  AppOrigin tells whether the application is published by Microsoft, by the tenant or by another tenant.
 reading:
-  decisive: IP jamais vue pour cette application, d'un hébergeur ou d'un pays inhabituel, utilisant un secret client.
-  context: Hausse soudaine des appels Graph ou des échecs d'authentification.
-  noise: Exécuteurs CI/CD dont les IP changent, poste du développeur qui teste en local.
+  decisive: IP never seen for this application, from a hosting provider or an unusual country, using a client secret.
+  context: Sudden increase in Graph calls or authentication failures.
+  noise: CI/CD runners whose IPs change, developer workstation testing locally.
 v1: true
 window: { before: 14d, after: 1d }
 uses: [signins, spn_signins]
@@ -25,16 +26,25 @@ query: |
   (
       _Signins(StartTimestamp, EndTimestamp, "", "")
       | where AppId == ValueApp or AppDisplayName =~ ValueApp
-      | project TimeGenerated, Source = "Utilisateurs via l'application", IPAddress, Location, Identity = tolower(UserPrincipalName),
+      | project TimeGenerated, Source = "Users through the application", IPAddress, Location, Identity = tolower(UserPrincipalName),
           AppOrigin = "", Success = Succeeded, Detail = ResourceDisplayName
-  ),
-  (
+  )
+  // @sentinel-only:begin
+  , (
       MicrosoftGraphActivityLogs
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where AppId == ValueApp or ServicePrincipalId == ValueApp
       | project TimeGenerated, Source = "Microsoft Graph", IPAddress, Location = "", Identity = coalesce(UserId, ServicePrincipalId),
           AppOrigin = "", Success = ResponseStatusCode < 400, Detail = RequestMethod
+  ),
+  (
+      AADGraphActivityLogs
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where AppId == ValueApp or ServicePrincipalId == ValueApp
+      | project TimeGenerated, Source = "Azure AD Graph", IPAddress = CallerIpAddress, Location = "", Identity = coalesce(UserId, ServicePrincipalId),
+          AppOrigin = "", Success = ResponseStatusCode < 400, Detail = RequestMethod
   )
+  // @sentinel-only:end
   | summarize Events = count(), Successes = countif(Success), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated),
       ActiveDays = dcount(bin(TimeGenerated, 1d)), Identities = make_set(Identity, 10), Locations = make_set(Location, 5),
       Details = make_set(Detail, 5), AppOrigin = take_anyif(AppOrigin, isnotempty(AppOrigin)) by Source, IPAddress

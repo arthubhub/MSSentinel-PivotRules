@@ -1,18 +1,24 @@
-// Connexions Entra ID des applications (service principals) et des identités managées, normalisées :
-// - Sentinel : AADServicePrincipalSignInLogs et AADManagedIdentitySignInLogs ;
-// - Defender XDR : EntraIdSpnSignInEvents (IsManagedIdentity distingue les deux), lue seulement pour le type que les tables
-//   Sentinel ne fournissent pas sur la période (pas de doublon dans le portail unifié).
-// Paramètres : start, end, app (AppId, ServicePrincipalId ou nom ; vide = toutes), ip (vide = toutes).
+// Entra ID sign-ins of applications (service principals) and managed identities, normalized:
+// - Sentinel: AADServicePrincipalSignInLogs and AADManagedIdentitySignInLogs;
+// - Defender XDR: EntraIdSpnSignInEvents (IsManagedIdentity tells them apart), read only for the type the Sentinel
+//   tables do not provide over the period (no duplicates in the unified portal).
+// "@sentinel-only" blocks (Sentinel tables) are removed from the Defender XDR variant, which then reads only EntraIdSpnSignInEvents.
+// Parameters: start, end, app (AppId, ServicePrincipalId or name; empty = all), ip (empty = all).
 let _SpnSignins = (start:datetime, end:datetime, app:string, ip:string) {
     let _HasSpn = toscalar(union isfuzzy=true
+        // @sentinel-only:begin
         (AADServicePrincipalSignInLogs | where TimeGenerated between ((start - 1d) .. end) | take 1 | project Present = 1),
+        // @sentinel-only:end
         (print Present = 0)
         | summarize max(Present)) == 1;
     let _HasMi = toscalar(union isfuzzy=true
+        // @sentinel-only:begin
         (AADManagedIdentitySignInLogs | where TimeGenerated between ((start - 1d) .. end) | take 1 | project Present = 1),
+        // @sentinel-only:end
         (print Present = 0)
         | summarize max(Present)) == 1;
     union isfuzzy=true
+    // @sentinel-only:begin
     (
         AADServicePrincipalSignInLogs
         | where TimeGenerated between (start .. end)
@@ -27,27 +33,28 @@ let _SpnSignins = (start:datetime, end:datetime, app:string, ip:string) {
         | where TimeGenerated between (start .. end)
         | where isempty(app) or AppId == app or ServicePrincipalId == app or ServicePrincipalName =~ app
         | where isempty(ip) or IPAddress == ip
-        | project TimeGenerated, SourceTable = "AADManagedIdentitySignInLogs", SignInType = "Identité managée", ServicePrincipalName,
-            ServicePrincipalId, AppId, ResourceDisplayName, ResultType, IPAddress, Location, Credential = "Identité managée",
+        | project TimeGenerated, SourceTable = "AADManagedIdentitySignInLogs", SignInType = "Managed identity", ServicePrincipalName,
+            ServicePrincipalId, AppId, ResourceDisplayName, ResultType, IPAddress, Location, Credential = "Managed identity",
             AppOwnerTenantId, HomeTenantId = TenantId
     ),
+    // @sentinel-only:end
     (
         EntraIdSpnSignInEvents
         | where Timestamp between (start .. end)
-        | extend SignInType = iff(IsManagedIdentity, "Identité managée", "Service principal")
-        | where (SignInType == "Service principal" and not(_HasSpn)) or (SignInType == "Identité managée" and not(_HasMi))
+        | extend SignInType = iff(IsManagedIdentity, "Managed identity", "Service principal")
+        | where (SignInType == "Service principal" and not(_HasSpn)) or (SignInType == "Managed identity" and not(_HasMi))
         | where isempty(app) or ApplicationId == app or ServicePrincipalId == app or ServicePrincipalName =~ app or Application =~ app
         | where isempty(ip) or IPAddress == ip
         | project TimeGenerated = Timestamp, SourceTable = "EntraIdSpnSignInEvents", SignInType, ServicePrincipalName = coalesce(ServicePrincipalName, Application),
             ServicePrincipalId, AppId = ApplicationId, ResourceDisplayName, ResultType = tostring(ErrorCode), IPAddress, Location = Country,
-            Credential = iff(IsManagedIdentity, "Identité managée", iff(IsConfidentialClient, "Client confidentiel", "Client public")),
+            Credential = iff(IsManagedIdentity, "Managed identity", iff(IsConfidentialClient, "Confidential client", "Public client")),
             AppOwnerTenantId = "", HomeTenantId = ResourceTenantId
     )
     | extend Succeeded = ResultType == "0"
-    // Origine de l'application : éditeur Microsoft, application du tenant, ou application d'un autre tenant (multi-tenant tierce)
+    // Application origin: Microsoft publisher, application of this tenant, or application of another tenant (third-party multi-tenant)
     | extend AppOrigin = case(AppOwnerTenantId in ("f8cdef31-a31e-4b4a-93e4-5f571e91255a", "72f988bf-86f1-41af-91ab-2d7cd011db47"), "Microsoft (first-party)",
-        SignInType == "Identité managée", "Identité managée du tenant",
+        SignInType == "Managed identity", "Tenant managed identity",
         isempty(AppOwnerTenantId), "",
-        AppOwnerTenantId == HomeTenantId, "Application du tenant",
-        "Application d'un autre tenant")
+        AppOwnerTenantId == HomeTenantId, "Tenant application",
+        "Other-tenant application")
 };

@@ -1,14 +1,14 @@
 id: DM-S2
-name: Prévalence du domaine
+name: Domain prevalence
 indicators: [domain, url]
 action: statistics
 description: >
-  Première et dernière apparition du domaine sur 30 jours, nombre de machines et de comptes distincts, par
-  source et au total, avec les sous-domaines vus et le nombre de correspondances exactes de l'URL sélectionnée.
+  First and last appearance of the domain over 30 days, number of distinct devices and accounts, per source and in
+  total, with the subdomains seen and the number of exact matches of the selected URL.
 reading:
-  decisive: Domaine vu pour la première fois dans la fenêtre, sur 1 à 3 machines, nom proche d'une marque connue.
-  context: Sous-domaines aléatoires ou très longs (génération algorithmique, tunnel DNS).
-  noise: Nouveaux services SaaS adoptés par une équipe, domaines de CDN.
+  decisive: Domain seen for the first time in the window, on 1 to 3 devices, name close to a known brand.
+  context: Random or very long subdomains (algorithmic generation, DNS tunnel).
+  noise: New SaaS services adopted by a team, CDN domains.
 v1: true
 window: { before: 30d, after: 1d }
 uses: [domain_hits]

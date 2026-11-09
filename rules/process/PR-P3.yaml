@@ -1,17 +1,18 @@
 id: PR-P3
-name: Fichiers créés ou modifiés par le processus
+name: Files created or modified by the process
 indicators: [process]
 action: pivot
+targets: [hash, url, device]
 description: >
-  Fichiers créés, modifiés, renommés ou supprimés par le processus : Defender for Endpoint (DeviceFileEvents) et, dans
-  Sentinel, accès aux fichiers audités par SACL (4656, 4660, 4663, 4670 : seule source des lectures) et Sysmon (11 fichier
-  créé, 15 flux Zone.Identifier avec l'URL d'origine, 23 et 26 suppressions). Par exemple, depuis
-  notepad.exe on retrouve les fichiers modifiés ; depuis 7z.exe ou winrar.exe, les archives créées. MachineRole
-  donne le rôle connu de la machine (DC, serveur déclaré).
+  Files created, modified, renamed or deleted by the process: Defender for Endpoint (DeviceFileEvents) and, in
+  Sentinel, file access audited by SACL (4656, 4660, 4663, 4670: the only source for reads) and Sysmon (11 file
+  created, 15 Zone.Identifier stream with the origin URL, 23 and 26 deletions). For instance, from notepad.exe you
+  find the modified files; from 7z.exe or winrar.exe, the archives created. MachineRole gives the known role of the
+  device (DC, declared server).
 reading:
-  decisive: Archive volumineuse créée dans un dossier temporaire ou public avant un transfert sortant, ou exécutable déposé dans AppData.
-  context: Fichiers renommés en masse (chiffrement), écriture dans le dossier Démarrage.
-  noise: Fichiers temporaires et caches de l'application.
+  decisive: Large archive created in a temporary or public folder before an outbound transfer, or executable dropped in AppData.
+  context: Files renamed in bulk (encryption), write to the Startup folder.
+  noise: Temporary files and caches of the application.
 window: { before: 30m, after: 30m }
 context: [HOST]
 uses: [paths, roles, win_security, sysmon]

@@ -1,0 +1,130 @@
+id: MC-P7
+name: IP addresses of the device
+indicators: [device]
+action: pivot
+targets: [ip]
+description: >
+  IP addresses held by the device over the period, one row per address, with first seen, last seen and sources.
+  Direct sources: network adapter addresses (DeviceNetworkInfo, with adapter, MAC and address type), public egress IP
+  (DeviceInfo), local IP of network connections (DeviceNetworkEvents, useful for VPNs and virtual adapters), Azure
+  Monitor agent IP (Heartbeat, public IP and private IPs) and Linux device IP (Syslog). Indirect sources, seen by other
+  devices: remote workstation IP (DeviceLogonEvents of a server), source workstation IP seen by Defender for Identity,
+  and IP of the self-reported source workstation in the 4624, 4625, 4648, 4768, 4769, 4771 and 4776 events logged by
+  domain controllers and servers. Reverse of IP-P1: gives the IPs to pivot on next (firewall, proxy, cloud sign-ins).
+  The known role of the IP (DC, NAT, VPN…: EasyPivotRoles watchlist) is shown.
+reading:
+  decisive: IP assigned by DeviceNetworkInfo, Heartbeat or Syslog over the period (high confidence); this is the address to search for in firewall and proxy logs around T0.
+  context: IP seen only as a source workstation by other devices (4624, DeviceLogonEvents); public egress IP shared by a whole site.
+  noise: Virtual adapter addresses (Hyper-V, Docker, WSL), link-local addresses (169.254, fe80) and NAT or VPN IPs held by many devices.
+window: { before: 24h, after: 1h }
+uses: [win_security, roles]
+query: |
+  union isfuzzy=true
+  (
+      DeviceNetworkInfo
+      | where TimeGenerated between ((StartTimestamp - 1d) .. EndTimestamp)
+      | where DeviceName startswith ValueShort
+      | where _IsHost(DeviceName)
+      | mv-expand IpEntry = IPAddresses
+      | extend Ip = tostring(IpEntry.IPAddress)
+      | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
+          by Ip, Machine = tolower(DeviceName),
+          Evidence = strcat("Adapter ", NetworkAdapterName, " (", MacAddress, ", ", NetworkAdapterStatus, ", ", tostring(IpEntry.AddressType), ")"),
+          Source = "DeviceNetworkInfo"
+  ),
+  (
+      DeviceInfo
+      | where TimeGenerated between ((StartTimestamp - 1d) .. EndTimestamp)
+      | where DeviceName startswith ValueShort
+      | where _IsHost(DeviceName)
+      | where isnotempty(PublicIP)
+      | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
+          by Ip = PublicIP, Machine = tolower(DeviceName), Evidence = "Public egress IP", Source = "DeviceInfo"
+  ),
+  (
+      DeviceNetworkEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where DeviceName startswith ValueShort
+      | where _IsHost(DeviceName)
+      | where isnotempty(LocalIP)
+      | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
+          by Ip = LocalIP, Machine = tolower(DeviceName), Evidence = strcat("Local IP of network connections (", LocalIPType, ")"),
+          Source = "DeviceNetworkEvents"
+  ),
+  // @sentinel-only:begin
+  (
+      Heartbeat
+      | where TimeGenerated between ((StartTimestamp - 1d) .. EndTimestamp)
+      | where Computer startswith ValueShort
+      | where _IsHost(Computer)
+      | extend Ips = array_concat(pack_array(ComputerIP), iff(isnull(ComputerPrivateIPs), dynamic([]), ComputerPrivateIPs))
+      | mv-expand Ip = Ips to typeof(string)
+      | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
+          by Ip, Machine = tolower(Computer),
+          Evidence = iff(Ip == ComputerIP, "Azure Monitor agent IP", "Azure Monitor agent private IP"), Source = "Heartbeat"
+  ),
+  (
+      Syslog
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where Computer startswith ValueShort or HostName startswith ValueShort
+      | where _IsHost(Computer) or _IsHost(HostName)
+      | where isnotempty(HostIP)
+      | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
+          by Ip = HostIP, Machine = tolower(Computer), Evidence = "Linux device IP (Syslog)", Source = "Syslog"
+  ),
+  // @sentinel-only:end
+  (
+      DeviceLogonEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where RemoteDeviceName startswith ValueShort
+      | where _IsHost(RemoteDeviceName)
+      | where isnotempty(RemoteIP)
+      | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
+          by Ip = RemoteIP, Machine = tolower(RemoteDeviceName), Evidence = strcat("Remote workstation seen by ", tolower(DeviceName)),
+          Source = "DeviceLogonEvents"
+  ),
+  (
+      IdentityLogonEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where DeviceName startswith ValueShort
+      | where _IsHost(DeviceName)
+      | where isnotempty(IPAddress)
+      | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
+          by Ip = IPAddress, Machine = tolower(DeviceName), Evidence = strcat("Source ", Protocol, " to ", Application),
+          Source = "IdentityLogonEvents"
+  )
+  // @sentinel-only:begin
+  , (
+      _WinSecurity(StartTimestamp, EndTimestamp, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776]), ValueShort)
+      | where isnotempty(WorkstationName) and _IsHost(WorkstationName)
+      | where isnotempty(IpAddress) and IpAddress != "-"
+      | extend Ip = trim_start(@"::ffff:", IpAddress)
+      | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count()
+          by Ip, Machine = tolower(WorkstationName), Evidence = strcat("Self-reported source workstation, seen by ", tolower(Computer)),
+          Source = SourceTable
+  )
+  // @sentinel-only:end
+  | where isnotempty(Ip) and Ip !in ("127.0.0.1", "::1", "0.0.0.0", "::", "-")
+  | summarize FirstSeen = min(FirstSeen), LastSeen = max(LastSeen), Events = sum(Events),
+      Machines = make_set(Machine, 5), Evidence = make_set(Evidence, 10), Sources = make_set(Source) by Ip
+  | extend IpType = case(
+      Ip startswith "169.254." or Ip startswith "fe80:", "Link-local",
+      Ip contains ":", iff(Ip startswith "fc" or Ip startswith "fd", "Private IPv6", "IPv6"),
+      ipv4_is_private(Ip), "Private",
+      "Public")
+  | lookup kind=leftouter (_IpRoles(EndTimestamp) | where Ip !has "/" | project Ip, IpRole) on Ip
+  | extend ConfidenceRank = case(
+      set_has_element(Sources, "DeviceNetworkInfo") or set_has_element(Sources, "DeviceNetworkEvents")
+      // @sentinel-only:begin
+          or set_has_element(Sources, "Heartbeat") or set_has_element(Sources, "Syslog")
+      // @sentinel-only:end
+          , 1,
+      set_has_element(Sources, "DeviceInfo"), 2,
+      array_length(Sources) > 1, 3,
+      4)
+  | extend Confidence = case(ConfidenceRank == 1, "High: IP held by the device",
+      ConfidenceRank == 2, "High: public egress IP (shared by the site)",
+      ConfidenceRank == 3, "Medium: seen by several sources",
+      "Low: seen by a single indirect source")
+  | sort by ConfidenceRank asc, LastSeen desc
+  | project IPAddress = Ip, IpType, IpRole, Confidence, FirstSeen, LastSeen, Events, Evidence, Sources, Machines

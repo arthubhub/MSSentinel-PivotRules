@@ -1,15 +1,21 @@
 id: EM-P1
-name: Messages impliquant l'adresse
+name: Messages involving the address
 indicators: [email]
 action: pivot
+targets: [email, ip, domain]
 description: >
-  E-mails reçus ou envoyés par l'adresse autour de T0 (par défaut 4 heures avant et 1 heure après), avec
-  livraison, menaces, URL et pièces jointes, et le nombre de destinataires ayant reçu le même sujet du même
-  expéditeur (indice de campagne).
+  Emails received or sent by the address around T0 (4 hours before and 1 hour after by default), with
+  delivery, threats, URLs and attachments, and the number of recipients who received the same subject from the same
+  sender (campaign evidence). Each message is completed by post-delivery actions (EmailPostDeliveryEvents:
+  ZAP, admin purge, move, with the destination folder), URL domains (EmailUrlInfo) and
+  attachments, with the number of malicious attachments (EmailAttachmentInfo). Teams messages sent by the address
+  or mentioning it (MessageEvents) are added, and in Sentinel the Exchange audit operations on the mailbox
+  messages (OfficeActivity: send, send as or on behalf of, delete, move; ClientIP is the IP of the
+  mail client). The Source column gives the source table of each row.
 reading:
-  decisive: Même sujet du même expéditeur reçu par de nombreux destinataires (campagne), livré en boîte de réception.
-  context: Message en provenance d'un domaine nouveau, avec URL ou pièce jointe HTML, SVG ou archive.
-  noise: Notifications automatiques internes, invitations de calendrier.
+  decisive: Same subject from the same sender received by many recipients (campaign), delivered to the inbox; message removed by ZAP after delivery; malicious attachment.
+  context: Message from a new domain, with a URL or an HTML, SVG or archive attachment; Teams message from an external thread; messages sent or deleted by the mailbox from an unusual IP (Exchange audit).
+  noise: Internal automatic notifications, calendar invitations.
 window: { before: 4h, after: 1h }
 query: |
   let Mails = EmailEvents
@@ -19,10 +25,64 @@ query: |
       | where TimeGenerated between ((StartTimestamp - 1d) .. (EndTimestamp + 1d))
       | where Subject in ((Mails | distinct Subject))
       | summarize SameSubjectRecipients = dcount(RecipientEmailAddress) by Subject, SenderFromAddress;
-  Mails
-  | join kind=leftouter (Campaign) on Subject, SenderFromAddress
-  | extend Role = iff(RecipientEmailAddress =~ ValueMail, "Destinataire", "Expéditeur")
-  | project TimeGenerated, Role, SenderFromAddress, SenderMailFromAddress, SenderDisplayName, RecipientEmailAddress, Subject,
-      SameSubjectRecipients, EmailDirection, DeliveryAction, LatestDeliveryLocation, LatestDeliveryAction, ThreatTypes,
-      DetectionMethods, UrlCount, AttachmentCount, SenderIPv4, AuthenticationDetails, NetworkMessageId, InternetMessageId
+  let PostDelivery = EmailPostDeliveryEvents
+      | where TimeGenerated between (StartTimestamp .. (EndTimestamp + 2d))
+      | where NetworkMessageId in ((Mails | distinct NetworkMessageId))
+      | summarize PostDeliveryActions = make_set(strcat(ActionType, " · ", Action, " · ", ActionResult,
+          iff(isnotempty(DeliveryLocation), strcat(" → ", DeliveryLocation), "")), 10) by NetworkMessageId, RecipientEmailAddress;
+  let Urls = EmailUrlInfo
+      | where TimeGenerated between ((StartTimestamp - 1h) .. (EndTimestamp + 1h))
+      | where NetworkMessageId in ((Mails | distinct NetworkMessageId))
+      | summarize UrlDomains = make_set(tolower(UrlDomain), 10) by NetworkMessageId;
+  let Attachments = EmailAttachmentInfo
+      | where TimeGenerated between ((StartTimestamp - 1h) .. (EndTimestamp + 1h))
+      | where NetworkMessageId in ((Mails | distinct NetworkMessageId))
+      | summarize AttachmentNames = make_set(FileName, 10), MaliciousAttachments = countif(isnotempty(ThreatTypes))
+          by NetworkMessageId, RecipientEmailAddress;
+  union isfuzzy=true
+  (
+      Mails
+      | join kind=leftouter (Campaign) on Subject, SenderFromAddress
+      | join kind=leftouter (PostDelivery) on NetworkMessageId, RecipientEmailAddress
+      | join kind=leftouter (Urls) on NetworkMessageId
+      | join kind=leftouter (Attachments) on NetworkMessageId, RecipientEmailAddress
+      | extend Role = iff(RecipientEmailAddress =~ ValueMail, "Recipient", "Sender")
+      | project TimeGenerated, Role, SenderFromAddress, SenderMailFromAddress, SenderDisplayName, RecipientEmailAddress, Subject,
+          SameSubjectRecipients, EmailDirection, DeliveryAction, LatestDeliveryLocation, LatestDeliveryAction, ThreatTypes,
+          DetectionMethods, UrlCount, AttachmentCount, SenderIPv4, AuthenticationDetails, NetworkMessageId, InternetMessageId,
+          PostDeliveryActions, UrlDomains, AttachmentNames, MaliciousAttachments, ClientIP = "", Source = "EmailEvents"
+  ),
+  (
+      MessageEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where SenderEmailAddress =~ ValueMail or RecipientDetails has ValueMail
+      | extend Role = iff(SenderEmailAddress =~ ValueMail, "Sender (Teams)", "Recipient (Teams)")
+      | project TimeGenerated, Role, SenderFromAddress = SenderEmailAddress, SenderMailFromAddress = "", SenderDisplayName,
+          RecipientEmailAddress = iff(SenderEmailAddress =~ ValueMail, "", ValueMail), Subject = coalesce(MessageSubject, Subject, ThreadName),
+          SameSubjectRecipients = long(null), EmailDirection = iff(IsExternalThread, "Teams (external thread)", "Teams"), DeliveryAction,
+          LatestDeliveryLocation = DeliveryLocation, LatestDeliveryAction = "", ThreatTypes, DetectionMethods = tostring(DetectionMethods),
+          UrlCount = int(null), AttachmentCount = int(null), SenderIPv4 = "", AuthenticationDetails = "", NetworkMessageId = TeamsMessageId,
+          InternetMessageId = "", PostDeliveryActions = dynamic([]), UrlDomains = dynamic([]), AttachmentNames = dynamic([]),
+          MaliciousAttachments = long(null), ClientIP = "", Source = "MessageEvents"
+  )
+  // @sentinel-only:begin
+  , (
+      OfficeActivity
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where OfficeWorkload == "Exchange"
+      | where Operation in~ ("Send", "SendAs", "SendOnBehalf", "SoftDelete", "HardDelete", "MoveToDeletedItems", "Move")
+      | where UserId =~ ValueMail or MailboxOwnerUPN =~ ValueMail or SendAsUserSmtp =~ ValueMail or SendOnBehalfOfUserSmtp =~ ValueMail
+      | extend It = parse_json(Item), Affected = parse_json(AffectedItems)
+      | project TimeGenerated, Role = "Mailbox (Exchange audit)",
+          SenderFromAddress = iff(Operation startswith "Send", coalesce(SendAsUserSmtp, SendOnBehalfOfUserSmtp, MailboxOwnerUPN, UserId), ""),
+          SenderMailFromAddress = "", SenderDisplayName = "", RecipientEmailAddress = "",
+          Subject = coalesce(tostring(It.Subject), tostring(Affected[0].Subject)), SameSubjectRecipients = long(null),
+          EmailDirection = "Exchange audit", DeliveryAction = Operation, LatestDeliveryLocation = DestFolder, LatestDeliveryAction = ResultStatus,
+          ThreatTypes = "", DetectionMethods = "", UrlCount = int(null), AttachmentCount = int(null), SenderIPv4 = "",
+          AuthenticationDetails = ClientInfoString, NetworkMessageId = "",
+          InternetMessageId = coalesce(tostring(It.InternetMessageId), tostring(Affected[0].InternetMessageId)),
+          PostDeliveryActions = dynamic([]), UrlDomains = dynamic([]), AttachmentNames = dynamic([]), MaliciousAttachments = long(null),
+          ClientIP, Source = "OfficeActivity (Exchange)"
+  )
+  // @sentinel-only:end
   | sort by TimeGenerated asc

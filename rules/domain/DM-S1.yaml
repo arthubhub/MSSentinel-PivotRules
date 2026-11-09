@@ -1,16 +1,16 @@
 id: DM-S1
-name: Occurrences du domaine par jour et par source
+name: Domain occurrences per day and source
 indicators: [domain, url]
 action: statistics
 description: >
-  Nombre de traces du domaine (et de ses sous-domaines) par jour et par source : clics, URL d'e-mails et de
-  messages Teams, connexions Defender, origine de fichiers, DNS (DnsEvents, ASimDnsActivityLogs, réponses DNS de
-  Defender for Endpoint) et proxy ou pare-feu (CEF, ASIM web, Azure Firewall).
-  Pour une URL, c'est son domaine qui est compté.
+  Number of traces of the domain (and its subdomains) per day and per source: clicks, URLs in emails and Teams
+  messages, Defender connections, file origins, DNS (DnsEvents, ASimDnsActivityLogs, Defender for Endpoint DNS
+  responses) and proxy or firewall (CEF, ASIM web, Azure Firewall).
+  For a URL, its domain is counted.
 reading:
-  decisive: Domaine absent jusqu'à la veille puis présent dans plusieurs sources le jour de l'alerte.
-  context: Activité DNS qui continue après le blocage des clics (machine infectée qui rappelle).
-  noise: Domaines de CDN, d'analytique ou de régie publicitaire présents tous les jours.
+  decisive: Domain absent until the day before, then present in several sources on the day of the alert.
+  context: DNS activity that continues after clicks are blocked (infected device calling back).
+  noise: CDN, analytics or ad network domains present every day.
 window: { before: 14d, after: 1d }
 render: timechart
 uses: [domain_hits]
