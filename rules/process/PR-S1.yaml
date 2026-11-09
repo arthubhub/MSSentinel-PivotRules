@@ -1,17 +1,18 @@
 id: PR-S1
-name: Prévalence du processus
+name: Process prevalence
 indicators: [process]
 action: statistics
+targets: [device, account]
 description: >
-  Exécutions du binaire sur 30 jours, par chemin (profil utilisateur remplacé par *) : machines, comptes,
-  jours actifs, hash, éditeurs et parents. Repère un binaire légitime lancé depuis un emplacement anormal
-  (node.exe dans AppData, copie de rundll32). Couvre aussi les 4688 Windows, Sysmon 1 (avec hash et éditeur) et les processus normalisés ASIM (Sysmon,
-  Linux, EDR tiers). Les machines échantillons portent leur rôle connu (DC, serveur déclaré). Le contexte HOST restreint à
-  une machine.
+  Executions of the binary over 30 days, per path (user profile replaced by *): devices, accounts, active days,
+  hashes, vendors and parents. Spots a legitimate binary launched from an abnormal location (node.exe in AppData,
+  copy of rundll32). Also covers Windows 4688, Sysmon 1 (with hash and vendor) and ASIM normalized processes (Sysmon,
+  Linux, third-party EDR). Sample devices carry their known role (DC, declared server). The HOST context restricts to
+  one device.
 reading:
-  decisive: Chemin modifiable par l'utilisateur (AppData, Temp, ProgramData) vu sur 1 à 3 machines, sans éditeur connu.
-  context: Plusieurs hash pour un même nom et un même chemin, nom d'origine (OriginalFileName) différent du nom.
-  noise: Outils de développement (node, python) sur les postes des développeurs.
+  decisive: User-writable path (AppData, Temp, ProgramData) seen on 1 to 3 devices, without a known vendor.
+  context: Several hashes for the same name and path, original name (OriginalFileName) different from the name.
+  noise: Development tools (node, python) on developer workstations.
 v1: true
 window: { before: 30d, after: 1d }
 context: [HOST]
@@ -25,8 +26,9 @@ query: |
       | where isempty(HostFilter) or DeviceName startswith HostFilter
       | project TimeGenerated, Source = "DeviceProcessEvents", DeviceName = tolower(DeviceName), AccountName = tolower(AccountName),
           FolderPath, SHA256, Company = ProcessVersionInfoCompanyName, OriginalName = ProcessVersionInfoOriginalFileName, Parent = InitiatingProcessFileName
-  ),
-  (
+  )
+  // @sentinel-only:begin
+  , (
       _WinSecurity(StartTimestamp, EndTimestamp, dynamic([4688]), ValueFile)
       | where tolower(NewProcessName) endswith strcat(@"\", ValueFile)
       | where isempty(HostFilter) or Computer startswith HostFilter
@@ -50,6 +52,7 @@ query: |
       | project TimeGenerated, Source = "Sysmon 1", DeviceName = tolower(Computer), AccountName = UserSam, FolderPath = Image, SHA256,
           Company, OriginalName = OriginalFileName, Parent = ParentFile
   )
+  // @sentinel-only:end
   | extend MachineKey = _HostKey(DeviceName)
   | lookup kind=leftouter (_MachineRoles(EndTimestamp)) on MachineKey
   | extend DeviceLabel = _Labeled(DeviceName, MachineRole)

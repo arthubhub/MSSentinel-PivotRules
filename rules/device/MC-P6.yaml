@@ -1,58 +1,82 @@
 id: MC-P6
-name: Fichiers et partages accédés sur la machine
+name: Files and shares accessed on the device
 indicators: [device]
 action: pivot
+targets: [account, ip, process]
 description: >
-  Qui a accédé à quels fichiers et partages de la machine, regroupé par compte, dossier et type d'accès : accès aux
-  partages réseau (5140, 5145) et accès aux fichiers audités par SACL (4656, 4663, 4670, et 4660 rattaché au fichier par son
-  handle) journalisés par la machine, fichiers écrits à distance par SMB (Defender for Endpoint, RequestAccountName),
-  fichiers créés ou supprimés vus par Sysmon (11, 23, 26) et journaux ASIM de fichiers. Utile sur un serveur de fichiers :
-  les lectures n'apparaissent que dans l'audit Windows.
+  Who accessed which files and shares of the device, grouped by account, folder and access kind: network share access
+  (5140, 5145) and file access audited by SACL (4656, 4663, 4670, and 4660 linked to the file through its handle)
+  logged by the device, files written remotely over SMB (Defender for Endpoint, RequestAccountName), files created or
+  deleted seen by Sysmon (11, 23, 26) and ASIM file logs. Useful on a file server: reads only appear in the Windows
+  audit.
 reading:
-  decisive: Un compte qui lit en masse un partage qu'il n'utilise pas d'habitude, ou des accès aux partages administratifs (C$, ADMIN$).
-  context: Fichiers déposés à distance par SMB puis exécutés (mouvement latéral) ; permissions modifiées.
-  noise: Sauvegarde, antivirus, indexation, redirection de dossiers et profils itinérants.
+  decisive: An account reading a share in bulk that it does not usually use, or access to administrative shares (C$, ADMIN$).
+  context: Files dropped remotely over SMB then executed (lateral movement); permissions changed.
+  noise: Backup, antivirus, indexing, folder redirection and roaming profiles.
 window: { before: 24h, after: 1h }
 uses: [win_security, sysmon, roles]
 query: |
+  // @sentinel-only:begin
   let Win = materialize(_WinSecurity(StartTimestamp, EndTimestamp, dynamic([4656, 4660, 4663, 4670, 5140, 5145]), ValueShort)
       | where _IsHost(Computer)
       | where EventID in (5140, 5145) or ObjectType in ("File", ""));
   let Handles = Win | where EventID in (4656, 4663) and isnotempty(HandleId) | summarize HandleObject = take_any(ObjectName) by Computer, HandleId;
+  // @sentinel-only:end
   union isfuzzy=true
+  // @sentinel-only:begin
   (
       Win
       | join kind=leftouter (Handles) on Computer, HandleId
       | project TimeGenerated, Source = SourceTable, Account = tolower(strcat(SubjectDomainName, @"\", SubjectUserName)),
-          Kind = iff(EventID in (5140, 5145), "Partage réseau", "Fichier (audit Windows)"),
+          Kind = iff(EventID in (5140, 5145), "Network share", "File (Windows audit)"),
           Object = case(EventID == 5145, strcat(trim(@"[\\*]+", ShareName), @"\", RelativeTargetName), EventID == 5140, trim(@"[\\*]+", ShareName),
               coalesce(ObjectName, HandleObject)),
           Access = ObjectAccess, Process = tolower(tostring(split(ProcessName, @"\")[-1])), SourceIp = IpAddress
   ),
+  // @sentinel-only:end
   (
       DeviceFileEvents
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where DeviceName startswith ValueShort and _IsHost(DeviceName)
       | where isnotempty(RequestAccountName) and RequestProtocol == "Smb"
       | project TimeGenerated, Source = "DeviceFileEvents", Account = tolower(strcat(RequestAccountDomain, @"\", RequestAccountName)),
-          Kind = "Écriture à distance (SMB, Defender)", Object = FolderPath,
-          Access = case(ActionType == "FileDeleted", "suppression", ActionType == "FileRenamed", "renommage", "écriture"),
+          Kind = "Remote write (SMB, Defender)", Object = FolderPath,
+          Access = case(ActionType == "FileDeleted", "delete", ActionType == "FileRenamed", "rename", "write"),
           Process = tolower(InitiatingProcessFileName), SourceIp = RequestSourceIP
-  ),
-  (
+  )
+  // @defender-only:begin
+  // Defender XDR: 5140/5145 equivalent, Defender for Endpoint events of the device that carry a share name
+  , (
+      DeviceEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where DeviceName startswith ValueShort and _IsHost(DeviceName)
+      | where AdditionalFields has "ShareName"
+      | extend Share = trim(@"[\\*]+", tostring(parse_json(tostring(AdditionalFields)).ShareName))
+      | where isnotempty(Share)
+      | project TimeGenerated, Source = strcat("DeviceEvents · ", ActionType),
+          Account = tolower(iff(isnotempty(AccountName), strcat(AccountDomain, @"\", AccountName),
+              strcat(InitiatingProcessAccountDomain, @"\", InitiatingProcessAccountName))),
+          Kind = "Network share (Defender)",
+          Object = strcat(@"\\", tolower(DeviceName), @"\", Share, iff(isnotempty(FileName), strcat(@"\", FileName), "")),
+          Access = ActionType, Process = tolower(InitiatingProcessFileName), SourceIp = RemoteIP
+  )
+  // @defender-only:end
+  // @sentinel-only:begin
+  , (
       _Sysmon(StartTimestamp, EndTimestamp, dynamic([11, 23, 26]), ValueShort)
       | where Computer startswith ValueShort and _IsHost(Computer)
       | where UserSam !in ("system", "local service", "network service")
-      | project TimeGenerated, Source = strcat("Sysmon ", tostring(EventID)), Account = tolower(User), Kind = "Fichier (Sysmon)",
-          Object = TargetFilename, Access = iff(EventID == 11, "écriture", "suppression"), Process = ProcessFile, SourceIp = ""
+      | project TimeGenerated, Source = strcat("Sysmon ", tostring(EventID)), Account = tolower(User), Kind = "File (Sysmon)",
+          Object = TargetFilename, Access = iff(EventID == 11, "write", "delete"), Process = ProcessFile, SourceIp = ""
   ),
   (
       ASimFileEventLogs
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where DvcHostname startswith ValueShort and _IsHost(DvcHostname)
-      | project TimeGenerated, Source = strcat("ASIM ", EventProduct), Account = tolower(ActorUsername), Kind = "Fichier (ASIM)",
+      | project TimeGenerated, Source = strcat("ASIM ", EventProduct), Account = tolower(ActorUsername), Kind = "File (ASIM)",
           Object = TargetFilePath, Access = tolower(EventType), Process = tolower(tostring(split(ActingProcessName, @"\")[-1])), SourceIp = SrcIpAddr
   )
+  // @sentinel-only:end
   | where isnotempty(Object)
   | where not(Account endswith "$") and not(Account has_any (@"nt authority\", @"window manager\", @"font driver host\"))
   | extend Folder = tostring(parse_path(Object).DirectoryPath), File = tostring(parse_path(Object).Filename)

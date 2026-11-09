@@ -1,0 +1,13 @@
+id: S1
+name: Suspicious sign-in from an IP
+description: >
+  Qualify an IP seen in a sign-in alert: its nature (NAT, VPN, hosting provider, internal), the accounts that used
+  it, then the sign-in habits and actions of the most exposed account.
+indicator: ip
+steps:
+  - ruleId: IP-P6     # nature and role of the IP
+  - ruleId: IP-P2     # accounts signed in from the IP
+    carry: account
+  - ruleId: AC-S1     # usual applications and countries of the account
+  - ruleId: AC-P3     # admin and file actions
+  - ruleId: AC-T1     # account timeline

@@ -1,15 +1,16 @@
 id: AC-P4
-name: Règles de boîte, consentements et méthodes MFA
+name: Mailbox rules, consents and MFA methods
 indicators: [account]
 action: pivot
+targets: [ip, application]
 description: >
-  Modifications de persistance d'un compte cloud : règles de boîte et transferts (New-InboxRule, Set-Mailbox,
-  UpdateInboxRules…), délégations de boîte, consentements OAuth et permissions accordées, ajout de méthodes
-  d'authentification, changements de mot de passe et de rôle.
+  Persistence changes on a cloud account: mailbox rules and forwarding (New-InboxRule, Set-Mailbox,
+  UpdateInboxRules…), mailbox delegations, OAuth consents and granted permissions, added authentication
+  methods, password and role changes.
 reading:
-  decisive: Règle de transfert ou de redirection vers une adresse externe, ou consentement à une application inconnue, peu après une connexion suspecte.
-  context: Règle qui déplace ou supprime des messages contenant « facture », « paiement » ou le nom du support.
-  noise: Absences, boîtes partagées, enregistrement MFA lors d'un changement de téléphone.
+  decisive: Forwarding or redirect rule to an external address, or consent to an unknown application, shortly after a suspicious sign-in.
+  context: Rule that moves or deletes messages containing "invoice", "payment" or the name of the help desk.
+  noise: Out-of-office replies, shared mailboxes, MFA registration after a phone change.
 v1: true
 window: { before: 7d, after: 1d }
 query: |
@@ -21,11 +22,12 @@ query: |
       "Admin registered security info", "User changed default security info", "Reset password (by admin)",
       "Change user password", "Add member to role", "Add eligible member to role"]);
   let Flag = (text:string) {
-      case(text has_any ("ForwardTo", "RedirectTo", "ForwardingSmtpAddress", "ForwardingAddress", "ForwardAsAttachmentTo"), "Transfert ou redirection",
-          text has_any ("DeleteMessage", "MoveToFolder", "MarkAsRead", "SoftDeleteMessage"), "Suppression ou masquage",
+      case(text has_any ("ForwardTo", "RedirectTo", "ForwardingSmtpAddress", "ForwardingAddress", "ForwardAsAttachmentTo"), "Forwarding or redirect",
+          text has_any ("DeleteMessage", "MoveToFolder", "MarkAsRead", "SoftDeleteMessage"), "Deletion or hiding",
           "")
   };
   union isfuzzy=true
+  // @sentinel-only:begin
   (
       OfficeActivity
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
@@ -33,6 +35,7 @@ query: |
       | where UserId =~ ValueUpn or Parameters has ValueUpn
       | project TimeGenerated, Source = "OfficeActivity", Operation, Detail = substring(Parameters, 0, 1000), IP = ClientIP, Flag = Flag(Parameters)
   ),
+  // @sentinel-only:end
   (
       CloudAppEvents
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
@@ -40,8 +43,9 @@ query: |
       | where tostring(RawEventData.UserId) =~ ValueUpn or RawEventData has ValueUpn
       | extend Params = tostring(RawEventData.Parameters)
       | project TimeGenerated, Source = "CloudAppEvents", Operation = ActionType, Detail = substring(Params, 0, 1000), IP = IPAddress, Flag = Flag(Params)
-  ),
-  (
+  )
+  // @sentinel-only:begin
+  , (
       AuditLogs
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where OperationName in (EntraOps) or OperationName has "Certificates and secrets management"
@@ -50,9 +54,26 @@ query: |
       | project TimeGenerated, Source = "AuditLogs", Operation = OperationName,
           Detail = substring(strcat(tostring(TargetResources[0].displayName), " · ", Changes), 0, 1000),
           IP = tostring(InitiatedBy.user.ipAddress),
-          Flag = case(OperationName has "Consent" or OperationName has "permission grant", "Consentement OAuth",
-              OperationName has "security info", "Méthode d'authentification",
-              OperationName has "password", "Mot de passe",
-              OperationName has "role", "Rôle", "")
+          Flag = case(OperationName has "Consent" or OperationName has "permission grant", "OAuth consent",
+              OperationName has "security info", "Authentication method",
+              OperationName has "password", "Password",
+              OperationName has "role", "Role", "")
   )
+  // @sentinel-only:end
+  // @defender-only:begin
+  // Defender XDR: no AuditLogs; the same Entra ID operations appear in CloudAppEvents (name followed by a period)
+  , (
+      CloudAppEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where ActionType has_any (EntraOps) or ActionType has "Certificates and secrets management"
+      | where tostring(RawEventData.UserId) =~ ValueUpn or RawEventData has ValueUpn
+      | extend Changes = tostring(RawEventData.ModifiedProperties)
+      | project TimeGenerated, Source = "CloudAppEvents", Operation = ActionType,
+          Detail = substring(strcat(ObjectName, " · ", Changes), 0, 1000), IP = IPAddress,
+          Flag = case(ActionType has "Consent" or ActionType has "permission grant", "OAuth consent",
+              ActionType has "security info", "Authentication method",
+              ActionType has "password", "Password",
+              ActionType has "role", "Role", "")
+  )
+  // @defender-only:end
   | sort by TimeGenerated asc

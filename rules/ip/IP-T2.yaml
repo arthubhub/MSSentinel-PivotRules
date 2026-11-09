@@ -1,53 +1,75 @@
 id: IP-T2
-name: Demandes de connexion par machine dans le temps
+name: Connection requests per device over time
 indicators: [ip]
 action: timeline
+targets: [device]
 description: >
-  Courbe minute par minute des demandes de connexion venant de l'IP, une série par machine cible et par
-  résultat : authentifications Windows (SecurityEvent, WindowsEvent), Defender (DeviceLogonEvents), Defender for
-  Identity, journaux d'authentification ASIM et connexions entrantes acceptées (DeviceNetworkEvents). La cible est la
-  machine réellement visée (le service demandé pour un 4769) ; les simples validations d'identifiants par un contrôleur de
-  domaine (4768, 4771, 4776) forment une série « DC · validation » à part. Le rôle connu de la cible est indiqué.
+  Minute-by-minute chart of the connection requests from the IP, one series per target device and per
+  result: Windows authentications (SecurityEvent, WindowsEvent), Defender (DeviceLogonEvents), Defender for
+  Identity, ASIM authentication logs and accepted inbound connections (DeviceNetworkEvents). The target is the
+  device actually targeted (the requested service for a 4769); plain credential validations by a domain
+  controller (4768, 4771, 4776) form a separate "DC · validation" series. The known role of the target is shown.
 reading:
-  decisive: Une même source qui touche de nombreuses machines en quelques minutes.
-  context: Échecs sur une machine puis succès sur une autre (identifiants testés).
-  noise: Serveurs de déploiement ou de supervision qui contactent tout le parc à heure fixe ; séries « validation » des DC.
+  decisive: A single source touching many devices within a few minutes.
+  context: Failures on one device then success on another (credentials being tested).
+  noise: Deployment or monitoring servers that contact the whole fleet at fixed times; "validation" series of DCs.
 window: { before: 30m, after: 30m }
 render: timechart
 uses: [win_security, roles]
 query: |
   union isfuzzy=true
+  // @sentinel-only:begin
   (
       _WinSecurity(StartTimestamp, EndTimestamp, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776]), Value)
       | where IpAddress == Value
       | project TimeGenerated, Target = iff(isnotempty(TargetHost), TargetHost, strcat(AuthAuthority, " · validation")),
-          Outcome = iff(EventID in (4625, 4771) or Status !in ("", "-", "0x0"), "échec", "succès")
+          Outcome = iff(EventID in (4625, 4771) or Status !in ("", "-", "0x0"), "failure", "success")
   ),
   (
       DeviceLogonEvents
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where RemoteIP == Value
-      | project TimeGenerated, Target = tolower(DeviceName), Outcome = iff(ActionType == "LogonSuccess", "succès", "échec")
+      | project TimeGenerated, Target = tolower(DeviceName), Outcome = iff(ActionType == "LogonSuccess", "success", "failure")
   ),
   (
       IdentityLogonEvents
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where IPAddress == Value
       | project TimeGenerated, Target = iff(isnotempty(TargetDeviceName), tolower(TargetDeviceName), strcat(tolower(DestinationDeviceName), " · validation")),
-          Outcome = iff(ActionType == "LogonSuccess", "succès", "échec")
+          Outcome = iff(ActionType == "LogonSuccess", "success", "failure")
   ),
+  // @sentinel-only:end
+  // @defender-only:begin
+  // Defender XDR, without Windows logs: detailed result per logon type (session) and per protocol (validation by the DC)
+  (
+      DeviceLogonEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where RemoteIP == Value
+      | project TimeGenerated, Target = tolower(DeviceName),
+          Outcome = strcat(LogonType, " · ", iff(ActionType == "LogonSuccess", "success", "failure"))
+  ),
+  (
+      IdentityLogonEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where IPAddress == Value
+      | project TimeGenerated, Target = iff(isnotempty(TargetDeviceName), tolower(TargetDeviceName), strcat(tolower(DestinationDeviceName), " · validation")),
+          Outcome = strcat(Protocol, " · ", iff(ActionType == "LogonSuccess", "success", "failure"))
+  ),
+  // @defender-only:end
   (
       DeviceNetworkEvents
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where RemoteIP == Value and ActionType == "InboundConnectionAccepted"
-      | project TimeGenerated, Target = tolower(DeviceName), Outcome = "connexion entrante"
-  ),
-  (
+      | project TimeGenerated, Target = tolower(DeviceName), Outcome = "inbound connection"
+  )
+  // @sentinel-only:begin
+  , (
       ASimAuthenticationEventLogs
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where SrcIpAddr == Value
-      | project TimeGenerated, Target = tolower(coalesce(TargetHostname, DvcHostname)), Outcome = iff(EventResult == "Success", "succès", "échec")
+      | project TimeGenerated, Target = tolower(coalesce(TargetHostname, DvcHostname)), Outcome = iff(EventResult == "Success", "success", "failure")
   )
+  // @sentinel-only:end
   | where isnotempty(Target)
   | extend MachineKey = _HostKey(Target)
   | lookup kind=leftouter (_MachineRoles(EndTimestamp)) on MachineKey

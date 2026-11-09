@@ -1,16 +1,18 @@
 id: AC-T1
-name: Timeline du compte
+name: Account timeline
 indicators: [account]
 action: timeline
+targets: [device]
 description: >
-  Déroulé chronologique de l'activité du compte : connexions Entra ID, audit Entra ID, appels Microsoft Graph,
-  Microsoft 365, Azure, ouvertures de session Defender for Endpoint, authentifications Windows (4624, 4625, 4648, 4768,
-  4769, 4771, 4776, 4740) et Defender for Identity, ASIM, SSH Linux et clics sur des liens. Host est la machine
-  réellement concernée ; pour une simple validation d'identifiants, Host est vide et le DC figure dans Detail.
+  Chronological sequence of the account's activity: Entra ID sign-ins, Entra ID audit, Microsoft Graph calls,
+  Microsoft 365, Azure, Defender for Endpoint logons, Windows authentications (4624, 4625, 4648, 4768,
+  4769, 4771, 4776, 4740) and Defender for Identity (logons, directory changes targeting the account or
+  made by it, LDAP or SAMR reconnaissance queries it sends), legacy Azure AD Graph calls, ASIM, Linux SSH and link clicks. Host is the device
+  actually involved; for a simple credential validation, Host is empty and the DC appears in Detail.
 reading:
-  decisive: Connexion inhabituelle → ajout d'une méthode MFA → règle de boîte → consentement, en moins d'une heure.
-  context: Lecture de secrets ou opérations Azure dans la foulée d'une première connexion depuis une IP.
-  noise: Activité de bureautique ordinaire (consultation de fichiers, réunions Teams).
+  decisive: Unusual sign-in → MFA method added → mailbox rule → consent, in less than an hour.
+  context: Secrets read or Azure operations right after a first sign-in from an IP.
+  noise: Ordinary office activity (file viewing, Teams meetings).
 v1: true
 window: { before: 2h, after: 2h }
 uses: [signins, win_security]
@@ -20,9 +22,10 @@ query: |
   (
       _Signins(StartTimestamp, EndTimestamp, "", ValueUpn)
       | project TimeGenerated, Source = strcat("Entra ID ", SignInType), Host = DeviceName, Account = tolower(UserPrincipalName),
-          Action = iff(Succeeded, "Connexion réussie", strcat("Connexion échouée ", ResultType)),
+          Action = iff(Succeeded, "Successful sign-in", strcat("Failed sign-in ", ResultType)),
           Detail = strcat(AppDisplayName, " · ", IPAddress, " · ", Location, " · ", OperatingSystem, " ", Browser)
   ),
+  // @sentinel-only:begin
   (
       AuditLogs
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
@@ -37,6 +40,7 @@ query: |
       | project TimeGenerated, Source = strcat("OfficeActivity (", OfficeWorkload, ")"), Host = "", Account = tolower(UserId), Action = Operation,
           Detail = strcat(coalesce(OfficeObjectId, SourceFileName), " · ", ClientIP)
   ),
+  // @sentinel-only:end
   (
       CloudAppEvents
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
@@ -44,6 +48,7 @@ query: |
       | project TimeGenerated, Source = strcat("CloudAppEvents (", Application, ")"), Host = "", Account = ValueUpn, Action = ActionType,
           Detail = strcat(ObjectName, " · ", IPAddress, " · ", CountryCode)
   ),
+  // @sentinel-only:begin
   (
       AzureActivity
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
@@ -51,6 +56,7 @@ query: |
       | project TimeGenerated, Source = "AzureActivity", Host = "", Account = tolower(Caller), Action = OperationNameValue,
           Detail = strcat(_ResourceId, " · ", ActivityStatusValue, " · ", CallerIpAddress)
   ),
+  // @sentinel-only:end
   (
       DeviceLogonEvents
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
@@ -58,22 +64,45 @@ query: |
       | project TimeGenerated, Source = "DeviceLogonEvents", Host = tolower(DeviceName), Account = tolower(AccountName),
           Action = strcat(ActionType, " ", LogonType), Detail = strcat(RemoteIP, " ", RemoteDeviceName)
   ),
+  // @sentinel-only:begin
   (
       _WinSecurity(StartTimestamp, EndTimestamp, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776, 4740]), ValueSam)
       | where TargetSam == ValueSam
       | project TimeGenerated, Source = SourceTable, Host = TargetHost, Account = ValueSam,
           Action = strcat(tostring(EventID), " · ", EventName, iff(isnotempty(LogonTypeName), strcat(" ", LogonTypeName), "")),
-          Detail = strcat("depuis ", coalesce(WorkstationName, IpAddress), iff(isnotempty(AuthAuthority), strcat(" · validé par ", AuthAuthority), ""),
-              iff(EventID == 4769, strcat(" · service ", ServiceName), ""), iff(Status !in ("", "-", "0x0"), strcat(" · statut ", Status), ""))
+          Detail = strcat("from ", coalesce(WorkstationName, IpAddress), iff(isnotempty(AuthAuthority), strcat(" · validated by ", AuthAuthority), ""),
+              iff(EventID == 4769, strcat(" · service ", ServiceName), ""), iff(Status !in ("", "-", "0x0"), strcat(" · status ", Status), ""))
   ),
+  // @sentinel-only:end
   (
       IdentityLogonEvents
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where AccountUpn =~ ValueUpn or AccountName =~ ValueSam
       | project TimeGenerated, Source = "IdentityLogonEvents", Host = tolower(TargetDeviceName), Account = ValueSam,
           Action = strcat(ActionType, " ", Protocol, " ", LogonType),
-          Detail = strcat("depuis ", coalesce(DeviceName, IPAddress), " · validé par ", DestinationDeviceName, " · ", FailureReason)
+          Detail = strcat("from ", coalesce(DeviceName, IPAddress), " · validated by ", DestinationDeviceName, " · ", FailureReason)
   ),
+  (
+      // Defender for Identity: directory changes made by the account or targeting it (password, groups, state)
+      IdentityDirectoryEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where AccountUpn =~ ValueUpn or AccountName =~ ValueSam or TargetAccountUpn =~ ValueUpn
+      | extend IsTarget = TargetAccountUpn =~ ValueUpn
+      | project TimeGenerated, Source = "IdentityDirectoryEvents", Host = tolower(TargetDeviceName), Account = ValueSam,
+          Action = strcat(ActionType, iff(IsTarget, " (as target)", "")),
+          Detail = strcat(iff(IsTarget, strcat("by ", coalesce(AccountUpn, AccountName)), strcat("target ", coalesce(TargetAccountUpn, TargetAccountDisplayName, TargetDeviceName))),
+              " · ", Application, " · from ", coalesce(DeviceName, IPAddress), " · ", substring(tostring(AdditionalFields), 0, 200))
+  ),
+  (
+      // Defender for Identity: reconnaissance queries sent by the account (LDAP, SAMR, DNS, SMB)
+      IdentityQueryEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where AccountUpn =~ ValueUpn or AccountName =~ ValueSam
+      | project TimeGenerated, Source = "IdentityQueryEvents", Host = tolower(DeviceName), Account = ValueSam,
+          Action = strcat(ActionType, " ", Protocol, " ", QueryType),
+          Detail = strcat(QueryTarget, " · to ", DestinationDeviceName, " · ", substring(Query, 0, 200))
+  ),
+  // @sentinel-only:begin
   (
       MicrosoftGraphActivityLogs
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
@@ -83,12 +112,20 @@ query: |
           Detail = strcat(replace_regex(tostring(parse_url(RequestUri).Path), @"[0-9a-fA-F-]{36}", "{id}"), " · ", IPAddress)
   ),
   (
+      AADGraphActivityLogs
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where UserId in (UserIds)
+      | project TimeGenerated, Source = "AADGraphActivityLogs", Host = "", Account = ValueUpn,
+          Action = strcat("Azure AD Graph ", RequestMethod, " ", tostring(ResponseStatusCode)),
+          Detail = strcat(replace_regex(tostring(parse_url(RequestUri).Path), @"[0-9a-fA-F-]{36}", "{id}"), " · ", CallerIpAddress)
+  ),
+  (
       ASimAuthenticationEventLogs
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where TargetUsername has ValueSam
       | where tolower(TargetUsername) in (ValueSam, ValueUpn) or tolower(TargetUsername) endswith strcat(@"\", ValueSam)
       | project TimeGenerated, Source = strcat("ASIM ", EventProduct), Host = tolower(coalesce(TargetHostname, DvcHostname)), Account = ValueSam,
-          Action = strcat(EventType, " ", EventResult), Detail = strcat("depuis ", coalesce(SrcHostname, SrcIpAddr), " · ", LogonProtocol)
+          Action = strcat(EventType, " ", EventResult), Detail = strcat("from ", coalesce(SrcHostname, SrcIpAddr), " · ", LogonProtocol)
   ),
   (
       Syslog
@@ -97,11 +134,12 @@ query: |
       | project TimeGenerated, Source = strcat("Syslog (", ProcessName, ")"), Host = tolower(Computer), Account = ValueSam,
           Action = ProcessName, Detail = substring(SyslogMessage, 0, 300)
   ),
+  // @sentinel-only:end
   (
       UrlClickEvents
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where AccountUpn =~ ValueUpn
       | project TimeGenerated, Source = "UrlClickEvents", Host = "", Account = tolower(AccountUpn),
-          Action = strcat("Clic ", ActionType), Detail = Url
+          Action = strcat("Click ", ActionType), Detail = Url
   )
   | sort by TimeGenerated asc

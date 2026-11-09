@@ -1,0 +1,13 @@
+id: S8
+name: Malicious OAuth consent
+description: >
+  A suspicious third-party application (consent phishing): who granted it which permissions, what its service
+  principal does, which accounts use it, then what those accounts changed in their mailbox and the directory.
+indicator: application
+steps:
+  - ruleId: AP-P1     # consents, permissions and secrets
+  - ruleId: AP-P2     # service principal sign-ins and calls
+  - ruleId: AP-P3     # devices and accounts using it
+    carry: account
+  - ruleId: AC-P4     # mailbox rules, consents, MFA methods
+  - ruleId: AC-P3     # admin and file actions

@@ -1,35 +1,38 @@
 id: IP-P6
-name: Nature et rôle de l'IP
+name: Nature and role of the IP
 indicators: [ip]
 action: pivot
+targets: [device, account]
 description: >
-  Dit ce qu'est l'IP avant de pivoter dessus : privée ou publique, rôle connu (contrôleur de domaine détecté, NAT, proxy,
-  VPN, scanner… déclarés dans la watchlist EasyPivotRoles, plages CIDR comprises), machines qui la portent
-  (DeviceNetworkInfo, Heartbeat, DeviceInfo), et volume d'identités et de machines vues avec elle sur la fenêtre. Une IP
-  vue avec beaucoup de comptes est signalée comme partagée : les pivots IP-P2, IP-S4 et IP-T3 y seront bruités.
+  Tells what the IP is before pivoting on it: private or public, known role (detected domain controller, NAT, proxy,
+  VPN, scanner… declared in the EasyPivotRoles watchlist, CIDR ranges included), devices that hold it
+  (DeviceNetworkInfo, Heartbeat, DeviceInfo), and the number of identities and devices seen with it in the window. An IP
+  seen with many accounts is flagged as shared: pivots IP-P2, IP-S4 and IP-T3 will be noisy on it.
 reading:
-  decisive: IP publique sans rôle connu, vue avec quelques comptes seulement, dont un succès inhabituel.
-  context: IP partagée (NAT, proxy, VPN), à restreindre au compte ou à la machine plutôt qu'à l'IP.
-  noise: IP d'un contrôleur de domaine ou d'un serveur d'infrastructure, présente dans presque tous les journaux.
+  decisive: Public IP with no known role, seen with only a few accounts, including an unusual success.
+  context: Shared IP (NAT, proxy, VPN); narrow down to the account or device rather than the IP.
+  noise: IP of a domain controller or infrastructure server, present in almost every log.
 v1: true
 window: { before: 24h, after: 1h }
 uses: [ip_events, roles]
 query: |
   let Kind = case(
-      Value matches regex @"^(127\.|::1$)", "Bouclage",
-      ipv4_is_private(Value), "Privée (RFC 1918)",
-      Value matches regex @"^(169\.254\.|fe80:)", "Lien local",
-      Value matches regex @"^(100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.)", "Partagée opérateur (CGNAT)",
-      Value matches regex @"^(fc|fd)", "Privée (IPv6 ULA)",
-      "Publique");
+      Value matches regex @"^(127\.|::1$)", "Loopback",
+      ipv4_is_private(Value), "Private (RFC 1918)",
+      Value matches regex @"^(169\.254\.|fe80:)", "Link-local",
+      Value matches regex @"^(100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.)", "Carrier-grade NAT (CGNAT)",
+      Value matches regex @"^(fc|fd)", "Private (IPv6 ULA)",
+      "Public");
   let Owners = union isfuzzy=true
       (datatable(Machine:string, Basis:string)[]),
       (DeviceNetworkInfo | where TimeGenerated between ((StartTimestamp - 1d) .. EndTimestamp) | where IPAddresses has Value
-          | summarize by Machine = tolower(DeviceName) | extend Basis = "Carte réseau (DeviceNetworkInfo)"),
+          | summarize by Machine = tolower(DeviceName) | extend Basis = "Network adapter (DeviceNetworkInfo)"),
+      // @sentinel-only:begin
       (Heartbeat | where TimeGenerated between ((StartTimestamp - 1d) .. EndTimestamp) | where ComputerIP == Value or ComputerPrivateIPs has Value
-          | summarize by Machine = tolower(Computer) | extend Basis = "Agent Azure Monitor (Heartbeat)"),
+          | summarize by Machine = tolower(Computer) | extend Basis = "Azure Monitor agent (Heartbeat)"),
+      // @sentinel-only:end
       (DeviceInfo | where TimeGenerated between ((StartTimestamp - 1d) .. EndTimestamp) | where PublicIP == Value
-          | summarize by Machine = tolower(DeviceName) | extend Basis = "IP publique de sortie (DeviceInfo)");
+          | summarize by Machine = tolower(DeviceName) | extend Basis = "Public egress IP (DeviceInfo)");
   let Seen = _IpEvents(StartTimestamp, EndTimestamp, Value)
       | summarize Events = count(), Accounts = dcountif(Account, isnotempty(Account) and Account != "-"),
           Machines = dcountif(Host, isnotempty(Host)), Sources = make_set(Source, 30),
@@ -39,9 +42,9 @@ query: |
       OwnerMachines = toscalar(Owners | summarize make_set(strcat(Machine, " (", Basis, ")"), 20)),
       OwnerCount = toscalar(Owners | summarize dcount(Machine))
   | extend Assessment = case(
-      isnotempty(KnownRole), strcat("Rôle connu : ", KnownRole, ". Les pivots sur cette IP ramènent son trafic d'infrastructure."),
-      OwnerCount > 3, "Portée par plusieurs machines (NAT, VPN, IP réattribuée) : pivoter sur la machine plutôt que sur l'IP.",
-      Accounts > 20, "Vue avec de nombreux comptes : IP partagée probable (NAT, proxy, VPN, Citrix).",
-      Events == 0, "Aucun événement sur la fenêtre : élargir la fenêtre ou vérifier la couverture (IP-S0).",
-      "Pas de rôle connu ni de signe de partage.")
+      isnotempty(KnownRole), strcat("Known role: ", KnownRole, ". Pivots on this IP return its infrastructure traffic."),
+      OwnerCount > 3, "Held by several devices (NAT, VPN, reassigned IP): pivot on the device rather than the IP.",
+      Accounts > 20, "Seen with many accounts: likely shared IP (NAT, proxy, VPN, Citrix).",
+      Events == 0, "No events in the window: widen the window or check coverage (IP-S0).",
+      "No known role and no sign of sharing.")
   | project Ip, Kind, KnownRole, Assessment, OwnerMachines, Accounts, Machines, Events, FirstSeen, LastSeen, Sources

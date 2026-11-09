@@ -1,35 +1,35 @@
-// Événements Sysmon (journal Microsoft-Windows-Sysmon/Operational) normalisés, quelle que soit la table d'ingestion :
-// Event (agent Azure Monitor, EventData en XML) ou WindowsEvent (transfert d'événements, EventData en JSON).
-// Paramètres : start, end, ids (EventID, vide = tous), term (pré-filtre texte sur les données et le nom de machine, vide = aucun).
-// Colonnes de Sysmon (Image, CommandLine, ParentImage, User, Hashes, TargetFilename, ImageLoaded, TargetObject, Details,
-// SourceIp, DestinationIp, DestinationPort, DestinationHostname, QueryName, QueryResults…) et colonnes dérivées :
-// Contents (flux Zone.Identifier de l'événement 15 : HostUrl et ReferrerUrl du téléchargement).
-// ProcessFile, ParentFile, TargetFile (noms de fichier en minuscules), UserSam, SHA256, SHA1, MD5, RegistryEventType, EventName.
-// Fragment propre à Sentinel : retiré de la variante Defender (les règles l'appellent dans des blocs @sentinel-only).
-// Ne produit rien sans Sysmon installé et une configuration qui journalise les EventID demandés.
+// Sysmon events (Microsoft-Windows-Sysmon/Operational log) normalized, whatever the ingestion table:
+// Event (Azure Monitor agent, EventData as XML) or WindowsEvent (event forwarding, EventData as JSON).
+// Parameters: start, end, ids (EventIDs, empty = all), term (text pre-filter on event data and device name, empty = none).
+// Sysmon columns (Image, CommandLine, ParentImage, User, Hashes, TargetFilename, ImageLoaded, TargetObject, Details,
+// SourceIp, DestinationIp, DestinationPort, DestinationHostname, QueryName, QueryResults...) and derived columns:
+// Contents (Zone.Identifier stream of event 15: HostUrl and ReferrerUrl of the download).
+// ProcessFile, ParentFile, TargetFile (lowercase file names), UserSam, SHA256, SHA1, MD5, RegistryEventType, EventName.
+// Sentinel-only fragment: removed from the Defender variant (rules call it inside @sentinel-only blocks).
+// Returns nothing unless Sysmon is installed with a configuration that logs the requested EventIDs.
 // @sentinel-only:begin
 let _SysmonEventName = (id:int) {
     case(
-        id == 1, "Processus créé",
-        id == 2, "Date de création d'un fichier modifiée",
-        id == 3, "Connexion réseau",
-        id == 5, "Processus terminé",
-        id == 6, "Pilote chargé",
-        id == 7, "Image (DLL) chargée",
-        id == 8, "Thread distant créé",
-        id == 10, "Accès à un processus",
-        id == 11, "Fichier créé",
-        id == 12, "Clé de registre créée ou supprimée",
-        id == 13, "Valeur de registre modifiée",
-        id == 14, "Clé ou valeur de registre renommée",
-        id == 15, "Flux de fichier créé (ADS, Mark of the Web)",
-        id == 17, "Canal nommé créé",
-        id == 18, "Canal nommé connecté",
-        id == 22, "Requête DNS",
-        id == 23, "Fichier supprimé (archivé)",
-        id == 25, "Altération de processus",
-        id == 26, "Fichier supprimé",
-        id == 29, "Exécutable détecté",
+        id == 1, "Process created",
+        id == 2, "File creation time changed",
+        id == 3, "Network connection",
+        id == 5, "Process terminated",
+        id == 6, "Driver loaded",
+        id == 7, "Image (DLL) loaded",
+        id == 8, "Remote thread created",
+        id == 10, "Process accessed",
+        id == 11, "File created",
+        id == 12, "Registry key created or deleted",
+        id == 13, "Registry value set",
+        id == 14, "Registry key or value renamed",
+        id == 15, "File stream created (ADS, Mark of the Web)",
+        id == 17, "Named pipe created",
+        id == 18, "Named pipe connected",
+        id == 22, "DNS query",
+        id == 23, "File deleted (archived)",
+        id == 25, "Process tampering",
+        id == 26, "File deleted",
+        id == 29, "Executable detected",
         strcat("Sysmon ", tostring(id)))
 };
 let _Sysmon = (start:datetime, end:datetime, ids:dynamic, term:string) {

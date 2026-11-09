@@ -1,0 +1,13 @@
+id: S13
+name: Suspicious outbound traffic from a device
+description: >
+  A device talking to destinations nobody else contacts: the rarest destination, its prevalence, the other devices
+  and processes reaching it, then the timeline of one of them.
+indicator: device
+steps:
+  - ruleId: MC-P2     # rare outbound destinations
+    carry: domain
+  - ruleId: DM-S2     # domain prevalence
+  - ruleId: DM-P3     # devices and processes in contact
+    carry: device
+  - ruleId: MC-T1     # device timeline

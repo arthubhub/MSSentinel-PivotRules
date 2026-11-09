@@ -1,0 +1,13 @@
+id: S10
+name: Password spray or brute force
+description: >
+  An IP piling up authentication failures: how many accounts it targets and when, which ones eventually
+  succeeded, then the failure profile and Entra risk of the first account reached.
+indicator: ip
+steps:
+  - ruleId: IP-S4     # usage per day, per account
+  - ruleId: IP-T3     # accounts seen from the IP over time
+  - ruleId: IP-P2     # accounts signed in (successes and failures)
+    carry: account
+  - ruleId: AC-S2     # authentication failures and successes per hour
+  - ruleId: AC-P9     # Entra risk and anomalies of the account

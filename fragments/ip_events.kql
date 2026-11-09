@@ -1,24 +1,25 @@
-// Toutes les sources de journaux où apparaît une adresse IP, ramenées à des colonnes communes :
-// TimeGenerated, Source, EventType (EventID, ActionType ou opération), Host, AuthBy, Account, Detail.
-// - Host : machine concernée par l'événement (la cible quand l'IP est la source, la machine de l'IP quand elle est la cible),
-//   jamais le contrôleur de domaine qui a seulement validé des identifiants.
-// - AuthBy : contrôleur de domaine (ou machine locale) qui a validé les identifiants (4768, 4769, 4771, 4776, Defender for Identity).
-// Sources : Entra ID (utilisateurs et applications), audit Entra ID, Microsoft Graph, Windows, Defender for Endpoint et
-// Defender for Identity, Sysmon 3, accès aux partages (5140, 5145), Microsoft 365, Azure, pare-feu et proxy (CEF, Azure
-// Firewall, ASIM), messagerie, Linux (Syslog).
+// All log sources where an IP address appears, mapped to common columns:
+// TimeGenerated, Source, EventType (EventID, ActionType or operation), Host, AuthBy, Account, Detail.
+// - Host: device the event is about (the target when the IP is the source, the IP's device when it is the target),
+//   never the domain controller that only validated credentials.
+// - AuthBy: domain controller (or local device) that validated the credentials (4768, 4769, 4771, 4776, Defender for Identity).
+// Sources: Entra ID (users and applications), Entra ID audit, Microsoft Graph, Windows, Defender for Endpoint and
+// Defender for Identity, Sysmon 3, share access (5140, 5145), Microsoft 365, Azure, firewall and proxy (CEF, Azure
+// Firewall, ASIM), email, Linux (Syslog).
 // @requires: win_security, sysmon, signins, spn_signins
 let _IpEvents = (start:datetime, end:datetime, ip:string) {
     union isfuzzy=true
     (
         _Signins(start, end, ip, "")
-        | project TimeGenerated, Source = strcat("Entra ID (", SignInType, ")"), EventType = iff(Succeeded, "Connexion réussie", strcat("Échec ", ResultType)),
+        | project TimeGenerated, Source = strcat("Entra ID (", SignInType, ")"), EventType = iff(Succeeded, "Successful sign-in", strcat("Failed sign-in ", ResultType)),
             Host = DeviceName, AuthBy = "", Account = tolower(UserPrincipalName), Detail = AppDisplayName
     ),
     (
         _SpnSignins(start, end, "", ip)
-        | project TimeGenerated, Source = strcat("Entra ID (", SignInType, ")"), EventType = iff(Succeeded, "Connexion réussie", strcat("Échec ", ResultType)),
+        | project TimeGenerated, Source = strcat("Entra ID (", SignInType, ")"), EventType = iff(Succeeded, "Successful sign-in", strcat("Failed sign-in ", ResultType)),
             Host = "", AuthBy = "", Account = tolower(ServicePrincipalName), Detail = ResourceDisplayName
     ),
+    // @sentinel-only:begin
     (
         AuditLogs
         | where TimeGenerated between (start .. end)
@@ -35,6 +36,23 @@ let _IpEvents = (start:datetime, end:datetime, ip:string) {
             Host = "", AuthBy = "", Account = coalesce(UserId, ServicePrincipalId),
             Detail = replace_regex(tostring(parse_url(RequestUri).Path), @"[0-9a-fA-F-]{36}", "{id}")
     ),
+    // Sentinel only: legacy Azure AD Graph, Entra ID Protection risk detections (AD FS sign-ins: via _Signins)
+    (
+        AADGraphActivityLogs
+        | where TimeGenerated between (start .. end)
+        | where CallerIpAddress == ip
+        | project TimeGenerated, Source = "AADGraphActivityLogs", EventType = strcat(RequestMethod, " ", tostring(ResponseStatusCode)),
+            Host = "", AuthBy = "", Account = coalesce(UserId, ServicePrincipalId),
+            Detail = replace_regex(tostring(parse_url(RequestUri).Path), @"[0-9a-fA-F-]{36}", "{id}")
+    ),
+    (
+        AADUserRiskEvents
+        | where TimeGenerated between (start .. end)
+        | where IpAddress == ip
+        | summarize arg_max(TimeGenerated, *) by Id
+        | project TimeGenerated, Source = "AADUserRiskEvents", EventType = strcat("Risk ", RiskLevel, " · ", RiskState),
+            Host = "", AuthBy = "", Account = tolower(UserPrincipalName), Detail = strcat(RiskEventType, " · ", DetectionTimingType)
+    ),
     (
         _WinSecurity(start, end, dynamic([]), ip)
         | where IpAddress == ip
@@ -45,10 +63,11 @@ let _IpEvents = (start:datetime, end:datetime, ip:string) {
     (
         _Sysmon(start, end, dynamic([3]), ip)
         | where DestinationIp == ip or SourceIp == ip
-        | project TimeGenerated, Source = "Sysmon 3", EventType = iff(Initiated == "true", "Connexion sortante", "Connexion entrante"),
+        | project TimeGenerated, Source = "Sysmon 3", EventType = iff(Initiated == "true", "Outbound connection", "Inbound connection"),
             Host = Computer, AuthBy = "", Account = UserSam,
             Detail = strcat(ProcessFile, " → ", DestinationIp, ":", DestinationPort, iff(isempty(DestinationHostname), "", strcat(" (", DestinationHostname, ")")))
     ),
+    // @sentinel-only:end
     (
         DeviceNetworkEvents
         | where TimeGenerated between (start .. end)
@@ -67,7 +86,7 @@ let _IpEvents = (start:datetime, end:datetime, ip:string) {
         IdentityLogonEvents
         | where TimeGenerated between (start .. end)
         | where IPAddress == ip or DestinationIPAddress == ip
-        // IP source : la machine concernée est la cible (le DC de destination n'a fait que valider) ; IP destination : la machine source
+        // Source IP: the relevant device is the target (the destination DC only validated); destination IP: the source device
         | project TimeGenerated, Source = "IdentityLogonEvents", EventType = ActionType,
             Host = iff(IPAddress == ip, TargetDeviceName, DeviceName),
             AuthBy = iff(IPAddress == ip, DestinationDeviceName, ""),
@@ -87,6 +106,7 @@ let _IpEvents = (start:datetime, end:datetime, ip:string) {
         | project TimeGenerated, Source = "IdentityDirectoryEvents", EventType = ActionType, Host = coalesce(TargetDeviceName, DeviceName),
             AuthBy = DestinationDeviceName, Account = tolower(coalesce(AccountUpn, AccountName)), Detail = strcat(Application, " ", Protocol)
     ),
+    // @sentinel-only:begin
     (
         ASimAuthenticationEventLogs
         | where TimeGenerated between (start .. end)
@@ -95,6 +115,7 @@ let _IpEvents = (start:datetime, end:datetime, ip:string) {
             Host = iff(SrcIpAddr == ip, coalesce(TargetHostname, DvcHostname), SrcHostname), AuthBy = "",
             Account = tolower(TargetUsername), Detail = strcat(LogonProtocol, " ", LogonMethod)
     ),
+    // @sentinel-only:end
     (
         CloudAppEvents
         | where TimeGenerated between (start .. end)
@@ -102,6 +123,7 @@ let _IpEvents = (start:datetime, end:datetime, ip:string) {
         | project TimeGenerated, Source = "CloudAppEvents", EventType = ActionType, Host = "", AuthBy = "",
             Account = tolower(coalesce(tostring(RawEventData.UserId), AccountDisplayName)), Detail = Application
     ),
+    // @sentinel-only:begin
     (
         OfficeActivity
         | where TimeGenerated between (start .. end)
@@ -153,6 +175,29 @@ let _IpEvents = (start:datetime, end:datetime, ip:string) {
         | project TimeGenerated, Source = "AZFWApplicationRule", EventType = Action, Host = "", AuthBy = "", Account = "",
             Detail = coalesce(TargetUrl, Fqdn)
     ),
+    // Azure Firewall, continued: DNAT, threat intelligence and DNS proxy
+    (
+        AZFWNatRule
+        | where TimeGenerated between (start .. end)
+        | where SourceIp == ip or DestinationIp == ip or TranslatedIp == ip
+        | project TimeGenerated, Source = "AZFWNatRule", EventType = strcat("DNAT ", Rule), Host = "", AuthBy = "", Account = "",
+            Detail = strcat(SourceIp, " → ", DestinationIp, ":", tostring(DestinationPort), " ⇒ ", TranslatedIp, ":", tostring(TranslatedPort), " ", Protocol)
+    ),
+    (
+        AZFWThreatIntel
+        | where TimeGenerated between (start .. end)
+        | where SourceIp == ip or DestinationIp == ip
+        | project TimeGenerated, Source = "AZFWThreatIntel", EventType = strcat("Threat intel ", Action), Host = "", AuthBy = "", Account = "",
+            Detail = strcat(SourceIp, " → ", DestinationIp, ":", tostring(DestinationPort), " · ", ThreatDescription)
+    ),
+    (
+        AZFWDnsQuery
+        | where TimeGenerated between (start .. end)
+        | where SourceIp == ip
+        | project TimeGenerated, Source = "AZFWDnsQuery", EventType = strcat("DNS ", QueryType, " ", ResponseCode), Host = "", AuthBy = "",
+            Account = "", Detail = QueryName
+    ),
+    // @sentinel-only:end
     (
         EmailEvents
         | where TimeGenerated between (start .. end)
@@ -166,8 +211,9 @@ let _IpEvents = (start:datetime, end:datetime, ip:string) {
         | where IPAddress == ip
         | project TimeGenerated, Source = "UrlClickEvents", EventType = ActionType, Host = "", AuthBy = "",
             Account = tolower(AccountUpn), Detail = Url
-    ),
-    (
+    )
+    // @sentinel-only:begin
+    , (
         Syslog
         | where TimeGenerated between (start .. end)
         | where SyslogMessage has ip or HostIP == ip
@@ -175,5 +221,6 @@ let _IpEvents = (start:datetime, end:datetime, ip:string) {
             Account = tolower(extract(@"(?:Accepted|Failed) \S+ for (?:invalid user )?(\S+) from", 1, SyslogMessage)),
             Detail = substring(SyslogMessage, 0, 300)
     )
+    // @sentinel-only:end
     | extend Host = tolower(Host), AuthBy = tolower(AuthBy)
 };

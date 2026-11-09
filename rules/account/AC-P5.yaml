@@ -1,18 +1,18 @@
 id: AC-P5
-name: Profil et rôles du compte
+name: Account profile and roles
 indicators: [account]
 action: pivot
 description: >
-  Dit qui est le compte avant de pivoter dessus : fiche IdentityInfo (nom, service, poste, état, type), rôles connus
-  (rôle Entra ID attribué, groupe AD privilégié, compte de service, compte sensible ou leurre selon Defender for
-  Identity, watchlist EasyPivotRoles), catégorie déduite du nom (compte machine, système, krbtgt, synchronisation Entra
-  Connect, administrateur intégré) et comportement sur la fenêtre : ouvertures de session de type service ou batch, nombre
-  de machines et d'IP, part des connexions non interactives. Un compte qui se comporte comme un compte de service sans
-  être déclaré comme tel est signalé.
+  Tells who the account is before pivoting on it: IdentityInfo record (name, department, job title, state, type), known roles
+  (Entra ID role assigned, privileged AD group, service account, sensitive or honeytoken account according to Defender for
+  Identity, EasyPivotRoles watchlist), category inferred from the name (machine account, system account, krbtgt, Entra
+  Connect sync, built-in administrator) and behavior over the window: service or batch logons, number
+  of devices and IPs, share of non-interactive sign-ins. An account that behaves like a service account without
+  being declared as one is flagged.
 reading:
-  decisive: Compte privilégié ou sensible impliqué dans l'alerte, ou compte de service utilisé en session interactive.
-  context: Compte désactivé ou supprimé qui s'authentifie encore ; compte sans fiche IdentityInfo (local, externe, récent).
-  noise: Comptes de service et de synchronisation, très présents dans tous les journaux d'authentification.
+  decisive: Privileged or sensitive account involved in the alert, or service account used in an interactive session.
+  context: Disabled or deleted account that still authenticates; account with no IdentityInfo record (local, external, recent).
+  noise: Service and sync accounts, very frequent in all authentication logs.
 v1: true
 window: { before: 7d, after: 1d }
 uses: [signins, win_security, roles]
@@ -38,9 +38,11 @@ query: |
   let Logons = union isfuzzy=true
       (datatable(Machine:string, LogonType:string, Source:string)[]),
       (DeviceLogonEvents | where TimeGenerated between (StartTimestamp .. EndTimestamp) | where AccountName =~ ValueSam
-          | project Machine = tolower(DeviceName), LogonType, Source = "DeviceLogonEvents"),
-      (_WinSecurity(StartTimestamp, EndTimestamp, dynamic([4624]), ValueSam) | where TargetSam == ValueSam
+          | project Machine = tolower(DeviceName), LogonType, Source = "DeviceLogonEvents")
+      // @sentinel-only:begin
+      , (_WinSecurity(StartTimestamp, EndTimestamp, dynamic([4624]), ValueSam) | where TargetSam == ValueSam
           | project Machine = TargetHost, LogonType = LogonTypeName, Source = SourceTable)
+      // @sentinel-only:end
       | summarize Machines = dcount(Machine), ServiceLogons = countif(LogonType in ("Service", "Batch")),
           InteractiveLogons = countif(LogonType in ("Interactive", "RemoteInteractive", "CachedInteractive", "Unlock")), Logons = count();
   let Cloud = _Signins(StartTimestamp, EndTimestamp, "", ValueUpn)
@@ -52,11 +54,11 @@ query: |
   | extend L = toscalar(Logons | project pack_all()), C = toscalar(Cloud | project pack_all())
   | extend BehavesLikeService = toint(L.ServiceLogons) > 0 and toint(L.InteractiveLogons) == 0
   | extend Assessment = case(
-      isnotempty(KnownRoles), strcat("Rôle connu : ", KnownRoles),
-      isnotempty(NameCategory), strcat("Catégorie : ", NameCategory),
-      BehavesLikeService, "Se comporte comme un compte de service (sessions de service ou batch, aucune session interactive) sans être déclaré comme tel",
-      isempty(tostring(P.Sam)), "Absent d'IdentityInfo : compte local, externe, récent, ou UEBA non activé",
-      "Compte utilisateur sans rôle particulier connu")
+      isnotempty(KnownRoles), strcat("Known role: ", KnownRoles),
+      isnotempty(NameCategory), strcat("Category: ", NameCategory),
+      BehavesLikeService, "Behaves like a service account (service or batch logons, no interactive logon) without being declared as one",
+      isempty(tostring(P.Sam)), "Missing from IdentityInfo: local, external or recent account, or UEBA not enabled",
+      "User account with no known special role")
   | project Account, Sam, Assessment, KnownRoles, NameCategory, DisplayName = tostring(P.DisplayName), Upn = tostring(P.Upn),
       Department = tostring(P.Department), JobTitle = tostring(P.JobTitle), Enabled = tostring(P.Enabled), UserType = tostring(P.UserType),
       Risk = tostring(P.Risk), Machines = toint(L.Machines), Logons = toint(L.Logons), ServiceLogons = toint(L.ServiceLogons),

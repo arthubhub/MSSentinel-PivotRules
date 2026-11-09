@@ -1,16 +1,20 @@
 id: IP-P4
-name: Processus ayant contacté l'IP
+name: Processes that contacted the IP
 indicators: [ip]
 action: pivot
+targets: [process, device, account, url, hash]
 description: >
-  Processus, machines et comptes à l'origine des connexions vers l'IP (ou depuis l'IP quand elle est locale),
-  avec ports, URL et premier et dernier contact. Inclut l'écart médian entre connexions pour repérer un balisage.
-  Defender for Endpoint, complété dans Sentinel par Sysmon 3 et par les sessions réseau ASIM qui portent un nom
-  d'application (pare-feu applicatifs). Le rôle de la machine (DC, serveur déclaré) et la catégorie du compte (système, service) sont indiqués.
+  Processes, devices and accounts behind the connections to the IP (or from the IP when it is local),
+  with ports, URLs and first and last contact. Includes the median gap between connections to spot beaconing.
+  Defender for Endpoint (DeviceNetworkEvents, and DeviceEvents for events that carry the IP: network protection,
+  connection inspection, blocks), completed in Sentinel by Sysmon 3, by ASIM network sessions that carry an
+  application name (application firewalls) and by firewalls and proxies (CommonSecurityLog, AZFWNetworkRule,
+  AZFWApplicationRule when the IP is the source): source workstation by name or IP, process only if
+  the appliance logs it. The device role (DC, declared server) and the account category (system, service) are shown.
 reading:
-  decisive: Binaire signé légitime (rundll32, msiexec, node.exe, mshta) ou processus hors dossier d'installation qui parle à une IP publique.
-  context: Écart médian régulier entre connexions (balise C2) ou destination contactée depuis une seule machine.
-  noise: Navigateurs, agents de mise à jour et outils de sécurité qui contactent des IP de CDN.
+  decisive: Legitimate signed binary (rundll32, msiexec, node.exe, mshta) or process outside its install folder talking to a public IP.
+  context: Regular median gap between connections (C2 beacon) or destination contacted from a single device.
+  noise: Browsers, update agents and security tools contacting CDN IPs; firewall rows without a process (DeviceName is then the workstation IP, pivot on it with IP-P1).
 window: { before: 1h, after: 1h }
 uses: [roles, sysmon]
 query: |
@@ -20,9 +24,19 @@ query: |
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where RemoteIP == Value or LocalIP == Value
       | project TimeGenerated, Source = "DeviceNetworkEvents", DeviceName = tolower(DeviceName),
-          Direction = iff(RemoteIP == Value, "Vers l'IP", "IP locale de la machine"), Process = InitiatingProcessFileName,
+          Direction = iff(RemoteIP == Value, "To the IP", "Local IP of the device"), Process = InitiatingProcessFileName,
           ProcessPath = InitiatingProcessFolderPath, Account = tolower(InitiatingProcessAccountName), ProcessSHA256 = InitiatingProcessSHA256,
           RemotePort, RemoteUrl, ActionType, CommandLine = InitiatingProcessCommandLine
+  ),
+  (
+      // Defender events carrying the IP: network protection, connection inspection, blocks, bypasses
+      DeviceEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where RemoteIP == Value or LocalIP == Value
+      | project TimeGenerated, Source = "DeviceEvents", DeviceName = tolower(DeviceName),
+          Direction = iff(RemoteIP == Value, "To the IP", "Local IP of the device"), Process = InitiatingProcessFileName,
+          ProcessPath = InitiatingProcessFolderPath, Account = tolower(InitiatingProcessAccountName), ProcessSHA256 = InitiatingProcessSHA256,
+          RemotePort = toint(RemotePort), RemoteUrl, ActionType, CommandLine = InitiatingProcessCommandLine
   )
   // @sentinel-only:begin
   , (
@@ -30,7 +44,7 @@ query: |
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where (DstIpAddr == Value or SrcIpAddr == Value) and isnotempty(SrcAppName)
       | project TimeGenerated, Source = strcat("ASimNetworkSessionLogs (", EventProduct, ")"), DeviceName = tolower(SrcHostname),
-          Direction = iff(DstIpAddr == Value, "Vers l'IP", "IP locale de la machine"), Process = tostring(split(replace_string(SrcAppName, "/", @"\"), @"\")[-1]),
+          Direction = iff(DstIpAddr == Value, "To the IP", "Local IP of the device"), Process = tostring(split(replace_string(SrcAppName, "/", @"\"), @"\")[-1]),
           ProcessPath = SrcAppName, Account = tolower(SrcUsername), ProcessSHA256 = "", RemotePort = DstPortNumber, RemoteUrl = DstFQDN,
           ActionType = DvcAction, CommandLine = ""
   ),
@@ -38,9 +52,36 @@ query: |
       _Sysmon(StartTimestamp, EndTimestamp, dynamic([3]), Value)
       | where DestinationIp == Value or SourceIp == Value
       | project TimeGenerated, Source = "Sysmon 3", DeviceName = tolower(Computer),
-          Direction = iff(DestinationIp == Value, "Vers l'IP", "IP locale de la machine"), Process = ProcessFile, ProcessPath = Image,
+          Direction = iff(DestinationIp == Value, "To the IP", "Local IP of the device"), Process = ProcessFile, ProcessPath = Image,
           Account = UserSam, ProcessSHA256 = "", RemotePort = toint(DestinationPort), RemoteUrl = DestinationHostname,
-          ActionType = iff(Initiated == "true", "Connexion sortante", "Connexion entrante"), CommandLine = ""
+          ActionType = iff(Initiated == "true", "Outbound connection", "Inbound connection"), CommandLine = ""
+  ),
+  // Firewall and proxy: source workstation (name or IP), process only when the appliance logs it
+  (
+      CommonSecurityLog
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where DestinationIP == Value or SourceIP == Value
+      | project TimeGenerated, Source = strcat("CommonSecurityLog (", DeviceVendor, ")"),
+          DeviceName = tolower(iff(DestinationIP == Value, coalesce(SourceHostName, SourceIP), coalesce(DestinationHostName, DestinationIP))),
+          Direction = iff(DestinationIP == Value, "To the IP", "From the IP (firewall)"), Process = SourceProcessName, ProcessPath = "",
+          Account = tolower(SourceUserName), ProcessSHA256 = "", RemotePort = toint(DestinationPort), RemoteUrl = RequestURL,
+          ActionType = coalesce(DeviceAction, Activity), CommandLine = ""
+  ),
+  (
+      AZFWNetworkRule
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where DestinationIp == Value or SourceIp == Value
+      | project TimeGenerated, Source = "AZFWNetworkRule", DeviceName = iff(DestinationIp == Value, SourceIp, DestinationIp),
+          Direction = iff(DestinationIp == Value, "To the IP", "From the IP (firewall)"), Process = "", ProcessPath = "", Account = "",
+          ProcessSHA256 = "", RemotePort = toint(DestinationPort), RemoteUrl = "", ActionType = Action, CommandLine = ""
+  ),
+  (
+      AZFWApplicationRule
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where SourceIp == Value
+      | project TimeGenerated, Source = "AZFWApplicationRule", DeviceName = SourceIp, Direction = "Local IP of the device", Process = "",
+          ProcessPath = "", Account = "", ProcessSHA256 = "", RemotePort = toint(DestinationPort), RemoteUrl = coalesce(TargetUrl, Fqdn),
+          ActionType = Action, CommandLine = ""
   )
   // @sentinel-only:end
   | sort by DeviceName asc, Process asc, TimeGenerated asc

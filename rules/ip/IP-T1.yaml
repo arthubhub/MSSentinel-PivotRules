@@ -1,23 +1,25 @@
 id: IP-T1
-name: Chaîne d'authentification Windows depuis l'IP
+name: Windows authentication chain from the IP
 indicators: [ip]
 action: timeline
+targets: [device, account]
 description: >
-  Enchaînement des événements d'authentification Windows liés à l'IP : 4625 (échec), 4624 (succès), 4648
-  (identifiants explicites), 4768 et 4769 (Kerberos), 4771, 4776 (NTLM), puis, pour chaque session ouverte,
-  les 4672 (privilèges), 4688 (processus lancés dans la session) et 4634 ou 4647 (fermeture), rattachés par
-  l'identifiant de session sur la même machine. Couvre SecurityEvent et WindowsEvent, y compris quand les
-  colonnes ne sont remplies que dans le XML brut. LoggedOn est la machine qui a journalisé l'événement, Target la
-  machine réellement visée (service demandé pour un 4769, serveur cible pour un 4648) et ValidatedBy le contrôleur de
-  domaine qui a validé les identifiants ; le rôle connu de LoggedOn est indiqué (LoggedOnRole).
+  Sequence of Windows authentication events linked to the IP: 4625 (failure), 4624 (success), 4648
+  (explicit credentials), 4768 and 4769 (Kerberos), 4771, 4776 (NTLM), then, for each opened session,
+  the 4672 (privileges), 4688 (processes started in the session) and 4634 or 4647 (logoff) events, linked by
+  the logon ID on the same device. Covers SecurityEvent and WindowsEvent, including when the
+  columns are only filled in the raw XML. LoggedOn is the device that logged the event, Target the
+  device actually targeted (requested service for a 4769, target server for a 4648) and ValidatedBy the domain
+  controller that validated the credentials; the known role of LoggedOn is shown (LoggedOnRole).
 reading:
-  decisive: Série de 4625 puis 4624 de type 3 ou 10, suivie d'un 4672 et de 4688 dans la même session.
-  context: Ticket 4769 demandé avec un chiffrement RC4 (0x17) vers un compte de service (Kerberoasting).
-  noise: Ouvertures de type 3 répétées par des serveurs de fichiers, d'impression ou de supervision.
+  decisive: Series of 4625 then 4624 of type 3 or 10, followed by a 4672 and 4688 events in the same session.
+  context: 4769 ticket requested with RC4 encryption (0x17) for a service account (Kerberoasting).
+  noise: Repeated type 3 logons by file, print or monitoring servers.
 v1: true
 window: { before: 30m, after: 30m }
 uses: [win_security, roles]
 query: |
+  // @sentinel-only:begin
   let Auth = _WinSecurity(StartTimestamp, EndTimestamp, dynamic([4624, 4625, 4648, 4768, 4769, 4771, 4776]), Value)
       | where IpAddress == Value;
   let Sessions = Auth
@@ -36,12 +38,59 @@ query: |
       ValidatedBy = AuthAuthority, Account = tolower(AccountName),
       Action = strcat(tostring(EventID), " · ", EventName),
       Detail = case(
-          EventID in (4624, 4625), strcat(LogonTypeName, " · ", AuthenticationPackageName, " · poste ", WorkstationName, iff(EventID == 4625, strcat(" · ", Status, "/", SubStatus), "")),
-          EventID == 4648, strcat("vers ", TargetServerName, " · ", ProcessName),
-          EventID in (4768, 4769, 4771), strcat(ServiceName, " · chiffrement ", TicketEncryptionType, " · statut ", Status),
-          EventID == 4776, strcat("poste ", WorkstationName, " · statut ", Status),
+          EventID in (4624, 4625), strcat(LogonTypeName, " · ", AuthenticationPackageName, " · workstation ", WorkstationName, iff(EventID == 4625, strcat(" · ", Status, "/", SubStatus), "")),
+          EventID == 4648, strcat("to ", TargetServerName, " · ", ProcessName),
+          EventID in (4768, 4769, 4771), strcat(ServiceName, " · encryption ", TicketEncryptionType, " · status ", Status),
+          EventID == 4776, strcat("workstation ", WorkstationName, " · status ", Status),
           EventID == 4672, PrivilegeList,
           EventID == 4688, strcat(NewProcessName, " ← ", ParentProcessName, " · ", CommandLine),
           ""),
       LogonId = iff(EventID in (4672, 4688), SubjectLogonId, TargetLogonId)
   | sort by TimeGenerated asc
+  // @sentinel-only:end
+  // @defender-only:begin
+  // Defender XDR variant: logons seen by Defender for Endpoint (DeviceLogonEvents) and by Defender for
+  // Identity (IdentityLogonEvents), then processes started in each opened session, linked by LogonId on the same device.
+  let DAuth = DeviceLogonEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where RemoteIP == Value;
+  let DSessions = DAuth
+      | where ActionType == "LogonSuccess" and isnotempty(LogonId) and LogonId != 0
+      | distinct SessionDeviceId = DeviceId, SessionLogonId = LogonId;
+  let DSessionHosts = DSessions | distinct SessionDeviceId;
+  union isfuzzy=true
+  (
+      DAuth
+      | project TimeGenerated, Source = "DeviceLogonEvents", LoggedOn = tolower(DeviceName), Target = tolower(DeviceName),
+          ValidatedBy = "", Account = tolower(strcat(AccountDomain, @"\", AccountName)),
+          Action = strcat(ActionType, " · ", LogonType),
+          Detail = strcat(Protocol, " · workstation ", RemoteDeviceName, iff(IsLocalAdmin, " · local admin", ""),
+              iff(isnotempty(FailureReason), strcat(" · ", FailureReason), "")),
+          LogonId = tostring(LogonId)
+  ),
+  (
+      DeviceProcessEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where DeviceId in (DSessionHosts)
+      | join kind=inner (DSessions) on $left.DeviceId == $right.SessionDeviceId, $left.InitiatingProcessLogonId == $right.SessionLogonId
+      | project TimeGenerated, Source = "DeviceProcessEvents", LoggedOn = tolower(DeviceName), Target = "", ValidatedBy = "",
+          Account = tolower(strcat(InitiatingProcessAccountDomain, @"\", InitiatingProcessAccountName)),
+          Action = ActionType, Detail = strcat(FolderPath, " ← ", InitiatingProcessFileName, " · ", ProcessCommandLine),
+          LogonId = tostring(InitiatingProcessLogonId)
+  ),
+  (
+      IdentityLogonEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where IPAddress == Value
+      | project TimeGenerated, Source = "IdentityLogonEvents", LoggedOn = tolower(DestinationDeviceName),
+          Target = tolower(TargetDeviceName), ValidatedBy = tolower(DestinationDeviceName),
+          Account = tolower(iff(isnotempty(AccountDomain), strcat(AccountDomain, @"\", AccountName), coalesce(AccountUpn, AccountName))),
+          Action = strcat(ActionType, " · ", LogonType),
+          Detail = strcat(Protocol, " · ", Application, " · workstation ", DeviceName, iff(isnotempty(FailureReason), strcat(" · ", FailureReason), "")),
+          LogonId = ""
+  )
+  | extend MachineKey = _HostKey(LoggedOn)
+  | lookup kind=leftouter (_MachineRoles(EndTimestamp)) on MachineKey
+  | project TimeGenerated, Source, LoggedOn, LoggedOnRole = MachineRole, Target, ValidatedBy, Account, Action, Detail, LogonId
+  | sort by TimeGenerated asc
+  // @defender-only:end

@@ -1,0 +1,59 @@
+id: AC-P7
+name: Messages and clicks of the account
+indicators: [account]
+action: pivot
+targets: [email, url]
+description: >
+  Email correspondents and URLs clicked by the account, one row per entity: senders of received messages and
+  recipients of sent messages (EmailEvents), URLs clicked through link protection (UrlClickEvents,
+  AccountUpn). The account's email addresses are taken from IdentityInfo (primary address and aliases, columns read
+  with column_ifexists because they differ between Sentinel and Defender XDR), otherwise the UPN itself. Used to go
+  from a compromised account to the phishing messages received or sent and to the links followed.
+reading:
+  decisive: External first-contact sender with a detected threat, followed by an allowed or forced click (IsClickedThrough) by the account.
+  context: Burst of messages sent by the account to many external recipients (account used for internal or outbound phishing).
+  noise: Newsletters, automatic notifications and links to collaboration services (SharePoint, Teams) clicked every day.
+window: { before: 7d, after: 1d }
+query: |
+  let Addrs = toscalar(union isfuzzy=true
+      (print Addr = iff(ValueUpn contains "@", ValueUpn, "")),
+      (
+          IdentityInfo
+          | where TimeGenerated between ((T0 - 14d) .. EndTimestamp)
+          | extend Sam = tolower(coalesce(tostring(column_ifexists("SAMAccountName", "")), AccountName)),
+              Upn = tolower(coalesce(tostring(column_ifexists("AccountUPN", "")), tostring(column_ifexists("AccountUpn", ""))))
+          | where Sam == ValueSam or Upn == ValueUpn
+          | extend Extra = column_ifexists("AdditionalMailAddresses", dynamic([]))
+          | extend Mails = array_concat(pack_array(Upn, tostring(column_ifexists("MailAddress", "")), tostring(column_ifexists("EmailAddress", ""))),
+              iff(array_length(Extra) > 0, Extra, dynamic([])))
+          | mv-expand Addr = Mails to typeof(string)
+          | project Addr = tolower(trim_start("(?i)smtp:", Addr))
+      )
+      | where Addr contains "@"
+      | summarize make_set(Addr, 20));
+  union isfuzzy=true
+  (
+      EmailEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where tolower(RecipientEmailAddress) in (Addrs) or tolower(SenderFromAddress) in (Addrs) or tolower(SenderMailFromAddress) in (Addrs)
+      | extend Received = tolower(RecipientEmailAddress) in (Addrs)
+      | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = dcount(NetworkMessageId),
+          Details = make_set(Subject, 5), Threats = make_set_if(ThreatTypes, isnotempty(ThreatTypes), 5),
+          Actions = make_set(DeliveryAction, 5), FirstContact = countif(IsFirstContact)
+          by Entity = tolower(iff(Received, SenderFromAddress, RecipientEmailAddress)),
+          Kind = iff(Received, "Sender of a received message", "Recipient of a sent message")
+      | extend Sources = pack_array("EmailEvents")
+  ),
+  (
+      UrlClickEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where AccountUpn =~ ValueUpn or tolower(AccountUpn) in (Addrs)
+      | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count(),
+          Details = make_set(Workload, 5), Threats = dynamic([]), Actions = make_set(ActionType, 5),
+          FirstContact = countif(IsClickedThrough)
+          by Entity = Url, Kind = "Clicked URL"
+      | extend Sources = pack_array("UrlClickEvents")
+  )
+  | extend Rank = case(array_length(Threats) > 0, 0, Kind == "Clicked URL" and Actions has "ClickAllowed", 1, FirstContact > 0, 2, 3)
+  | sort by Rank asc, LastSeen desc
+  | project Kind, Entity, FirstSeen, LastSeen, Events, Threats, Actions, Details, FirstContactOrClickedThrough = FirstContact, Sources

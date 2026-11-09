@@ -1,0 +1,80 @@
+id: DM-P5
+name: Files downloaded from the domain
+indicators: [domain, url]
+action: pivot
+targets: [hash, device, account, email]
+description: >
+  Files coming from the domain (or its subdomains), one row per file (hash): downloads whose origin URL or referrer
+  is in the domain (DeviceFileEvents, FileOriginUrl and FileOriginReferrerUrl), attachments of messages containing a
+  link to the domain (EmailUrlInfo matched with EmailAttachmentInfo on NetworkMessageId) and, in Sentinel, downloads
+  seen by the proxy (ASimWebSessionLogs, CommonSecurityLog) and Zone.Identifier streams logged by Sysmon 15 (HostUrl,
+  ReferrerUrl). Gives devices, accounts or recipients, URLs and the process that wrote the file. Pivot on the hashes
+  next (HS-P1, HS-P2).
+reading:
+  decisive: Executable, script, archive or ISO downloaded from the domain then present on several devices; attachment of a message whose link points to the domain.
+  context: Download where only the referrer is in the domain (redirect or lure page); written by a non-browser process.
+  noise: Software vendor and update CDN domains; images and fonts of web pages.
+window: { before: 7d, after: 1d }
+uses: [web_functions, sysmon]
+query: |
+  union isfuzzy=true
+  (
+      DeviceFileEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where FileOriginUrl has ValueDomain or FileOriginReferrerUrl has ValueDomain
+      | extend ViaReferrer = not(_InDomain(_Host(FileOriginUrl), ValueDomain))
+      | where not(ViaReferrer) or _InDomain(_Host(FileOriginReferrerUrl), ValueDomain)
+      | project TimeGenerated, Hash = tolower(coalesce(SHA256, SHA1)), FileName, Where = tolower(DeviceName),
+          Who = tolower(coalesce(InitiatingProcessAccountUpn, InitiatingProcessAccountName)),
+          Url = iff(ViaReferrer, strcat(FileOriginUrl, " (referrer ", FileOriginReferrerUrl, ")"), FileOriginUrl),
+          Via = InitiatingProcessFileName, Source = "DeviceFileEvents"
+  ),
+  (
+      EmailUrlInfo
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where UrlDomain has ValueDomain or Url has ValueDomain
+      | where _InDomain(tolower(coalesce(UrlDomain, _Host(Url))), ValueDomain)
+      | summarize Url = take_any(Url) by NetworkMessageId
+      | join kind=inner (
+          EmailAttachmentInfo
+          | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+          | where isnotempty(SHA256)
+          ) on NetworkMessageId
+      | project TimeGenerated, Hash = tolower(SHA256), FileName, Where = tolower(RecipientEmailAddress), Who = tolower(SenderFromAddress),
+          Url = strcat("Message link: ", Url), Via = "Attachment", Source = "EmailUrlInfo + EmailAttachmentInfo"
+  )
+  // @sentinel-only:begin
+  , (
+      ASimWebSessionLogs
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where Url has ValueDomain
+      | where isnotempty(FileSHA256) or isnotempty(FileSHA1) or isnotempty(FileMD5)
+      | where _InDomain(_Host(Url), ValueDomain)
+      | project TimeGenerated, Hash = tolower(coalesce(FileSHA256, FileSHA1, FileMD5)), FileName, Where = tolower(coalesce(SrcHostname, SrcIpAddr)),
+          Who = tolower(SrcUsername), Url, Via = "Proxy", Source = strcat("ASimWebSessionLogs (", EventProduct, ")")
+  ),
+  (
+      CommonSecurityLog
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where RequestURL has ValueDomain and isnotempty(FileHash)
+      | where _InDomain(_Host(RequestURL), ValueDomain)
+      | project TimeGenerated, Hash = tolower(FileHash), FileName, Where = tolower(coalesce(SourceHostName, SourceIP)),
+          Who = tolower(SourceUserName), Url = RequestURL, Via = DeviceProduct, Source = strcat("CommonSecurityLog (", DeviceVendor, ")")
+  ),
+  (
+      _Sysmon(StartTimestamp, EndTimestamp, dynamic([15]), ValueDomain)
+      | extend HostUrl = extract(@"HostUrl=(\S+)", 1, Contents), Referrer = extract(@"ReferrerUrl=(\S+)", 1, Contents)
+      | where _InDomain(_Host(HostUrl), ValueDomain) or _InDomain(_Host(Referrer), ValueDomain)
+      | project TimeGenerated, Hash = coalesce(SHA256, SHA1, MD5), FileName = TargetFile, Where = tolower(Computer), Who = UserSam,
+          Url = HostUrl, Via = ProcessFile, Source = "Sysmon 15 (Zone.Identifier)"
+  )
+  // @sentinel-only:end
+  | where isnotempty(Hash)
+  | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count(), WhereCount = dcount(Where),
+      MachinesOrRecipients = make_set(Where, 10), AccountsOrSenders = make_set_if(Who, isnotempty(Who), 10),
+      FileNames = make_set(FileName, 5), Urls = make_set(Url, 5), WrittenBy = make_set(Via, 5), Sources = make_set(Source)
+      by FileHash = Hash
+  | extend Executable = tostring(FileNames) matches regex @"(?i)\.(exe|dll|scr|ps1|js|jse|vbs|vbe|hta|bat|cmd|msi|lnk|iso|img|zip|7z|rar)\b"
+  | sort by Executable desc, WhereCount desc, FirstSeen asc
+  | project FileHash, FileNames, Executable, FirstSeen, LastSeen, Events, WhereCount, MachinesOrRecipients, AccountsOrSenders, Urls,
+      WrittenBy, Sources

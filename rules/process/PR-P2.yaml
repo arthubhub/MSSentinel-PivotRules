@@ -1,14 +1,16 @@
 id: PR-P2
-name: Connexions réseau du processus
+name: Process network connections
 indicators: [process]
 action: pivot
+targets: [ip, url, device]
 description: >
-  Destinations contactées par le processus (DeviceNetworkEvents, et Sysmon 3 dans Sentinel) : URL ou IP, port, type d'adresse, nombre de
-  connexions, premier et dernier contact, machines (avec leur rôle connu : DC, serveur déclaré) et lignes de commande.
+  Destinations contacted by the process (DeviceNetworkEvents, and Sysmon 3 in Sentinel): URL or IP, port, address type,
+  number of connections, first and last contact, devices (with their known role: DC, declared server) and command
+  lines.
 reading:
-  decisive: Moteur de script ou LOLBin (powershell, mshta, rundll32, node) qui contacte une destination publique récente.
-  context: Destination IP sans nom de domaine (C2 résolu hors DNS, par exemple via une blockchain).
-  noise: Mises à jour et télémétrie des éditeurs.
+  decisive: Script engine or LOLBin (powershell, mshta, rundll32, node) contacting a recent public destination.
+  context: IP destination without a domain name (C2 resolved outside DNS, for instance through a blockchain).
+  noise: Vendor updates and telemetry.
 v1: true
 window: { before: 30m, after: 30m }
 context: [HOST]

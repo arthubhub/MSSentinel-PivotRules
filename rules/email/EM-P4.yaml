@@ -1,14 +1,15 @@
 id: EM-P4
-name: URL et pièces jointes des messages
+name: URLs and attachments of the messages
 indicators: [email]
 action: pivot
+targets: [url, hash, email, account]
 description: >
-  URL (EmailUrlInfo) et pièces jointes (EmailAttachmentInfo) des e-mails impliquant l'adresse, avec le
-  nombre de clics sur chaque URL depuis la réception.
+  URLs (EmailUrlInfo) and attachments (EmailAttachmentInfo) of the emails involving the address, with the
+  number of clicks on each URL since receipt.
 reading:
-  decisive: URL cliquée vers un domaine nouveau, ou pièce jointe HTML, SVG, ISO, archive ou script signalée par Defender.
-  context: QR code (URL extraite d'une image), chaîne de redirections.
-  noise: Liens de désinscription, pixels de suivi, signatures avec liens vers les réseaux sociaux.
+  decisive: Clicked URL to a new domain, or HTML, SVG, ISO, archive or script attachment flagged by Defender.
+  context: QR code (URL extracted from an image), redirect chain.
+  noise: Unsubscribe links, tracking pixels, signatures with links to social networks.
 window: { before: 4h, after: 1h }
 query: |
   let Msgs = EmailEvents
@@ -31,7 +32,7 @@ query: |
       EmailAttachmentInfo
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | join kind=inner (Msgs) on NetworkMessageId
-      | project MailTime, Sender, Subject, Kind = "Pièce jointe", Item = FileName, Info = strcat(FileType, " · ", tostring(FileSize), " octets"),
+      | project MailTime, Sender, Subject, Kind = "Attachment", Item = FileName, Info = strcat(FileType, " · ", tostring(FileSize), " bytes"),
           SHA256, Threat = strcat(ThreatTypes, " ", ThreatNames), Clicks = long(null), Clickers = dynamic(null), NetworkMessageId
   )
   | sort by MailTime asc, Kind asc

@@ -1,14 +1,14 @@
 id: MC-S2
-name: Alertes de la machine par jour
+name: Device alerts per day
 indicators: [device]
 action: statistics
 description: >
-  Alertes qui citent la machine, par jour, titre et gravité : Defender XDR (AlertEvidence) et Sentinel
-  (SecurityAlert). Une alerte Defender peut apparaître dans les deux tables.
+  Alerts that mention the device, per day, title and severity: Defender XDR (AlertEvidence) and Sentinel
+  (SecurityAlert). A Defender alert can appear in both tables.
 reading:
-  decisive: Plusieurs alertes de familles différentes (exécution, persistance, accès aux identifiants) le même jour.
-  context: Alerte récurrente jamais traitée sur la machine.
-  noise: Détections d'outils d'administration ou de logiciels potentiellement indésirables récurrentes.
+  decisive: Several alerts of different families (execution, persistence, credential access) on the same day.
+  context: Recurring alert on the device that was never handled.
+  noise: Recurring detections of admin tools or potentially unwanted software.
 window: { before: 30d, after: 1d }
 render: columnchart
 query: |
@@ -19,13 +19,27 @@ query: |
       | where DeviceName startswith ValueShort
       | where _IsHost(DeviceName)
       | summarize arg_min(TimeGenerated, Title, Severity) by AlertId
-  ),
-  (
+      // @defender-only:begin
+      // Defender XDR: title, severity, category and detection source of the alert (AlertInfo, one row per alert)
+      | lookup kind=leftouter (
+          AlertInfo
+          | where TimeGenerated between ((StartTimestamp - 1d) .. EndTimestamp)
+          | summarize InfoTitle = take_any(Title), InfoSeverity = take_any(Severity), Category = take_any(Category),
+              DetectionSource = take_any(DetectionSource), AttackTechniques = take_any(AttackTechniques) by AlertId
+        ) on AlertId
+      | extend Title = strcat(coalesce(InfoTitle, Title), iff(isnotempty(Category), strcat(" (", Category, ")"), "")),
+          Severity = coalesce(InfoSeverity, Severity)
+      | project TimeGenerated, Title, Severity, AlertId
+      // @defender-only:end
+  )
+  // @sentinel-only:begin
+  , (
       SecurityAlert
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where CompromisedEntity has ValueShort or Entities has ValueShort
       | summarize arg_max(TimeGenerated, AlertName, AlertSeverity) by SystemAlertId
       | project TimeGenerated, Title = AlertName, Severity = AlertSeverity, AlertId = SystemAlertId
   )
+  // @sentinel-only:end
   | summarize Alerts = dcount(AlertId) by bin(TimeGenerated, 1d), Serie = strcat(Severity, " · ", Title)
   | render columnchart

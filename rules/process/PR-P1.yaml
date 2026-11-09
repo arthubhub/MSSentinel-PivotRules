@@ -1,18 +1,19 @@
 id: PR-P1
-name: Parents et enfants du processus
+name: Process parents and children
 indicators: [process]
 action: pivot
+targets: [process, device, account]
 description: >
-  Arbre autour du processus : ses parents et grands-parents (quand il est lancé) et ses enfants (ce qu'il
-  lance), avec lignes de commande, machines et comptes. Sources : DeviceProcessEvents, 4688 Windows, Sysmon 1 et
-  processus normalisés ASIM (Sysmon, Linux, EDR tiers). Le rôle connu des machines (DC, serveur déclaré) et la
-  catégorie des comptes (système, service) sont indiqués entre crochets.
-  Par exemple, depuis explorer.exe on voit les exécutables lancés par l'utilisateur ; depuis powershell.exe
-  on voit qui l'a lancé et avec quelles options. Si la valeur est un chemin complet, seul ce chemin est retenu.
+  Tree around the process: its parents and grandparents (when it is launched) and its children (what it launches),
+  with command lines, devices and accounts. Sources: DeviceProcessEvents, Windows 4688, Sysmon 1 and ASIM normalized
+  processes (Sysmon, Linux, third-party EDR). The known role of the devices (DC, declared server) and the category of
+  the accounts (system, service) are shown in brackets.
+  For instance, from explorer.exe you see the executables launched by the user; from powershell.exe you see who
+  launched it and with which options. If the value is a full path, only that path is kept.
 reading:
-  decisive: powershell, mshta ou cmd lancés par explorer ou un navigateur avec une URL ou du Base64 (ClickFix), ou par Office.
-  context: Enfant LOLBin (rundll32, regsvr32, certutil, msbuild, node) d'un processus inhabituel.
-  noise: Scripts d'administration lancés par les agents de gestion (SCCM, Intune, RMM).
+  decisive: powershell, mshta or cmd launched by explorer or a browser with a URL or Base64 (ClickFix), or by Office.
+  context: LOLBin child (rundll32, regsvr32, certutil, msbuild, node) of an unusual process.
+  noise: Admin scripts launched by management agents (SCCM, Intune, RMM).
 v1: true
 window: { before: 30m, after: 30m }
 context: [HOST]
@@ -25,16 +26,17 @@ query: |
       | where FileName =~ ValueFile or InitiatingProcessFileName =~ ValueFile
       | where isempty(HostFilter) or DeviceName startswith HostFilter
       | where isempty(ValuePath) or FolderPath =~ ValuePath or InitiatingProcessFolderPath =~ ValuePath
-      | extend Role = iff(FileName =~ ValueFile, "1 · Lancement du processus", "2 · Enfant")
+      | extend Role = iff(FileName =~ ValueFile, "1 · Process launch", "2 · Child")
       | project TimeGenerated, Source = "DeviceProcessEvents", DeviceName = tolower(DeviceName), Role,
           GrandParent = tolower(InitiatingProcessParentFileName), Parent = tolower(InitiatingProcessFileName), Process = tolower(FileName),
           CommandLine = ProcessCommandLine, ParentCommandLine = InitiatingProcessCommandLine, Account = tolower(AccountName)
-  ),
-  (
+  )
+  // @sentinel-only:begin
+  , (
       _WinSecurity(StartTimestamp, EndTimestamp, dynamic([4688]), ValueFile)
       | where tolower(NewProcessName) endswith strcat(@"\", ValueFile) or tolower(ParentProcessName) endswith strcat(@"\", ValueFile)
       | where isempty(HostFilter) or Computer startswith HostFilter
-      | extend Role = iff(tolower(NewProcessName) endswith strcat(@"\", ValueFile), "1 · Lancement du processus", "2 · Enfant")
+      | extend Role = iff(tolower(NewProcessName) endswith strcat(@"\", ValueFile), "1 · Process launch", "2 · Child")
       | project TimeGenerated, Source = SourceTable, DeviceName = tolower(Computer), Role, GrandParent = "",
           Parent = tolower(tostring(split(ParentProcessName, @"\")[-1])), Process = tolower(tostring(split(NewProcessName, @"\")[-1])),
           CommandLine, ParentCommandLine = "", Account = tolower(SubjectUserName)
@@ -47,7 +49,7 @@ query: |
       | where _t == ValueFile or _p == ValueFile
       | where isempty(HostFilter) or DvcHostname startswith HostFilter
       | where isempty(ValuePath) or tolower(TargetProcessName) == ValuePath or tolower(ActingProcessName) == ValuePath
-      | extend Role = iff(_t == ValueFile, "1 · Lancement du processus", "2 · Enfant")
+      | extend Role = iff(_t == ValueFile, "1 · Process launch", "2 · Child")
       | project TimeGenerated, Source = strcat("ASIM ", EventProduct), DeviceName = tolower(DvcHostname), Role,
           GrandParent = tolower(tostring(split(replace_string(ParentProcessName, "/", @"\\"), @"\\")[-1])), Parent = _p, Process = _t,
           CommandLine = TargetProcessCommandLine, ParentCommandLine = ActingProcessCommandLine, Account = tolower(ActorUsername)
@@ -57,10 +59,11 @@ query: |
       | where ProcessFile == ValueFile or ParentFile == ValueFile
       | where isempty(HostFilter) or Computer startswith HostFilter
       | where isempty(ValuePath) or tolower(Image) == ValuePath or tolower(ParentImage) == ValuePath
-      | extend Role = iff(ProcessFile == ValueFile, "1 · Lancement du processus", "2 · Enfant")
+      | extend Role = iff(ProcessFile == ValueFile, "1 · Process launch", "2 · Child")
       | project TimeGenerated, Source = "Sysmon 1", DeviceName = tolower(Computer), Role, GrandParent = "", Parent = ParentFile,
           Process = ProcessFile, CommandLine, ParentCommandLine, Account = UserSam
   )
+  // @sentinel-only:end
   | extend MachineKey = _HostKey(DeviceName)
   | lookup kind=leftouter (_MachineRoles(EndTimestamp)) on MachineKey
   | extend DeviceName = _Labeled(DeviceName, MachineRole), Account = _Labeled(Account, _AccountKind(_SamOf(Account)))

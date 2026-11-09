@@ -1,0 +1,12 @@
+id: S5
+name: Malicious domain
+description: >
+  A domain flagged by threat intelligence: its prevalence, the devices and processes that contacted it, then the
+  timeline of the most exposed device.
+indicator: domain
+steps:
+  - ruleId: DM-S2     # domain prevalence
+  - ruleId: DM-P4     # DNS resolutions and related IPs
+  - ruleId: DM-P3     # devices and processes in contact
+    carry: device
+  - ruleId: MC-T1     # device timeline

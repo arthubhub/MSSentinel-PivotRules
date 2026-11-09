@@ -1,14 +1,15 @@
 id: EM-P5
-name: Livraison et actions après livraison
+name: Delivery and post-delivery actions
 indicators: [email]
 action: pivot
+targets: [email]
 description: >
-  Pour chaque e-mail impliquant l'adresse : action et dossier de livraison initiaux, puis actions ultérieures
-  (ZAP, retrait manuel, déplacement par l'utilisateur) issues d'EmailPostDeliveryEvents.
+  For each email involving the address: initial delivery action and folder, then later actions
+  (ZAP, manual removal, move by the user) from EmailPostDeliveryEvents.
 reading:
-  decisive: Message livré en boîte de réception puis retiré par ZAP après un clic de l'utilisateur.
-  context: Message déplacé hors du courrier indésirable par l'utilisateur.
-  noise: Purges administratives de campagnes déjà traitées.
+  decisive: Message delivered to the inbox then removed by ZAP after a click by the user.
+  context: Message moved out of junk email by the user.
+  noise: Admin purges of campaigns already handled.
 window: { before: 1h, after: 24h }
 query: |
   EmailEvents

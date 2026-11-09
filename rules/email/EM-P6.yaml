@@ -1,14 +1,15 @@
 id: EM-P6
-name: Messages envoyés vers l'adresse
+name: Messages sent to the address
 indicators: [email]
 action: pivot
+targets: [email]
 description: >
-  Expéditeurs qui ont envoyé des messages à l'adresse : utile quand l'adresse est la cible d'une règle de
-  transfert (adresse externe). Indique le sens (sortant), le nombre de messages transférés et les sujets.
+  Senders who sent messages to the address: useful when the address is the target of a forwarding
+  rule (external address). Shows the direction (outbound), the number of forwarded messages and the subjects.
 reading:
-  decisive: Messages sortants vers une adresse externe juste après la création d'une règle de transfert.
-  context: Transferts depuis plusieurs boîtes vers la même adresse externe.
-  noise: Transferts autorisés vers des partenaires, copies vers des outils de ticketing.
+  decisive: Outbound messages to an external address right after a forwarding rule was created.
+  context: Forwarding from several mailboxes to the same external address.
+  noise: Authorized forwarding to partners, copies to ticketing tools.
 window: { before: 7d, after: 1d }
 query: |
   EmailEvents

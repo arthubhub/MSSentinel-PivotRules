@@ -1,15 +1,16 @@
 id: IP-S4
-name: Utilisation par jour, par compte
+name: Daily usage by account
 indicators: [ip]
 action: statistics
+targets: [account]
 description: >
-  Tableau croisé compte × jour du nombre d'événements associant l'IP à un compte (connexions Entra ID des utilisateurs et
-  des applications, ouvertures de session Windows, Defender et Linux, Microsoft 365, Azure, Microsoft Graph). Le rôle connu du
-  compte (compte de service, groupe privilégié, compte machine ou système, watchlist) est indiqué entre crochets.
+  Account × day cross-table of the number of events linking the IP to an account (Entra ID sign-ins of users and
+  applications, Windows, Defender and Linux logons, Microsoft 365, Azure, Microsoft Graph). The known role of the
+  account (service account, privileged group, machine or system account, watchlist) is shown in brackets.
 reading:
-  decisive: Des dizaines ou centaines de comptes différents avec 1 à 3 tentatives chacun (password spray).
-  context: Un seul compte avec un très grand nombre de tentatives (force brute), ou un compte privilégié parmi les comptes vus.
-  noise: IP de NAT d'entreprise ou de VPN partagée par de nombreux utilisateurs légitimes ; comptes de service à heure fixe.
+  decisive: Dozens or hundreds of different accounts with 1 to 3 attempts each (password spray).
+  context: A single account with a very large number of attempts (brute force), or a privileged account among the accounts seen.
+  noise: Corporate NAT or VPN IP shared by many legitimate users; service accounts at fixed times.
 window: { before: 7d, after: 1d }
 uses: [ip_events, roles]
 query: |

@@ -1,15 +1,15 @@
 id: IP-S1
-name: Activité de l'IP par jour
+name: IP activity per day
 indicators: [ip]
 action: statistics
 description: >
-  Nombre d'événements contenant l'IP par jour et par table (Entra ID utilisateurs et applications, Microsoft Graph,
-  Windows, Defender, Microsoft 365, Azure, pare-feu et proxy, messagerie, Linux). Montre si l'IP est nouvelle, dormante ou
-  habituelle. Une table absente n'apparaît pas : voir IP-S0 pour savoir lesquelles sont alimentées.
+  Number of events containing the IP per day and per table (Entra ID users and applications, Microsoft Graph,
+  Windows, Defender, Microsoft 365, Azure, firewall and proxy, email, Linux). Shows whether the IP is new, dormant or
+  usual. A missing table does not appear: see IP-S0 to know which tables are populated.
 reading:
-  decisive: Première apparition dans les dernières 24 heures après plusieurs jours d'absence.
-  context: Changement brutal de volume ou apparition dans une nouvelle table (par exemple Azure après Entra ID).
-  noise: IP de proxy, de NAT ou de VPN d'entreprise présentes tous les jours dans toutes les tables.
+  decisive: First appearance in the last 24 hours after several days of absence.
+  context: Sudden change in volume or appearance in a new table (for example Azure after Entra ID).
+  noise: Corporate proxy, NAT or VPN IPs present every day in every table.
 window: { before: 7d, after: 1d }
 render: timechart
 uses: [ip_events]

@@ -1,16 +1,16 @@
 id: AC-S2
-name: Échecs et succès d'authentification par heure
+name: Authentication failures and successes per hour
 indicators: [account]
 action: statistics
 description: >
-  Courbe horaire des succès et échecs d'authentification du compte, une série par source et par point de vue :
-  Entra ID, ouvertures de session Windows sur les machines (4624, 4625), validations d'identifiants par les contrôleurs
-  de domaine (4768, 4771, 4776, séparées pour ne pas doubler chaque ouverture de session), Defender for Endpoint,
-  Defender for Identity, ASIM et SSH Linux.
+  Hourly chart of the account's authentication successes and failures, one series per source and perspective:
+  Entra ID, Windows logons on devices (4624, 4625), credential validations by domain
+  controllers (4768, 4771, 4776, kept separate so that each logon is not counted twice), Defender for Endpoint,
+  Defender for Identity, ASIM and Linux SSH.
 reading:
-  decisive: Série d'échecs suivie d'un succès, ou succès Entra ID juste après une rafale d'échecs MFA.
-  context: Échecs nocturnes réguliers ; échecs de validation au DC sans session ouverte (mot de passe testé ailleurs).
-  noise: Compte de service au mot de passe expiré qui échoue à heure fixe depuis la même machine.
+  decisive: Series of failures followed by a success, or Entra ID success right after a burst of MFA failures.
+  context: Regular failures at night; DC validation failures without any logon (password tried elsewhere).
+  noise: Service account with an expired password that fails at a fixed time from the same device.
 window: { before: 24h, after: 1h }
 render: timechart
 uses: [signins, win_security]
@@ -18,39 +18,58 @@ query: |
   union isfuzzy=true
   (
       _Signins(StartTimestamp, EndTimestamp, "", ValueUpn)
-      | project TimeGenerated, Serie = strcat("Entra ID · ", iff(Succeeded, "succès", "échec"))
+      | project TimeGenerated, Serie = strcat("Entra ID · ", iff(Succeeded, "success", "failure"))
   ),
+  // @sentinel-only:begin
   (
       _WinSecurity(StartTimestamp, EndTimestamp, dynamic([4624, 4625, 4768, 4771, 4776]), ValueSam)
       | where TargetSam == ValueSam
-      | project TimeGenerated, Serie = strcat(iff(EventID in (4624, 4625), "Windows session · ", "Windows validation DC · "),
-          iff(EventID in (4625, 4771) or Status !in ("", "-", "0x0"), "échec", "succès"))
+      | project TimeGenerated, Serie = strcat(iff(EventID in (4624, 4625), "Windows session · ", "Windows DC validation · "),
+          iff(EventID in (4625, 4771) or Status !in ("", "-", "0x0"), "failure", "success"))
   ),
   (
       DeviceLogonEvents
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where AccountName =~ ValueSam
-      | project TimeGenerated, Serie = strcat("Defender · ", iff(ActionType == "LogonSuccess", "succès", "échec"))
+      | project TimeGenerated, Serie = strcat("Defender · ", iff(ActionType == "LogonSuccess", "success", "failure"))
   ),
   (
       IdentityLogonEvents
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where AccountUpn =~ ValueUpn or AccountName =~ ValueSam
-      | project TimeGenerated, Serie = strcat("Defender for Identity · ", iff(ActionType == "LogonSuccess", "succès", "échec"))
+      | project TimeGenerated, Serie = strcat("Defender for Identity · ", iff(ActionType == "LogonSuccess", "success", "failure"))
+  )
+  // @sentinel-only:end
+  // @defender-only:begin
+  // Defender XDR, no Windows log: series split by logon type (session) and by protocol (DC validation)
+  (
+      DeviceLogonEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where AccountName =~ ValueSam
+      | project TimeGenerated, Serie = strcat("Defender · ", LogonType, " · ", iff(ActionType == "LogonSuccess", "success", "failure"))
   ),
   (
+      IdentityLogonEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where AccountUpn =~ ValueUpn or AccountName =~ ValueSam
+      | project TimeGenerated, Serie = strcat("Defender for Identity · ", Protocol, " · ", iff(ActionType == "LogonSuccess", "success", "failure"))
+  )
+  // @defender-only:end
+  // @sentinel-only:begin
+  , (
       ASimAuthenticationEventLogs
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where TargetUsername has ValueSam
       | where tolower(TargetUsername) in (ValueSam, ValueUpn) or tolower(TargetUsername) endswith strcat(@"\", ValueSam)
-      | project TimeGenerated, Serie = strcat("ASIM ", EventProduct, " · ", iff(EventResult == "Success", "succès", "échec"))
+      | project TimeGenerated, Serie = strcat("ASIM ", EventProduct, " · ", iff(EventResult == "Success", "success", "failure"))
   ),
   (
       Syslog
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where ProcessName in~ ("sshd", "sshd-session") and SyslogMessage has ValueSam
       | where tolower(extract(@"(?:Accepted|Failed) \S+ for (?:invalid user )?(\S+) from", 1, SyslogMessage)) == ValueSam
-      | project TimeGenerated, Serie = strcat("SSH · ", iff(SyslogMessage startswith "Accepted", "succès", "échec"))
+      | project TimeGenerated, Serie = strcat("SSH · ", iff(SyslogMessage startswith "Accepted", "success", "failure"))
   )
+  // @sentinel-only:end
   | summarize Events = count() by bin(TimeGenerated, 1h), Serie
   | render timechart

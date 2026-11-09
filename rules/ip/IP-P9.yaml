@@ -1,0 +1,55 @@
+id: IP-P9
+name: Files downloaded from the IP
+indicators: [ip]
+action: pivot
+targets: [hash, device, account, url]
+description: >
+  Files whose download origin is this IP, one row per file (hash): origin IP recorded
+  by Defender for Endpoint when the file was written (DeviceFileEvents, FileOriginIP), with the URL and referrer,
+  the devices, the accounts and the process that wrote it. In Sentinel, downloads seen by the proxy
+  (ASimWebSessionLogs, hash of the transferred file) and by CEF appliances (CommonSecurityLog, FileHash)
+  fill the gap when the workstation is not covered. Gives the hashes to pivot on next (HS-P1, HS-P2).
+reading:
+  decisive: Executable, script or archive downloaded from a public IP without a domain name, written by a browser, Outlook or an interpreter (powershell.exe, mshta.exe).
+  context: Same file downloaded on several devices within a short interval; origin URL on a non-standard port.
+  noise: Internal update and software distribution servers (WSUS, SCCM) or vendor CDNs.
+window: { before: 7d, after: 1d }
+query: |
+  union isfuzzy=true
+  (
+      DeviceFileEvents
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where FileOriginIP == Value
+      | project TimeGenerated, SHA256 = tolower(SHA256), SHA1 = tolower(SHA1), FileName, FolderPath, Machine = tolower(DeviceName),
+          Account = tolower(coalesce(InitiatingProcessAccountUpn, InitiatingProcessAccountName)), OriginUrl = FileOriginUrl,
+          Referrer = FileOriginReferrerUrl, Via = InitiatingProcessFileName, Source = "DeviceFileEvents"
+  )
+  // @sentinel-only:begin
+  , (
+      ASimWebSessionLogs
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where DstIpAddr == Value
+      | where isnotempty(FileSHA256) or isnotempty(FileSHA1) or isnotempty(FileMD5)
+      | project TimeGenerated, SHA256 = tolower(coalesce(FileSHA256, FileMD5)), SHA1 = tolower(FileSHA1), FileName, FolderPath = "",
+          Machine = tolower(coalesce(SrcHostname, SrcIpAddr)), Account = tolower(SrcUsername), OriginUrl = Url, Referrer = HttpReferrer,
+          Via = strcat("Proxy · ", HttpUserAgent), Source = strcat("ASimWebSessionLogs (", EventProduct, ")")
+  ),
+  (
+      CommonSecurityLog
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where DestinationIP == Value and isnotempty(FileHash)
+      | project TimeGenerated, SHA256 = tolower(FileHash), SHA1 = "", FileName, FolderPath = FilePath,
+          Machine = tolower(coalesce(SourceHostName, SourceIP)), Account = tolower(SourceUserName), OriginUrl = RequestURL, Referrer = "",
+          Via = DeviceProduct, Source = strcat("CommonSecurityLog (", DeviceVendor, ")")
+  )
+  // @sentinel-only:end
+  | where isnotempty(SHA256) or isnotempty(SHA1)
+  | summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Events = count(), MachineCount = dcount(Machine),
+      Machines = make_set(Machine, 10), Accounts = make_set_if(Account, isnotempty(Account), 10), FileNames = make_set(FileName, 5),
+      Folders = make_set(FolderPath, 5), OriginUrls = make_set_if(OriginUrl, isnotempty(OriginUrl), 5),
+      Referrers = make_set_if(Referrer, isnotempty(Referrer), 5), WrittenBy = make_set(Via, 5), Sources = make_set(Source)
+      by FileHash = coalesce(SHA256, SHA1)
+  | extend Executable = tostring(FileNames) matches regex @"(?i)\.(exe|dll|scr|ps1|js|jse|vbs|vbe|hta|bat|cmd|msi|lnk|iso|img|zip|7z|rar)\b"
+  | sort by Executable desc, FirstSeen asc
+  | project FileHash, FileNames, Executable, FirstSeen, LastSeen, Events, MachineCount, Machines, Accounts, OriginUrls,
+      Referrers, WrittenBy, Folders, Sources

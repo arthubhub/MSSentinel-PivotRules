@@ -1,16 +1,17 @@
 id: MC-P3
-name: Persistance installée sur la machine
+name: Persistence installed on the device
 indicators: [device]
 action: pivot
+targets: [process]
 description: >
-  Mécanismes de persistance créés ou modifiés : clés de registre Run, RunOnce, Winlogon, IFEO et ImagePath de
-  services (DeviceRegistryEvents), tâches planifiées et services (DeviceEvents), commandes schtasks, sc, reg, wmic
-  et PowerShell (DeviceProcessEvents), raccourcis du dossier Démarrage (DeviceFileEvents) et événements
-  Windows 4697, 4698, 4702, 4720, 4732 (SecurityEvent et WindowsEvent).
+  Persistence mechanisms created or modified: Run, RunOnce, Winlogon, IFEO registry keys and service ImagePath
+  (DeviceRegistryEvents), scheduled tasks and services (DeviceEvents), schtasks, sc, reg, wmic and PowerShell commands
+  (DeviceProcessEvents), Startup folder shortcuts (DeviceFileEvents) and Windows events 4697, 4698, 4702, 4720, 4732
+  (SecurityEvent and WindowsEvent).
 reading:
-  decisive: Tâche ou clé Run pointant vers un fichier déposé dans AppData, Temp ou ProgramData dans l'heure.
-  context: Tâche au nom d'un composant système (GoogleUpdate, OneDrive) mais binaire non signé ou hors de son dossier.
-  noise: Installations et mises à jour de logiciels signés, tâches créées par l'IT.
+  decisive: Task or Run key pointing to a file dropped in AppData, Temp or ProgramData within the hour.
+  context: Task named after a system component (GoogleUpdate, OneDrive) but with an unsigned binary or outside its folder.
+  noise: Installs and updates of signed software, tasks created by IT.
 v1: true
 window: { before: 1h, after: 24h }
 uses: [persistence, win_security, paths, sysmon]
@@ -23,7 +24,7 @@ query: |
       | where _IsHost(DeviceName)
       | where ActionType in ("RegistryValueSet", "RegistryKeyCreated")
       | where _IsPersistenceKey(RegistryKey, RegistryValueName)
-      | project TimeGenerated, Mechanism = "Registre", Item = strcat(RegistryKey, @"\", RegistryValueName), Detail = RegistryValueData,
+      | project TimeGenerated, Mechanism = "Registry", Item = strcat(RegistryKey, @"\", RegistryValueName), Detail = RegistryValueData,
           Process = InitiatingProcessFileName, CommandLine = InitiatingProcessCommandLine
   ),
   (
@@ -46,7 +47,7 @@ query: |
           or (FileName =~ "sc.exe" and ProcessCommandLine has_any ("create", "config"))
           or (FileName =~ "reg.exe" and ProcessCommandLine has "add" and ProcessCommandLine has_any ("CurrentVersion\\Run", "Winlogon", "Image File Execution Options"))
           or (FileName in~ ("powershell.exe", "pwsh.exe", "wmic.exe") and ProcessCommandLine has_any ("Register-ScheduledTask", "New-ScheduledTask", "New-Service", "__EventFilter", "CommandLineEventConsumer"))
-      | project TimeGenerated, Mechanism = "Commande", Item = FileName, Detail = ProcessCommandLine,
+      | project TimeGenerated, Mechanism = "Command", Item = FileName, Detail = ProcessCommandLine,
           Process = InitiatingProcessFileName, CommandLine = InitiatingProcessCommandLine
   ),
   (
@@ -55,10 +56,11 @@ query: |
       | where DeviceName startswith ValueShort
       | where _IsHost(DeviceName)
       | where ActionType == "FileCreated" and FolderPath has @"\Start Menu\Programs\Startup"
-      | project TimeGenerated, Mechanism = "Dossier Démarrage", Item = FileName, Detail = FolderPath,
+      | project TimeGenerated, Mechanism = "Startup folder", Item = FileName, Detail = FolderPath,
           Process = InitiatingProcessFileName, CommandLine = InitiatingProcessCommandLine
-  ),
-  (
+  )
+  // @sentinel-only:begin
+  , (
       _WinSecurity(StartTimestamp, EndTimestamp, dynamic([4697, 4698, 4702, 4720, 4732]), ValueShort)
       | where _IsHost(Computer)
       | project TimeGenerated, Mechanism = strcat(tostring(EventID), " ", EventName),
@@ -70,7 +72,7 @@ query: |
       _WinSecurity(StartTimestamp, EndTimestamp, dynamic([4657]), ValueShort)
       | where _IsHost(Computer)
       | where _IsPersistenceKey(ObjectName, ObjectValueName)
-      | project TimeGenerated, Mechanism = "4657 · Registre (audit Windows)", Item = strcat(ObjectName, @"\", ObjectValueName), Detail = ObjectAccess,
+      | project TimeGenerated, Mechanism = "4657 · Registry (Windows audit)", Item = strcat(ObjectName, @"\", ObjectValueName), Detail = ObjectAccess,
           Process = ProcessName, CommandLine = ""
   ),
   (
@@ -78,7 +80,7 @@ query: |
       | where _IsHost(Computer)
       | extend ValueName = tostring(split(TargetObject, @"\")[-1])
       | where _IsPersistenceKey(TargetObject, ValueName)
-      | project TimeGenerated, Mechanism = strcat("Registre (Sysmon ", tostring(EventID), ")"), Item = TargetObject, Detail = Details,
+      | project TimeGenerated, Mechanism = strcat("Registry (Sysmon ", tostring(EventID), ")"), Item = TargetObject, Detail = Details,
           Process = ProcessFile, CommandLine = ""
   ),
   (
@@ -91,8 +93,9 @@ query: |
           | where Computer startswith ValueShort and _IsHost(Computer)
           | project TimeGenerated, ServiceName = tostring(EventData.ServiceName), ImagePath = tostring(EventData.ImagePath),
               Account = tostring(EventData.AccountName))
-      | project TimeGenerated, Mechanism = "7045 · Service installé (journal Système)", Item = ServiceName, Detail = ImagePath,
+      | project TimeGenerated, Mechanism = "7045 · Service installed (System log)", Item = ServiceName, Detail = ImagePath,
           Process = Account, CommandLine = ""
   )
+  // @sentinel-only:end
   | extend UserWritablePath = _IsUserWritable(Detail)
   | sort by TimeGenerated asc

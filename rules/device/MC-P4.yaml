@@ -1,16 +1,22 @@
 id: MC-P4
-name: Fichiers téléchargés puis exécutés
+name: Files downloaded then executed
 indicators: [device]
 action: pivot
+targets: [hash, url, account, process]
 description: >
-  Fichiers écrits sur la machine (avec URL d'origine, ou dans Téléchargements, Temp, cache Outlook ou du
-  navigateur) puis exécutés dans les 10 minutes, rapprochés par SHA256. Donne le délai, l'URL, le processus
-  qui a écrit le fichier et celui qui l'a lancé.
+  Files written on the device (with an origin URL, or in Downloads, Temp, the Outlook or browser cache) then
+  executed within 10 minutes. Gives the delay, the URL, the process that wrote the file and the one that launched it.
+  Defender for Endpoint: DeviceFileEvents then DeviceProcessEvents, matched on SHA256. In Sentinel, Sysmon 11 (file
+  created) and 15 (Zone.Identifier stream, with the origin URL) then Sysmon 1 or 4688 (SecurityEvent, WindowsEvent),
+  matched on the file path on the same device. SmartScreen, ASR and Exploit Guard warnings and blocks recorded by
+  Defender on this file (DeviceEvents) are shown (Warnings); Sources gives the logs of the download and of the
+  execution.
 reading:
-  decisive: Exécutable ou script venant d'un domaine récent, lancé en moins de 10 minutes, avec enfant LOLBin ou connexion sortante.
-  context: Fichier écrit par 7-Zip, WinRAR ou l'explorateur depuis une archive téléchargée.
-  noise: Installations faites par l'utilisateur depuis le site officiel de l'éditeur.
+  decisive: Executable or script from a recent domain, launched within 10 minutes, with a LOLBin child or an outbound connection; SmartScreen warning bypassed just before execution.
+  context: File written by 7-Zip, WinRAR or Explorer from a downloaded archive.
+  noise: Installs by the user from the vendor's official site; same pair seen by both Defender and Sysmon (two rows, different Sources).
 window: { before: 1h, after: 1h }
+uses: [sysmon, win_security]
 query: |
   let Downloads = DeviceFileEvents
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
@@ -20,15 +26,66 @@ query: |
       | where isnotempty(FileOriginUrl) or FolderPath has_any (@"\Downloads\", @"\AppData\Local\Temp\", @"\Content.Outlook\", @"\INetCache\")
       | project DownloadTime = TimeGenerated, DeviceId, SHA256, DownloadedFile = FileName, FolderPath, FileOriginUrl,
           FileOriginReferrerUrl, Writer = InitiatingProcessFileName;
-  DeviceProcessEvents
-  | where TimeGenerated between (StartTimestamp .. (EndTimestamp + 10m))
-  | where DeviceName startswith ValueShort
-  | where _IsHost(DeviceName)
-  | project ExecTime = TimeGenerated, DeviceId, DeviceName, SHA256, ExecutedFile = FileName, ProcessCommandLine,
-      Parent = InitiatingProcessFileName, AccountName
-  | join kind=inner (Downloads) on DeviceId, SHA256
-  | where ExecTime between (DownloadTime .. (DownloadTime + 10m))
-  | extend DelaySeconds = datetime_diff("second", ExecTime, DownloadTime)
+  // Defender warnings and blocks related to a file of the device (SmartScreen, ASR, Exploit Guard)
+  let Warnings = DeviceEvents
+      | where TimeGenerated between ((StartTimestamp - 1h) .. (EndTimestamp + 10m))
+      | where DeviceName startswith ValueShort
+      | where _IsHost(DeviceName)
+      | where ActionType startswith "SmartScreen" or ActionType startswith "Asr" or ActionType startswith "ExploitGuard"
+      | where isnotempty(FileName)
+      | summarize Warnings = make_set(ActionType, 5) by FileKey = tolower(FileName);
+  // @sentinel-only:begin
+  let SysDownloads = _Sysmon(StartTimestamp, EndTimestamp, dynamic([11, 15]), ValueShort)
+      | where _IsHost(Computer)
+      | extend PathKey = tolower(replace_regex(TargetFilename, @":Zone\.Identifier$", ""))
+      | extend HostUrl = iff(EventID == 15, extract(@"HostUrl=(\S+)", 1, Contents), ""),
+          Referrer = iff(EventID == 15, extract(@"ReferrerUrl=(\S+)", 1, Contents), "")
+      | where isnotempty(HostUrl) or PathKey has_any (@"\downloads\", @"\appdata\local\temp\", @"\content.outlook\", @"\inetcache\")
+      | summarize DownloadTime = min(TimeGenerated), FileOriginUrl = take_anyif(HostUrl, isnotempty(HostUrl)),
+          FileOriginReferrerUrl = take_anyif(Referrer, isnotempty(Referrer)), Writer = take_any(ProcessFile),
+          DownloadSHA256 = take_anyif(SHA256, isnotempty(SHA256)), DownloadSources = make_set(strcat("Sysmon ", tostring(EventID))),
+          FolderPath = take_any(replace_regex(TargetFilename, @":Zone\.Identifier$", ""))
+          by Machine = tolower(tostring(split(Computer, ".")[0])), PathKey;
+  let SysExecs = union isfuzzy=true
+      (
+          _Sysmon(StartTimestamp, EndTimestamp + 10m, dynamic([1]), ValueShort)
+          | where _IsHost(Computer)
+          | project ExecTime = TimeGenerated, Machine = tolower(tostring(split(Computer, ".")[0])), DeviceName = tolower(Computer),
+              PathKey = tolower(Image), ExecutedFile = ProcessFile, ProcessCommandLine = CommandLine, Parent = ParentFile, AccountName = UserSam,
+              ExecSHA256 = SHA256, ExecSource = "Sysmon 1"
+      ),
+      (
+          _WinSecurity(StartTimestamp, EndTimestamp + 10m, dynamic([4688]), ValueShort)
+          | where _IsHost(Computer)
+          | project ExecTime = TimeGenerated, Machine = tolower(tostring(split(Computer, ".")[0])), DeviceName = tolower(Computer),
+              PathKey = tolower(NewProcessName), ExecutedFile = tolower(tostring(split(NewProcessName, @"\")[-1])), ProcessCommandLine = CommandLine,
+              Parent = tolower(tostring(split(ParentProcessName, @"\")[-1])), AccountName = SubjectSam, ExecSHA256 = "",
+              ExecSource = strcat("4688 (", SourceTable, ")")
+      );
+  // @sentinel-only:end
+  union isfuzzy=true
+  (
+      DeviceProcessEvents
+      | where TimeGenerated between (StartTimestamp .. (EndTimestamp + 10m))
+      | where DeviceName startswith ValueShort
+      | where _IsHost(DeviceName)
+      | project ExecTime = TimeGenerated, DeviceId, DeviceName, SHA256, ExecutedFile = FileName, ProcessCommandLine,
+          Parent = InitiatingProcessFileName, AccountName
+      | join kind=inner (Downloads) on DeviceId, SHA256
+      | where ExecTime between (DownloadTime .. (DownloadTime + 10m))
+      | extend Sources = "DeviceFileEvents → DeviceProcessEvents"
+  )
+  // @sentinel-only:begin
+  , (
+      SysExecs
+      | join kind=inner (SysDownloads) on Machine, PathKey
+      | where ExecTime between (DownloadTime .. (DownloadTime + 10m))
+      | extend SHA256 = coalesce(ExecSHA256, DownloadSHA256), DownloadedFile = tostring(split(FolderPath, @"\")[-1]),
+          Sources = strcat(strcat_array(DownloadSources, " + "), " → ", ExecSource)
+  )
+  // @sentinel-only:end
+  | extend DelaySeconds = datetime_diff("second", ExecTime, DownloadTime), FileKey = tolower(DownloadedFile)
+  | lookup kind=leftouter (Warnings) on FileKey
   | project DownloadTime, ExecTime, DelaySeconds, DeviceName, AccountName, DownloadedFile, FolderPath, FileOriginUrl,
-      FileOriginReferrerUrl, Writer, Parent, ProcessCommandLine, SHA256
+      FileOriginReferrerUrl, Writer, Parent, ProcessCommandLine, SHA256, Sources, Warnings
   | sort by DownloadTime asc

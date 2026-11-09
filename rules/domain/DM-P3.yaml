@@ -1,17 +1,19 @@
 id: DM-P3
-name: Machines et processus en contact avec le domaine
+name: Devices and processes in contact with the domain
 indicators: [domain, url]
 action: pivot
+targets: [device, account, process]
 description: >
-  Machines, comptes et processus qui ont contacté le domaine (DeviceNetworkEvents), téléchargé un fichier depuis
-  ce domaine (DeviceFileEvents, origine ou référent) ou l'ont cité dans une ligne de commande (DeviceProcessEvents).
-  Dans Sentinel, Sysmon (22 requêtes DNS, 3 connexions, avec le processus) et les postes vus par le proxy
-  (ASimWebSessionLogs, CommonSecurityLog, sans processus) complètent Defender for Endpoint. MachineRole donne le rôle connu de la machine, AccountKind la catégorie du compte (système,
-  service).
+  Devices, accounts and processes that contacted the domain (DeviceNetworkEvents), downloaded a file from the domain
+  (DeviceFileEvents, origin or referrer) or mentioned it in a command line (DeviceProcessEvents). In Sentinel, Sysmon
+  (22 DNS queries, 3 connections, with the process), workstations seen by the proxy (ASimWebSessionLogs,
+  CommonSecurityLog, without process) and Azure Firewall (AZFWApplicationRule, AZFWDnsQuery: source IP only, without
+  device name or process) complete Defender for Endpoint. MachineRole gives the known role of the device, AccountKind
+  the category of the account (system, service).
 reading:
-  decisive: Processus non navigateur (powershell, mshta, curl, rclone, node) qui contacte le domaine.
-  context: Fichier téléchargé depuis le domaine puis exécuté sur la même machine.
-  noise: Navigateurs qui chargent des ressources tierces de la page.
+  decisive: Non-browser process (powershell, mshta, curl, rclone, node) contacting the domain.
+  context: File downloaded from the domain then executed on the same device.
+  noise: Browsers loading third-party resources of the page.
 v1: true
 window: { before: 7d, after: 1d }
 uses: [web_functions, roles, sysmon]
@@ -39,7 +41,7 @@ query: |
       | where TimeGenerated between (StartTimestamp .. EndTimestamp)
       | where ProcessCommandLine has ValueDomain
       | project TimeGenerated, Source = "DeviceProcessEvents", DeviceName = tolower(DeviceName), Account = tolower(AccountName),
-          Process = tolower(FileName), CommandLine = ProcessCommandLine, Evidence = "Domaine dans la ligne de commande"
+          Process = tolower(FileName), CommandLine = ProcessCommandLine, Evidence = "Domain in the command line"
   )
   // @sentinel-only:begin
   , (
@@ -57,6 +59,23 @@ query: |
       | where _InDomain(_Host(RequestURL), ValueDomain) or _InDomain(tolower(DestinationHostName), ValueDomain)
       | project TimeGenerated, Source = strcat("CommonSecurityLog (", DeviceVendor, ")"), DeviceName = tolower(coalesce(SourceHostName, SourceIP)),
           Account = tolower(SourceUserName), Process = "", CommandLine = "", Evidence = strcat(coalesce(RequestURL, DestinationHostName), " · ", DeviceAction)
+  ),
+  (
+      AZFWApplicationRule
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where Fqdn has ValueDomain or TargetUrl has ValueDomain
+      | where _InDomain(tolower(Fqdn), ValueDomain) or _InDomain(_Host(TargetUrl), ValueDomain)
+      | project TimeGenerated, Source = "AZFWApplicationRule", DeviceName = SourceIp, Account = "", Process = "", CommandLine = "",
+          Evidence = strcat(coalesce(TargetUrl, Fqdn), " · ", Action, iff(isnotempty(WebCategory), strcat(" · ", WebCategory), ""))
+  ),
+  (
+      AZFWDnsQuery
+      | where TimeGenerated between (StartTimestamp .. EndTimestamp)
+      | where QueryName has ValueDomain
+      | extend Q = tolower(trim_end(@"\.", QueryName))
+      | where _InDomain(Q, ValueDomain)
+      | project TimeGenerated, Source = "AZFWDnsQuery", DeviceName = SourceIp, Account = "", Process = "", CommandLine = "",
+          Evidence = strcat("DNS ", Q, " ", QueryType, " · ", ResponseCode)
   ),
   (
       _Sysmon(StartTimestamp, EndTimestamp, dynamic([3, 22]), ValueDomain)

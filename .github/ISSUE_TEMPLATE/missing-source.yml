@@ -1,0 +1,47 @@
+name: Missing log source
+description: A table or column holds an indicator but no rule reads it (suggested by EasyPivot from a Discovery rule).
+title: "[COVERAGE] "
+labels: ["coverage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Do not include values or identifiers**: no IOC, customer name, tenant, workspace or row count.
+        Only the indicator type, table, column and platform are useful. Custom `_CL` tables are not accepted.
+  - type: input
+    id: indicator
+    attributes:
+      label: Indicator type
+      description: ip, account, email, url, domain, device, process, application or hash
+    validations:
+      required: true
+  - type: input
+    id: table
+    attributes:
+      label: Table
+      placeholder: SigninLogs
+    validations:
+      required: true
+  - type: input
+    id: column
+    attributes:
+      label: Column
+      placeholder: IPAddress
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: Platform
+      description: sentinel or defender
+    validations:
+      required: true
+  - type: input
+    id: catalog_version
+    attributes:
+      label: Catalog version
+      placeholder: 0.2.0
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes (optional, no values)

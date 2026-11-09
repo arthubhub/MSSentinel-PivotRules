@@ -1,0 +1,13 @@
+id: S2
+name: Compromised account
+description: >
+  After an alert on an account: profile and roles, IPs and devices used, persistence in the mailbox and the
+  directory (forwarding rules, consents, MFA), then the devices reached and their timeline.
+indicator: account
+steps:
+  - ruleId: AC-P5     # profile and roles
+  - ruleId: AC-P1     # IPs and devices
+  - ruleId: AC-P4     # mailbox rules, consents, MFA methods
+  - ruleId: AC-P2     # devices where the account logged on
+    carry: device
+  - ruleId: MC-T1     # device timeline

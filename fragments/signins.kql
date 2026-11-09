@@ -1,20 +1,26 @@
-// Connexions Entra ID des utilisateurs, normalisées, quelle que soit la table qui les porte :
-// - Sentinel : SigninLogs (interactives) et AADNonInteractiveUserSignInLogs (non interactives). Dans cette dernière,
-//   DeviceDetail, Status et LocationDetails sont des chaînes JSON : elles sont analysées pour obtenir les mêmes colonnes.
-// - Defender XDR : EntraIdSignInEvents (interactives et non interactives, colonne Timestamp, ErrorCode 0 = succès).
-//   Elle n'est lue que pour le type de connexion que la table Sentinel ne fournit pas sur la période : pas de doublon
-//   dans le portail unifié, et les connexions restent visibles sans le connecteur Entra ID de Sentinel.
-// Paramètres : start, end, ip (vide = toutes), upn (vide = tous). Résultat : 0 = succès. SourceTable indique la table d'origine.
+// Entra ID user sign-ins, normalized whatever table holds them:
+// - Sentinel: SigninLogs (interactive) and AADNonInteractiveUserSignInLogs (non-interactive). In the latter,
+//   DeviceDetail, Status and LocationDetails are JSON strings: they are parsed to produce the same columns.
+// - Defender XDR: EntraIdSignInEvents (interactive and non-interactive, Timestamp column, ErrorCode 0 = success).
+//   It is read only for the sign-in type the Sentinel table does not provide over the period: no duplicates
+//   in the unified portal, and sign-ins stay visible without the Sentinel Entra ID connector.
+// "@sentinel-only" blocks (Sentinel tables) are removed from the Defender XDR variant, which then reads only EntraIdSignInEvents.
+// Parameters: start, end, ip (empty = all), upn (empty = all). Result: 0 = success. SourceTable gives the source table.
 let _Signins = (start:datetime, end:datetime, ip:string, upn:string) {
     let _HasInteractive = toscalar(union isfuzzy=true
+        // @sentinel-only:begin
         (SigninLogs | where TimeGenerated between ((start - 1d) .. end) | take 1 | project Present = 1),
+        // @sentinel-only:end
         (print Present = 0)
         | summarize max(Present)) == 1;
     let _HasNonInteractive = toscalar(union isfuzzy=true
+        // @sentinel-only:begin
         (AADNonInteractiveUserSignInLogs | where TimeGenerated between ((start - 1d) .. end) | take 1 | project Present = 1),
+        // @sentinel-only:end
         (print Present = 0)
         | summarize max(Present)) == 1;
     union isfuzzy=true
+    // @sentinel-only:begin
     (
         SigninLogs
         | where TimeGenerated between (start .. end)
@@ -41,6 +47,23 @@ let _Signins = (start:datetime, end:datetime, ip:string, upn:string) {
             Browser = tostring(_dev.browser), IsManaged = tostring(_dev.isManaged), IsCompliant = tostring(_dev.isCompliant),
             TrustType = tostring(_dev.trustType), ConditionalAccessStatus, AuthenticationRequirement, RiskLevelDuringSignIn, SessionId, CorrelationId
     ),
+    // ADFSSignInLogs: AD FS sign-ins reported by Microsoft Entra Connect Health (SignInType "AD FS"), as a complement.
+    // They cover federated applications specific to AD FS; a federated sign-in to an Entra ID application also appears in SigninLogs.
+    (
+        ADFSSignInLogs
+        | where TimeGenerated between (start .. end)
+        | where isempty(ip) or IPAddress == ip
+        | where isempty(upn) or UserPrincipalName =~ upn
+        | extend _dev = parse_json(DeviceDetail), _st = parse_json(Status)
+        | project TimeGenerated, SourceTable = "ADFSSignInLogs", SignInType = "AD FS", UserPrincipalName, UserId, AppDisplayName, AppId,
+            ResourceDisplayName, ResultType, ResultDescription = tostring(_st.additionalDetails), FailureReason = tostring(_st.failureReason),
+            IPAddress, Location = "", City = "", AutonomousSystemNumber = "", ClientAppUsed = "", UserAgent,
+            DeviceName = tostring(_dev.displayName), DeviceId = tostring(_dev.deviceId), OperatingSystem = tostring(_dev.operatingSystem),
+            Browser = tostring(_dev.browser), IsManaged = tostring(_dev.isManaged), IsCompliant = tostring(_dev.isCompliant),
+            TrustType = tostring(_dev.trustType), ConditionalAccessStatus, AuthenticationRequirement = "", RiskLevelDuringSignIn = "",
+            SessionId = "", CorrelationId
+    ),
+    // @sentinel-only:end
     (
         EntraIdSignInEvents
         | where Timestamp between (start .. end)
